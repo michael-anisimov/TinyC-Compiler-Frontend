@@ -12,6 +12,8 @@
 
 ## Description
 
+Assignment can be found [here](paper/Assignment.pdf).
+
 The aim of the project is to design universal compiler frontend for the TinyC
 programming language as used in the NI-GEN course that can be given to its students so
 they can focus on the middle- and back-end work. The frontend should be implemented

@@ -2,26 +2,26 @@ image: texlive/texlive:latest
 
 LuaLaTeX:
   script:
-    - sed 's/\[czech/\[slovak/' thesis.tex > thesis-sk.tex
-    - sed 's/\[czech/\[english/' thesis.tex > thesis-en.tex
-    - latexmk -pdflua thesis.tex
-    - latexmk -pdflua thesis-en.tex
-    - latexmk -pdflua thesis-sk.tex
+    - sed 's/\[czech/\[slovak/' paper/thesis.tex > paper/thesis-sk.tex
+    - sed 's/\[czech/\[english/' paper/thesis.tex > paper/thesis-en.tex
+    - latexmk -pdflua paper/thesis.tex
+    - latexmk -pdflua paper/thesis-en.tex
+    - latexmk -pdflua paper/thesis-sk.tex
   artifacts:
     paths:
-      - thesis.pdf
-      - thesis-en.pdf
-      - thesis-sk.pdf
+      - paper/thesis.pdf
+      - paper/thesis-en.pdf
+      - paper/thesis-sk.pdf
 
 XeLaTeX:
   script:
-    - sed 's/\[czech/\[slovak/' thesis.tex > thesis-sk.tex
-    - sed 's/\[czech/\[english/' thesis.tex > thesis-en.tex
-    - latexmk -pdfxe thesis.tex
-    - latexmk -pdfxe thesis-en.tex
-    - latexmk -pdfxe thesis-sk.tex
+    - sed 's/\[czech/\[slovak/' paper/thesis.tex > paper/thesis-sk.tex
+    - sed 's/\[czech/\[english/' paper/thesis.tex > paper/thesis-en.tex
+    - latexmk -pdfxe paper/thesis.tex
+    - latexmk -pdfxe paper/thesis-en.tex
+    - latexmk -pdfxe paper/thesis-sk.tex
   artifacts:
     paths:
-      - thesis.pdf
-      - thesis-en.pdf
-      - thesis-sk.pdf
+      - paper/thesis.pdf
+      - paper/thesis-en.pdf
+      - paper/thesis-sk.pdf
