@@ -1,0 +1,242 @@
+# TinyC Grammar (LL(1) Format)
+# The first rule (PROGRAM -> ...) defines the start symbol.
+
+PROGRAM -> PROGRAM_ITEM PROGRAM
+PROGRAM -> ε
+
+PROGRAM_ITEM -> TYPE_FUN_RET identifier PROGRAM_ITEM_TAIL
+PROGRAM_ITEM -> STRUCT_DECL
+PROGRAM_ITEM -> FUNPTR_DECL
+
+PROGRAM_ITEM_TAIL -> ( OPT_FUN_ARGS ) FUNC_TAIL
+PROGRAM_ITEM_TAIL -> GLOBAL_VAR_TAIL ;
+
+FUNC_TAIL -> BLOCK_STMT
+FUNC_TAIL -> ;
+
+GLOBAL_VAR_TAIL -> OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS
+
+MORE_GLOBAL_VARS -> , identifier OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS
+MORE_GLOBAL_VARS -> ε
+
+OPT_FUN_ARGS -> FUN_ARG FUN_ARG_TAIL
+OPT_FUN_ARGS -> ε
+
+FUN_ARG_TAIL -> , FUN_ARG FUN_ARG_TAIL
+FUN_ARG_TAIL -> ε
+
+FUN_ARG -> TYPE identifier
+
+# -- Statements --
+STATEMENT -> BLOCK_STMT
+STATEMENT -> IF_STMT
+STATEMENT -> SWITCH_STMT
+STATEMENT -> WHILE_STMT
+STATEMENT -> DO_WHILE_STMT
+STATEMENT -> FOR_STMT
+STATEMENT -> BREAK_STMT
+STATEMENT -> CONTINUE_STMT
+STATEMENT -> RETURN_STMT
+STATEMENT -> EXPR_STMT
+
+BLOCK_STMT -> { STATEMENT_STAR }
+
+STATEMENT_STAR -> STATEMENT STATEMENT_STAR
+STATEMENT_STAR -> ε
+
+# !!! remove curly braces in real grammar, now it silences the LL1 error 
+IF_STMT -> if ( EXPR ) { STATEMENT } ELSE_PART 
+
+ELSE_PART -> else STATEMENT
+ELSE_PART -> ε
+
+SWITCH_STMT -> switch ( EXPR ) { CASE_WITH_DEFAULT_STMT_STAR }
+
+CASE_WITH_DEFAULT_STMT_STAR -> CASE_STMT CASE_WITH_DEFAULT_STMT_STAR
+CASE_WITH_DEFAULT_STMT_STAR -> ε
+CASE_WITH_DEFAULT_STMT_STAR -> DEFAULT_CASE CASE_STMT_STAR
+
+CASE_STMT_STAR -> CASE_STMT CASE_STMT_STAR
+CASE_STMT_STAR -> ε
+
+CASE_STMT -> case integer_literal : CASE_BODY
+
+CASE_BODY -> STATEMENT_STAR
+
+DEFAULT_CASE -> default : CASE_BODY
+
+WHILE_STMT -> while ( EXPR ) STATEMENT
+
+DO_WHILE_STMT -> do STATEMENT while ( EXPR ) ;
+
+FOR_STMT -> for ( OPT_EXPR_OR_VAR_DECL ; OPT_EXPR ; OPT_EXPR ) STATEMENT
+
+OPT_EXPR_OR_VAR_DECL -> EXPR_OR_VAR_DECL
+OPT_EXPR_OR_VAR_DECL -> ε
+
+OPT_EXPR -> EXPR
+OPT_EXPR -> ε
+
+BREAK_STMT -> break ;
+
+CONTINUE_STMT -> continue ;
+
+RETURN_STMT -> return OPT_EXPR ;
+
+EXPR_STMT -> EXPR_OR_VAR_DECL ;
+
+# -- Expression or Variable Declarations --
+EXPR_OR_VAR_DECL -> VAR_DECLS
+EXPR_OR_VAR_DECL -> EXPRS
+
+VAR_DECLS -> VAR_DECL VAR_DECLS_TAIL
+VAR_DECLS_TAIL -> , VAR_DECL VAR_DECLS_TAIL
+VAR_DECLS_TAIL -> ε
+
+VAR_DECL -> TYPE identifier OPT_ARRAY_SIZE OPT_INIT
+
+OPT_ARRAY_SIZE -> [ E9 ]
+OPT_ARRAY_SIZE -> ε
+
+OPT_INIT -> = EXPR
+OPT_INIT -> ε
+
+EXPRS -> EXPR EXPRS_TAIL
+EXPRS_TAIL -> , EXPR EXPRS_TAIL
+EXPRS_TAIL -> ε
+
+# -- Types --
+TYPE_FUN_RET -> BaseOrIdType
+TYPE_FUN_RET -> void TypeFunRetTail
+
+BaseOrIdType -> BASE_TYPE STAR_SEQ
+BaseOrIdType -> TYPENAME STAR_SEQ
+
+TypeFunRetTail -> STAR_PLUS
+TypeFunRetTail -> ε
+
+TYPE -> BaseOrIdType
+TYPE -> void STAR_PLUS
+
+BASE_TYPE -> int
+BASE_TYPE -> double
+BASE_TYPE -> char
+
+STAR_PLUS -> * STAR_SEQ
+STAR_SEQ -> * STAR_SEQ
+STAR_SEQ -> ε
+
+# -- Struct Declarations --
+STRUCT_DECL -> struct identifier OPT_STRUCT_BODY ;
+
+OPT_STRUCT_BODY -> { STRUCT_FIELDS }
+OPT_STRUCT_BODY -> ε
+
+STRUCT_FIELDS -> STRUCT_FIELD STRUCT_FIELDS
+STRUCT_FIELDS -> ε
+
+STRUCT_FIELD -> TYPE identifier ;
+
+# -- Function Pointer Declarations --
+FUNPTR_DECL -> typedef TYPE_FUN_RET ( * identifier ) ( OPT_FUNPTR_ARGS ) ;
+
+OPT_FUNPTR_ARGS -> FUNPTR_ARGS
+OPT_FUNPTR_ARGS -> ε
+
+FUNPTR_ARGS -> TYPE FUNPTR_ARGS_TAIL
+FUNPTR_ARGS_TAIL -> , TYPE FUNPTR_ARGS_TAIL
+FUNPTR_ARGS_TAIL -> ε
+
+# -- Expressions --
+EXPR -> E9 EXPR_TAIL
+
+EXPR_TAIL -> = EXPR
+EXPR_TAIL -> ε
+
+E9 -> E8 E9_Prime
+E9_Prime -> || E8 E9_Prime
+E9_Prime -> ε
+
+E8 -> E7 E8_Prime
+E8_Prime -> && E7 E8_Prime
+E8_Prime -> ε
+
+E7 -> E6 E7_Prime
+E7_Prime -> | E6 E7_Prime
+E7_Prime -> ε
+
+E6 -> E5 E6_Prime
+E6_Prime -> & E5 E6_Prime
+E6_Prime -> ε
+
+E5 -> E4 E5_Prime
+E5_Prime -> == E4 E5_Prime
+E5_Prime -> != E4 E5_Prime
+E5_Prime -> ε
+
+E4 -> E3 E4_Prime
+E4_Prime -> < E3 E4_Prime
+E4_Prime -> <= E3 E4_Prime
+E4_Prime -> > E3 E4_Prime
+E4_Prime -> >= E3 E4_Prime
+E4_Prime -> ε
+
+E3 -> E2 E3_Prime
+E3_Prime -> << E2 E3_Prime
+E3_Prime -> >> E2 E3_Prime
+E3_Prime -> ε
+
+E2 -> E1 E2_Prime
+E2_Prime -> + E1 E2_Prime
+E2_Prime -> - E1 E2_Prime
+E2_Prime -> ε
+
+E1 -> E_UNARY_PRE E1_Prime
+E1_Prime -> * E_UNARY_PRE E1_Prime
+E1_Prime -> / E_UNARY_PRE E1_Prime
+E1_Prime -> % E_UNARY_PRE E1_Prime
+E1_Prime -> ε
+
+E_UNARY_PRE -> + E_UNARY_PRE
+E_UNARY_PRE -> - E_UNARY_PRE
+E_UNARY_PRE -> ! E_UNARY_PRE
+E_UNARY_PRE -> ~ E_UNARY_PRE
+E_UNARY_PRE -> ++ E_UNARY_PRE
+E_UNARY_PRE -> -- E_UNARY_PRE
+E_UNARY_PRE -> * E_UNARY_PRE
+E_UNARY_PRE -> & E_UNARY_PRE
+E_UNARY_PRE -> E_CALL_INDEX_MEMBER_POST
+
+E_CALL_INDEX_MEMBER_POST -> F E_CALL_INDEX_MEMBER_POST_Prime
+
+E_CALL_INDEX_MEMBER_POST_Prime -> E_CALL E_CALL_INDEX_MEMBER_POST_Prime
+E_CALL_INDEX_MEMBER_POST_Prime -> E_INDEX E_CALL_INDEX_MEMBER_POST_Prime
+E_CALL_INDEX_MEMBER_POST_Prime -> E_MEMBER E_CALL_INDEX_MEMBER_POST_Prime
+E_CALL_INDEX_MEMBER_POST_Prime -> E_POST E_CALL_INDEX_MEMBER_POST_Prime
+E_CALL_INDEX_MEMBER_POST_Prime -> ε
+
+E_CALL -> ( OPT_EXPR_LIST )
+
+OPT_EXPR_LIST -> EXPR EXPR_TAIL_LIST
+OPT_EXPR_LIST -> ε
+
+EXPR_TAIL_LIST -> , EXPR EXPR_TAIL_LIST
+EXPR_TAIL_LIST -> ε
+
+E_INDEX -> [ EXPR ]
+
+E_MEMBER -> . identifier
+E_MEMBER -> ~> identifier
+
+E_POST -> ++
+E_POST -> --
+
+F -> integer_literal
+F -> double_literal
+F -> char_literal
+F -> string_literal
+F -> identifier
+F -> ( EXPR )
+F -> E_CAST
+
+E_CAST -> cast < TYPE > ( EXPR )

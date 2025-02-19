@@ -1,0 +1,27 @@
+.DS_Store
+
+# TinyC project:
+tinyc/
+
+
+# Latex specific
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lol
+*.lot
+_minted-ctufit-thesis/
+*.out
+*.ps
+*.run.xml
+*.synctex.gz
+*.toc
+example-asssignment-include.pdf
+ctufit-thesis.pdf
+pdfa.xmpi
