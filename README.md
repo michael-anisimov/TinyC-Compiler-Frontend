@@ -6,8 +6,8 @@
 
 ### First fortnight tasks
 
-1. Conversion of [Initial Grammar](project/Grammar_reference.md) into its [LL(1) form](project/Grammar_LL1.txt)
-   The syntax used is suited for [LL1 Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl)
+1. Conversion of [Initial Grammar](project/grammar/Grammar_reference.md) into its [LL(1) form](project/grammar/Grammar_LL1.txt).
+   The syntax used is suited for [LL(1) Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl)
 2. I put the LL(1) grammar into the [thesis template](paper/thesis.pdf)
 
 ## Description
