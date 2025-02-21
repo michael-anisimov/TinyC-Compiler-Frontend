@@ -1,123 +1,288 @@
 \section{Program Structure}
 \begin{grammar}
-<PROGRAM> ::= <PROGRAM_ITEM> <PROGRAM> \ | \ \epsilon \\
+<PROGRAM> ::= <PROGRAM\_ITEM> <PROGRAM> | $\varepsilon$
 
-<PROGRAM_ITEM> ::= <NON_VOID_TYPE> identifier <NOT_VOID_FUNC_OR_VAR> \\
-    \ | \ void <VOID_DECL_TAIL> \\
-    \ | \ <STRUCT_DECL> \\
-    \ | \ <FUNPTR_DECL> \\
+<PROGRAM\_ITEM> ::= <NON\_VOID\_TYPE> "identifier" <NON\_VOID\_DECL\_TAIL> \\
+                 | "void" <VOID\_DECL\_TAIL> \\
+                 | <STRUCT\_DECL> \\
+                 | <FUNPTR\_DECL>
+\end{grammar}
 
-<NOT_VOID_FUNC_OR_VAR> ::= <VARIABLE_TAIL> \ | \ <FUNC_DECL_TAIL> \\
+\section{Function and Variable Declarations}
+\begin{grammar}
+<NON\_VOID\_DECL\_TAIL> ::= <VARIABLE\_TAIL> \\
+                         | <FUNCTION\_DECLARATION\_TAIL>
 
-<VOID_DECL_TAIL> ::= identifier <FUNC_DECL_TAIL> \\
-    \ | \ <STAR_PLUS> identifier <FUNC_OR_VAR_TAIL> \\
+<VOID\_DECL\_TAIL> ::= "identifier" <FUNCTION\_DECLARATION\_TAIL> \\
+                    | <STAR\_PLUS> "identifier" <FUNC\_OR\_VAR\_TAIL>
 
-<FUNC_OR_VAR_TAIL> ::= <VARIABLE_TAIL> \ | \ <FUNC_DECL_TAIL> \\
+<FUNC\_OR\_VAR\_TAIL> ::= <VARIABLE\_TAIL> \\
+                       | <FUNCTION\_DECLARATION\_TAIL>
 
-<VARIABLE_TAIL> ::= <OPT_ARRAY_SIZE> <OPT_INIT> <MORE_GLOBAL_VARS> ";" \\
+<VARIABLE\_TAIL> ::= <OPT\_ARRAY\_SIZE> <OPT\_INIT> <MORE\_GLOBAL\_VARS> ";"
 
-<FUNC_DECL_TAIL> ::= "(" <OPT_FUN_ARGS> ")" <FUNC_TAIL> \\
+<FUNCTION\_DECLARATION\_TAIL> ::= "(" <OPT\_FUN\_ARGS> ")" <FUNC\_TAIL>
 
-<FUNC_TAIL> ::= <BLOCK_STMT> \ | \ ";" \\
+<FUNC\_TAIL> ::= <BLOCK\_STMT> \\
+               | ";"
 
-<MORE_GLOBAL_VARS> ::= "," identifier <OPT_ARRAY_SIZE> <OPT_INIT> <MORE_GLOBAL_VARS> \ | \ \epsilon \\
+<MORE\_GLOBAL\_VARS> ::= "," "identifier" <OPT\_ARRAY\_SIZE> <OPT\_INIT> <MORE\_GLOBAL\_VARS> \\
+                      | $\varepsilon$
 
-<OPT_FUN_ARGS> ::= <FUN_ARG> <FUN_ARG_TAIL> \ | \ \epsilon \\
+<OPT\_FUN\_ARGS> ::= <FUN\_ARG> <FUN\_ARG\_TAIL> \\
+                   | $\varepsilon$
 
-<FUN_ARG_TAIL> ::= "," <FUN_ARG> <FUN_ARG_TAIL> \ | \ \epsilon \\
+<FUN\_ARG\_TAIL> ::= "," <FUN\_ARG> <FUN\_ARG\_TAIL> \\
+                   | $\varepsilon$
 
-<FUN_ARG> ::= <TYPE> identifier
+<FUN\_ARG> ::= <TYPE> "identifier"
 \end{grammar}
 
 \section{Statements}
 \begin{grammar}
-<STATEMENT> ::= <BLOCK_STMT> \ | \ <IF_STMT> \ | \ <SWITCH_STMT> \\
-    \ | \ <WHILE_STMT> \ | \ <DO_WHILE_STMT> \ | \ <FOR_STMT> \\
-    \ | \ <BREAK_STMT> \ | \ <CONTINUE_STMT> \ | \ <RETURN_STMT> \\
-    \ | \ <EXPR_STMT> \\
+<STATEMENT> ::= <BLOCK\_STMT> \\
+              | <IF\_STMT> \\
+              | <SWITCH\_STMT> \\
+              | <WHILE\_STMT> \\
+              | <DO\_WHILE\_STMT> \\
+              | <FOR\_STMT> \\
+              | <BREAK\_STMT> \\
+              | <CONTINUE\_STMT> \\
+              | <RETURN\_STMT> \\
+              | <EXPR\_STMT>
 
-<BLOCK_STMT> ::= "{" <STATEMENT_STAR> "}" \\
+<BLOCK\_STMT> ::= "{" <STATEMENT\_STAR> "}"
 
-<STATEMENT_STAR> ::= <STATEMENT> <STATEMENT_STAR> \ | \ \epsilon \\
+<STATEMENT\_STAR> ::= <STATEMENT> <STATEMENT\_STAR> \\
+                   | $\varepsilon$
 
-<IF_STMT> ::= "if" "(" <EXPR> ")" <STATEMENT> <ELSE_PART> \\
+<IF\_STMT> ::= "if" "(" <EXPR> ")" "{" <STATEMENT> "}" <ELSE\_PART>
 
-<ELSE_PART> ::= "else" <STATEMENT> \ | \ \epsilon \\
+<ELSE\_PART> ::= "else" <STATEMENT> \\
+               | $\varepsilon$
 
-<SWITCH_STMT> ::= "switch" "(" <EXPR> ")" "{" <CASE_DEF_STMT_STAR> "}" \\
+<SWITCH\_STMT> ::= "switch" "(" <EXPR> ")" "{" <CASE\_DEFLT\_STMT\_STAR> "}"
+\end{grammar}
 
-<CASE_DEF_STMT_STAR> ::= <CASE_STMT> <CASE_DEF_STMT_STAR> \\
-    \ | \ \epsilon \ | \ <DEFAULT_CASE> <CASE_STMT_STAR> \\
+\section{Switch Statement Structure}
+\begin{grammar}
+<CASE\_DEFLT\_STMT\_STAR> ::= <CASE\_STMT> <CASE\_DEFLT\_STMT\_STAR> \\
+                           | $\varepsilon$ \\
+                           | <DEFAULT\_CASE> <CASE\_STMT\_STAR>
 
-<CASE_STMT> ::= "case" integer_literal ":" <CASE_BODY> \\
+<CASE\_STMT\_STAR> ::= <CASE\_STMT> <CASE\_STMT\_STAR> \\
+                     | $\varepsilon$
 
-<CASE_BODY> ::= <STATEMENT_STAR> \\
+<CASE\_STMT> ::= "case" "integer_literal" ":" <CASE\_BODY>
 
-<DEFAULT_CASE> ::= "default" ":" <CASE_BODY> \\
+<CASE\_BODY> ::= <STATEMENT\_STAR>
 
-<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STATEMENT> \\
+<DEFAULT\_CASE> ::= "default" ":" <CASE\_BODY>
+\end{grammar}
 
-<DO_WHILE_STMT> ::= "do" <STATEMENT> "while" "(" <EXPR> ")" ";" \\
+\section{Loop Statements}
+\begin{grammar}
+<WHILE\_STMT> ::= "while" "(" <EXPR> ")" <STATEMENT>
 
-<FOR_STMT> ::= "for" "(" <OPT_EXPR_OR_VAR_DECL> ";" <OPT_EXPR> ";" <OPT_EXPR> ")" <STATEMENT> \\
+<DO\_WHILE\_STMT> ::= "do" <STATEMENT> "while" "(" <EXPR> ")" ";"
 
-<OPT_EXPR_OR_VAR_DECL> ::= <EXPR_OR_VAR_DECL> \ | \ \epsilon \\
+<FOR\_STMT> ::= "for" "(" <OPT\_EXPR\_OR\_VAR\_DECL> ";" <OPT\_EXPR> ";" <OPT\_EXPR> ")" <STATEMENT>
 
-<OPT_EXPR> ::= <EXPR> \ | \ \epsilon \\
+<OPT\_EXPR\_OR\_VAR\_DECL> ::= <EXPR\_OR\_VAR\_DECL> \\
+                             | $\varepsilon$
 
-<BREAK_STMT> ::= "break" ";" \\
+<OPT\_EXPR> ::= <EXPR> \\
+              | $\varepsilon$
+\end{grammar}
 
-<CONTINUE_STMT> ::= "continue" ";" \\
+\section{Control Statements}
+\begin{grammar}
+<BREAK\_STMT> ::= "break" ";"
 
-<RETURN_STMT> ::= "return" <OPT_EXPR> ";" \\
+<CONTINUE\_STMT> ::= "continue" ";"
 
-<EXPR_STMT> ::= <EXPR_OR_VAR_DECL> ";"
+<RETURN\_STMT> ::= "return" <OPT\_EXPR> ";"
+
+<EXPR\_STMT> ::= <EXPR\_OR\_VAR\_DECL> ";"
 \end{grammar}
 
 \section{Expressions and Variable Declarations}
 \begin{grammar}
-<EXPR_OR_VAR_DECL> ::= <VAR_DECLS> \ | \ <EXPRS> \\
+<EXPR\_OR\_VAR\_DECL> ::= <VAR\_DECLS> \\
+                        | <EXPRS>
 
-<VAR_DECLS> ::= <VAR_DECL> <VAR_DECLS_TAIL> \\
+<VAR\_DECLS> ::= <VAR\_DECL> <VAR\_DECLS\_TAIL>
 
-<VAR_DECLS_TAIL> ::= "," <VAR_DECL> <VAR_DECLS_TAIL> \ | \ \epsilon \\
+<VAR\_DECLS\_TAIL> ::= "," <VAR\_DECL> <VAR\_DECLS\_TAIL> \\
+                     | $\varepsilon$
 
-<VAR_DECL> ::= <TYPE> identifier <OPT_ARRAY_SIZE> <OPT_INIT> \\
+<VAR\_DECL> ::= <TYPE> "identifier" <OPT\_ARRAY\_SIZE> <OPT\_INIT>
 
-<OPT_ARRAY_SIZE> ::= "[" <E9> "]" \ | \ \epsilon \\
+<OPT\_ARRAY\_SIZE> ::= "[" <E9> "]" \\
+                     | $\varepsilon$
 
-<OPT_INIT> ::= "=" <EXPR> \ | \ \epsilon \\
+<OPT\_INIT> ::= "=" <EXPR> \\
+              | $\varepsilon$
 
-<EXPRS> ::= <EXPR> <EXPRS_TAIL> \\
+<EXPRS> ::= <EXPR> <EXPRS\_TAIL>
 
-<EXPRS_TAIL> ::= "," <EXPR> <EXPRS_TAIL> \ | \ \epsilon \\
+<EXPRS\_TAIL> ::= "," <EXPR> <EXPRS\_TAIL> \\
+                | $\varepsilon$
+\end{grammar}
 
-<EXPR> ::= <E9> <EXPR_TAIL> \\
+\section{Types}
+\begin{grammar}
+<TYPE> ::= <BASE\_TYPE> <STAR\_SEQ> \\
+         | <TYPENAME> <STAR\_SEQ> \\
+         | "void" <STAR\_PLUS>
 
-<EXPR_TAIL> ::= "=" <EXPR> \ | \ \epsilon \\
+<NON\_VOID\_TYPE> ::= <BASE\_TYPE> <STAR\_SEQ> \\
+                    | <TYPENAME> <STAR\_SEQ>
 
-<E9> ::= <E8> <E9_Prime> \\
-<E9_Prime> ::= "||" <E8> <E9_Prime> \ | \ \epsilon \\
+<BASE\_TYPE> ::= "int" \\
+               | "double" \\
+               | "char"
 
-<E8> ::= <E7> <E8_Prime> \\
-<E8_Prime> ::= "&&" <E7> <E8_Prime> \ | \ \epsilon \\
+<TYPE\_FUN\_RET> ::= <FUN\_RET\_TYPES> <STAR\_SEQ>
 
-<E7> ::= <E6> <E7_Prime> \\
-<E7_Prime> ::= "|" <E6> <E7_Prime> \ | \ \epsilon \\
+<FUN\_RET\_TYPES> ::= "void" \\
+                    | <BASE\_TYPE> \\
+                    | <TYPENAME>
 
-<E6> ::= <E5> <E6_Prime> \\
-<E6_Prime> ::= "&" <E5> <E6_Prime> \ | \ \epsilon \\
+<STAR\_PLUS> ::= "*" <STAR\_SEQ>
 
-<E5> ::= <E4> <E5_Prime> \\
-<E5_Prime> ::= "==" <E4> <E5_Prime> \ | \ "!=" <E4> <E5_Prime> \ | \ \epsilon \\
+<STAR\_SEQ> ::= "*" <STAR\_SEQ> \\
+              | $\varepsilon$
+\end{grammar}
 
-<E4> ::= <E3> <E4_Prime> \\
-<E4_Prime> ::= "<" <E3> <E4_Prime> \ | \ "<=" <E3> <E4_Prime> \ | \ ">" <E3> <E4_Prime> \ | \ ">=" <E3> <E4_Prime> \ | \ \epsilon \\
+\section{Struct Declarations}
+\begin{grammar}
+<STRUCT\_DECL> ::= "struct" "identifier" <OPT\_STRUCT\_BODY> ";"
 
-<E3> ::= <E2> <E3_Prime> \\
-<E3_Prime> ::= "<<" <E2> <E3_Prime> \ | \ ">>" <E2> <E3_Prime> \ | \ \epsilon \\
+<OPT\_STRUCT\_BODY> ::= "{" <STRUCT\_FIELDS> "}" \\
+                      | $\varepsilon$
 
-<E2> ::= <E1> <E2_Prime> \\
-<E2_Prime> ::= "+" <E1> <E2_Prime> \ | \ "-" <E1> <E2_Prime> \ | \ \epsilon \\
+<STRUCT\_FIELDS> ::= <STRUCT\_FIELD> <STRUCT\_FIELDS> \\
+                   | $\varepsilon$
 
+<STRUCT\_FIELD> ::= <TYPE> "identifier" ";"
+\end{grammar}
+
+\section{Function Pointer Declarations}
+\begin{grammar}
+<FUNPTR\_DECL> ::= "typedef" <TYPE\_FUN\_RET> "(" "*" "identifier" ")" "(" <OPT\_FUNPTR\_ARGS> ")" ";"
+
+<OPT\_FUNPTR\_ARGS> ::= <FUNPTR\_ARGS> \\
+                      | $\varepsilon$
+
+<FUNPTR\_ARGS> ::= <TYPE> <FUNPTR\_ARGS\_TAIL>
+
+<FUNPTR\_ARGS\_TAIL> ::= "," <TYPE> <FUNPTR\_ARGS\_TAIL> \\
+                       | $\varepsilon$
+\end{grammar}
+
+\section{Expressions}
+\begin{grammar}
+<EXPR> ::= <E9> <EXPR\_TAIL>
+
+<EXPR\_TAIL> ::= "=" <EXPR> \\
+                | $\varepsilon$
+
+<E9> ::= <E8> <E9\_Prime>
+
+<E9\_Prime> ::= "||" <E8> <E9\_Prime> \\
+              | $\varepsilon$
+
+<E8> ::= <E7> <E8\_Prime>
+
+<E8\_Prime> ::= "&&" <E7> <E8\_Prime> \\
+              | $\varepsilon$
+
+<E7> ::= <E6> <E7\_Prime>
+
+<E7\_Prime> ::= "|" <E6> <E7\_Prime> | $\varepsilon$
+
+<E6> ::= <E5> <E6\_Prime>
+
+<E6\_Prime> ::= "&" <E5> <E6\_Prime> | $\varepsilon$
+
+<E5> ::= <E4> <E5\_Prime>
+
+<E5\_Prime> ::= "==" <E4> <E5\_Prime> \\
+              | "!=" <E4> <E5\_Prime> \\
+              | $\varepsilon$
+
+<E4> ::= <E3> <E4\_Prime>
+
+<E4\_Prime> ::= "<" <E3> <E4\_Prime> \\
+              | "<=" <E3> <E4\_Prime> \\
+              | ">" <E3> <E4\_Prime> \\
+              | ">=" <E3> <E4\_Prime> \\
+              | $\varepsilon$
+
+<E3> ::= <E2> <E3\_Prime>
+
+<E3\_Prime> ::= "<<" <E2> <E3\_Prime> \\
+              | ">>" <E2> <E3\_Prime> \\
+              | $\varepsilon$
+
+<E2> ::= <E1> <E2\_Prime>
+
+<E2\_Prime> ::= "+" <E1> <E2\_Prime> \\
+              | "-" <E1> <E2\_Prime> \\
+              | $\varepsilon$
+
+<E1> ::= <E\_UNARY\_PRE> <E1\_Prime>
+
+<E1\_Prime> ::= "*" <E\_UNARY\_PRE> <E1\_Prime> \\
+              | "/" <E\_UNARY\_PRE> <E1\_Prime> \\
+              | "%" <E\_UNARY\_PRE> <E1\_Prime> \\
+              | $\varepsilon$
+\end{grammar}
+
+\section{Primary Expressions}
+\begin{grammar}
+<E\_UNARY\_PRE> ::= "+" <E\_UNARY\_PRE> \\
+                  | "-" <E\_UNARY\_PRE> \\
+                  | "!" <E\_UNARY\_PRE> \\
+                  | "~" <E\_UNARY\_PRE> \\
+                  | "++" <E\_UNARY\_PRE> \\
+                  | "--" <E\_UNARY\_PRE> \\
+                  | "*" <E\_UNARY\_PRE> \\
+                  | "&" <E\_UNARY\_PRE> \\
+                  | <E\_CALL\_INDEX\_MEMBER\_POST>
+
+<E\_CALL\_INDEX\_MEMBER\_POST> ::= <F> <E\_CALL\_IDX\_MEM\_POST\_Prime>
+
+<E\_CALL\_IDX\_MEM\_POST\_Prime> ::= <E\_CALL> <E\_CALL\_IDX\_MEM\_POST\_Prime> \\
+                                  | <E\_INDEX> <E\_CALL\_IDX\_MEM\_POST\_Prime> \\
+                                  | <E\_MEMBER> <E\_CALL\_IDX\_MEM\_POST\_Prime> \\
+                                  | <E\_POST> <E\_CALL\_IDX\_MEM\_POST\_Prime> \\
+                                  | $\varepsilon$
+
+<E\_CALL> ::= "(" <OPT\_EXPR\_LIST> ")"
+
+<OPT\_EXPR\_LIST> ::= <EXPR> <EXPR\_TAIL\_LIST> \\
+                    | $\varepsilon$
+
+<EXPR\_TAIL\_LIST> ::= "," <EXPR> <EXPR\_TAIL\_LIST> \\
+                     | $\varepsilon$
+
+<E\_INDEX> ::= "[" <EXPR> "]"
+
+<E\_MEMBER> ::= "." "identifier" \\
+              | "~>" "identifier"
+
+<E\_POST> ::= "++" \\
+            | "--"
+
+<F> ::= "integer_literal" \\
+      | "double_literal" \\
+      | "char_literal" \\
+      | "string_literal" \\
+      | "identifier" \\
+      | "(" <EXPR> ")" \\
+      | <E\_CAST>
+
+<E\_CAST> ::= "cast" "<" <TYPE> ">" "(" <EXPR> ")"
 \end{grammar}
