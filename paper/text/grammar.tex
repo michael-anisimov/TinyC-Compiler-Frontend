@@ -1,337 +1,123 @@
+\section{Program Structure}
+\begin{grammar}
+<PROGRAM> ::= <PROGRAM_ITEM> <PROGRAM> \ | \ \epsilon \\
 
-\section{Program and Program Items}
-\begin{align*}
-\text{PROGRAM}
-  &\to \text{PROGRAM\_ITEM}\;\text{PROGRAM}\\
-  &\to \varepsilon\\[6pt]
-\text{PROGRAM\_ITEM}
-  &\to \text{TYPE\_FUN\_RET}\;\text{identifier}\;\text{PROGRAM\_ITEM\_TAIL}\\
-  &\to \text{STRUCT\_DECL}\\
-  &\to \text{FUNPTR\_DECL}\\[6pt]
-\text{PROGRAM\_ITEM\_TAIL}
-  &\to (\,\text{OPT\_FUN\_ARGS}\,)\;\text{FUNC\_TAIL}\\
-  &\to \text{GLOBAL\_VAR\_TAIL}\; ;\\[6pt]
-\text{FUNC\_TAIL}
-  &\to \text{BLOCK\_STMT}\\
-  &\to ;
-\end{align*}
+<PROGRAM_ITEM> ::= <NON_VOID_TYPE> identifier <NOT_VOID_FUNC_OR_VAR> \\
+    \ | \ void <VOID_DECL_TAIL> \\
+    \ | \ <STRUCT_DECL> \\
+    \ | \ <FUNPTR_DECL> \\
 
-\begin{align*}
-\text{GLOBAL\_VAR\_TAIL}
-  &\to \text{OPT\_ARRAY\_SIZE}\;\text{OPT\_INIT}\;\text{MORE\_GLOBAL\_VARS}\\[6pt]
-\text{MORE\_GLOBAL\_VARS}
-  &\to ,\;\text{identifier}\;\text{OPT\_ARRAY\_SIZE}\;\text{OPT\_INIT}\;\text{MORE\_GLOBAL\_VARS}\\
-  &\to \varepsilon\\[6pt]
-\text{OPT\_FUN\_ARGS}
-  &\to \text{FUN\_ARG}\;\text{FUN\_ARG\_TAIL}\\
-  &\to \varepsilon\\[6pt]
-\text{FUN\_ARG\_TAIL}
-  &\to ,\;\text{FUN\_ARG}\;\text{FUN\_ARG\_TAIL}\\
-  &\to \varepsilon\\[6pt]
-\text{FUN\_ARG}
-  &\to \text{TYPE}\;\text{identifier}
-\end{align*}
+<NOT_VOID_FUNC_OR_VAR> ::= <VARIABLE_TAIL> \ | \ <FUNC_DECL_TAIL> \\
 
-%----------------------------------------
+<VOID_DECL_TAIL> ::= identifier <FUNC_DECL_TAIL> \\
+    \ | \ <STAR_PLUS> identifier <FUNC_OR_VAR_TAIL> \\
+
+<FUNC_OR_VAR_TAIL> ::= <VARIABLE_TAIL> \ | \ <FUNC_DECL_TAIL> \\
+
+<VARIABLE_TAIL> ::= <OPT_ARRAY_SIZE> <OPT_INIT> <MORE_GLOBAL_VARS> ";" \\
+
+<FUNC_DECL_TAIL> ::= "(" <OPT_FUN_ARGS> ")" <FUNC_TAIL> \\
+
+<FUNC_TAIL> ::= <BLOCK_STMT> \ | \ ";" \\
+
+<MORE_GLOBAL_VARS> ::= "," identifier <OPT_ARRAY_SIZE> <OPT_INIT> <MORE_GLOBAL_VARS> \ | \ \epsilon \\
+
+<OPT_FUN_ARGS> ::= <FUN_ARG> <FUN_ARG_TAIL> \ | \ \epsilon \\
+
+<FUN_ARG_TAIL> ::= "," <FUN_ARG> <FUN_ARG_TAIL> \ | \ \epsilon \\
+
+<FUN_ARG> ::= <TYPE> identifier
+\end{grammar}
+
 \section{Statements}
-\begin{align*}
-\text{STATEMENT}
-  &\to \text{BLOCK\_STMT}\\
-  &\to \text{IF\_STMT}\\
-  &\to \text{SWITCH\_STMT}\\
-  &\to \text{WHILE\_STMT}\\
-  &\to \text{DO\_WHILE\_STMT}\\
-  &\to \text{FOR\_STMT}\\
-  &\to \text{BREAK\_STMT}\\
-  &\to \text{CONTINUE\_STMT}\\
-  &\to \text{RETURN\_STMT}\\
-  &\to \text{EXPR\_STMT}\\[6pt]
-\text{BLOCK\_STMT}
-  &\to \{\,\text{STATEMENT\_STAR}\,\}\\[6pt]
-\text{STATEMENT\_STAR}
-  &\to \text{STATEMENT}\;\text{STATEMENT\_STAR}\\
-  &\to \varepsilon
-\end{align*}
+\begin{grammar}
+<STATEMENT> ::= <BLOCK_STMT> \ | \ <IF_STMT> \ | \ <SWITCH_STMT> \\
+    \ | \ <WHILE_STMT> \ | \ <DO_WHILE_STMT> \ | \ <FOR_STMT> \\
+    \ | \ <BREAK_STMT> \ | \ <CONTINUE_STMT> \ | \ <RETURN_STMT> \\
+    \ | \ <EXPR_STMT> \\
 
-\begin{align*}
-\text{IF\_STMT}
-  &\to \text{if}\;(\,\text{EXPR}\,)\;\{\,\text{STATEMENT}\}\;\text{ELSE\_PART}\\[6pt]
-\text{ELSE\_PART}
-  &\to \text{else}\;\text{STATEMENT}\\
-  &\to \varepsilon\\[6pt]
-\text{SWITCH\_STMT}
-  &\to \text{switch}\;(\,\text{EXPR}\,)\;\{\,\text{CASE\_WITH\_DEFAULT\_STMT\_STAR}\}\\[6pt]
-\text{CASE\_WITH\_DEFAULT\_STMT\_STAR}
-  &\to \text{CASE\_STMT}\;\text{CASE\_WITH\_DEFAULT\_STMT\_STAR}\\
-  &\to \varepsilon\\
-  &\to \text{DEFAULT\_CASE}\;\text{CASE\_STMT\_STAR}\\[6pt]
-\text{CASE\_STMT\_STAR}
-  &\to \text{CASE\_STMT}\;\text{CASE\_STMT\_STAR}\\
-  &\to \varepsilon\\[6pt]
-\text{CASE\_STMT}
-  &\to \text{case}\;\text{integer\_literal}\;:\;\text{CASE\_BODY}\\[6pt]
-\text{CASE\_BODY}
-  &\to \text{STATEMENT\_STAR}\\[6pt]
-\text{DEFAULT\_CASE}
-  &\to \text{default}\;:\;\text{CASE\_BODY}
-\end{align*}
+<BLOCK_STMT> ::= "{" <STATEMENT_STAR> "}" \\
 
-\begin{align*}
-\text{WHILE\_STMT}
-  &\to \text{while}\;(\,\text{EXPR}\,)\;\text{STATEMENT}\\[6pt]
-\text{DO\_WHILE\_STMT}
-  &\to \text{do}\;\text{STATEMENT}\;\text{while}\;(\,\text{EXPR}\,)\; ;\\[6pt]
-\text{FOR\_STMT}
-  &\to \text{for}\;( \text{OPT\_EXPR\_OR\_VAR\_DECL}\; ;\; \text{OPT\_EXPR}\; ;\; \text{OPT\_EXPR} )\;\text{STATEMENT}\\[6pt]
-\text{OPT\_EXPR\_OR\_VAR\_DECL}
-  &\to \text{EXPR\_OR\_VAR\_DECL}\\
-  &\to \varepsilon\\[6pt]
-\text{OPT\_EXPR}
-  &\to \text{EXPR}\\
-  &\to \varepsilon
-\end{align*}
+<STATEMENT_STAR> ::= <STATEMENT> <STATEMENT_STAR> \ | \ \epsilon \\
 
-\begin{align*}
-\text{BREAK\_STMT}
-  &\to \text{break}\; ;\\[6pt]
-\text{CONTINUE\_STMT}
-  &\to \text{continue}\; ;\\[6pt]
-\text{RETURN\_STMT}
-  &\to \text{return}\;\text{OPT\_EXPR}\; ;\\[6pt]
-\text{EXPR\_STMT}
-  &\to \text{EXPR\_OR\_VAR\_DECL}\; ;
-\end{align*}
+<IF_STMT> ::= "if" "(" <EXPR> ")" <STATEMENT> <ELSE_PART> \\
 
-%----------------------------------------
-\section{Expression or Variable Declarations}
-\begin{align*}
-\text{EXPR\_OR\_VAR\_DECL}
-  &\to \text{VAR\_DECLS}\\
-  &\to \text{EXPRS}\\[6pt]
-\text{VAR\_DECLS}
-  &\to \text{VAR\_DECL}\;\text{VAR\_DECLS\_TAIL}\\[6pt]
-\text{VAR\_DECLS\_TAIL}
-  &\to ,\;\text{VAR\_DECL}\;\text{VAR\_DECLS\_TAIL}\\
-  &\to \varepsilon\\[6pt]
-\text{VAR\_DECL}
-  &\to \text{TYPE}\;\text{identifier}\;\text{OPT\_ARRAY\_SIZE}\;\text{OPT\_INIT}\\[6pt]
-\text{OPT\_ARRAY\_SIZE}
-  &\to [\;\text{E9}\;]\\
-  &\to \varepsilon\\[6pt]
-\text{OPT\_INIT}
-  &\to =\;\text{EXPR}\\
-  &\to \varepsilon
-\end{align*}
+<ELSE_PART> ::= "else" <STATEMENT> \ | \ \epsilon \\
 
-\begin{align*}
-\text{EXPRS}
-  &\to \text{EXPR}\;\text{EXPRS\_TAIL}\\[6pt]
-\text{EXPRS\_TAIL}
-  &\to ,\;\text{EXPR}\;\text{EXPRS\_TAIL}\\
-  &\to \varepsilon
-\end{align*}
+<SWITCH_STMT> ::= "switch" "(" <EXPR> ")" "{" <CASE_DEF_STMT_STAR> "}" \\
 
-%----------------------------------------
-\section{Types}
-\begin{align*}
-\text{TYPE\_FUN\_RET}
-  &\to \text{BaseOrIdType}\\
-  &\to \text{void}\;\text{TypeFunRetTail}\\[6pt]
-\text{BaseOrIdType}
-  &\to \text{BASE\_TYPE}\;\text{STAR\_SEQ}\\
-  &\to \text{TYPENAME}\;\text{STAR\_SEQ}\\[6pt]
-\text{TypeFunRetTail}
-  &\to \text{STAR\_PLUS}\\
-  &\to \varepsilon\\[6pt]
-\text{TYPE}
-  &\to \text{BaseOrIdType}\\
-  &\to \text{void}\;\text{STAR\_PLUS}\\[6pt]
-\text{BASE\_TYPE}
-  &\to \text{int}\\
-  &\to \text{double}\\
-  &\to \text{char}\\[6pt]
-\text{STAR\_PLUS}
-  &\to *\;\text{STAR\_SEQ}\\[6pt]
-\text{STAR\_SEQ}
-  &\to *\;\text{STAR\_SEQ}\\
-  &\to \varepsilon
-\end{align*}
+<CASE_DEF_STMT_STAR> ::= <CASE_STMT> <CASE_DEF_STMT_STAR> \\
+    \ | \ \epsilon \ | \ <DEFAULT_CASE> <CASE_STMT_STAR> \\
 
-%----------------------------------------
-\section{Struct Declarations}
-\begin{align*}
-\text{STRUCT\_DECL}
-  &\to \text{struct}\;\text{identifier}\;\text{OPT\_STRUCT\_BODY}\; ;\\[6pt]
-\text{OPT\_STRUCT\_BODY}
-  &\to \{\,\text{STRUCT\_FIELDS}\,\}\\
-  &\to \varepsilon\\[6pt]
-\text{STRUCT\_FIELDS}
-  &\to \text{STRUCT\_FIELD}\;\text{STRUCT\_FIELDS}\\
-  &\to \varepsilon\\[6pt]
-\text{STRUCT\_FIELD}
-  &\to \text{TYPE}\;\text{identifier}\; ;
-\end{align*}
+<CASE_STMT> ::= "case" integer_literal ":" <CASE_BODY> \\
 
-%----------------------------------------
-\section{Function Pointer Declarations}
-\begin{align*}
-\text{FUNPTR\_DECL}
-  &\to \text{typedef}\;\text{TYPE\_FUN\_RET}\;( *\;\text{identifier} )(\,\text{OPT\_FUNPTR\_ARGS}\,)\; ;\\[6pt]
-\text{OPT\_FUNPTR\_ARGS}
-  &\to \text{FUNPTR\_ARGS}\\
-  &\to \varepsilon\\[6pt]
-\text{FUNPTR\_ARGS}
-  &\to \text{TYPE}\;\text{FUNPTR\_ARGS\_TAIL}\\[6pt]
-\text{FUNPTR\_ARGS\_TAIL}
-  &\to ,\;\text{TYPE}\;\text{FUNPTR\_ARGS\_TAIL}\\
-  &\to \varepsilon
-\end{align*}
+<CASE_BODY> ::= <STATEMENT_STAR> \\
 
-%----------------------------------------
-\section{Expressions}
-\begin{align*}
-\text{EXPR}
-  &\to \text{E9}\;\text{EXPR\_TAIL}\\[6pt]
-\text{EXPR\_TAIL}
-  &\to =\;\text{EXPR}\\
-  &\to \varepsilon
-\end{align*}
+<DEFAULT_CASE> ::= "default" ":" <CASE_BODY> \\
 
-\begin{align*}
-\text{E9}
-  &\to \text{E8}\;\text{E9\_Prime}\\[6pt]
-\text{E9\_Prime}
-  &\to ||\;\text{E8}\;\text{E9\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STATEMENT> \\
 
-\begin{align*}
-\text{E8}
-  &\to \text{E7}\;\text{E8\_Prime}\\[6pt]
-\text{E8\_Prime}
-  &\to &&\;\text{E7}\;\text{E8\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<DO_WHILE_STMT> ::= "do" <STATEMENT> "while" "(" <EXPR> ")" ";" \\
 
-\begin{align*}
-\text{E7}
-  &\to \text{E6}\;\text{E7\_Prime}\\[6pt]
-\text{E7\_Prime}
-  &\to |\;\text{E6}\;\text{E7\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<FOR_STMT> ::= "for" "(" <OPT_EXPR_OR_VAR_DECL> ";" <OPT_EXPR> ";" <OPT_EXPR> ")" <STATEMENT> \\
 
-\begin{align*}
-\text{E6}
-  &\to \text{E5}\;\text{E6\_Prime}\\[6pt]
-\text{E6\_Prime}
-  &\to &\;\text{E5}\;\text{E6\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<OPT_EXPR_OR_VAR_DECL> ::= <EXPR_OR_VAR_DECL> \ | \ \epsilon \\
 
-\begin{align*}
-\text{E5}
-  &\to \text{E4}\;\text{E5\_Prime}\\[6pt]
-\text{E5\_Prime}
-  &\to ==\;\text{E4}\;\text{E5\_Prime}\\
-  &\to !=\;\text{E4}\;\text{E5\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<OPT_EXPR> ::= <EXPR> \ | \ \epsilon \\
 
-\begin{align*}
-\text{E4}
-  &\to \text{E3}\;\text{E4\_Prime}\\[6pt]
-\text{E4\_Prime}
-  &\to <\;\text{E3}\;\text{E4\_Prime}\\
-  &\to <=\;\text{E3}\;\text{E4\_Prime}\\
-  &\to >\;\text{E3}\;\text{E4\_Prime}\\
-  &\to >=\;\text{E3}\;\text{E4\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<BREAK_STMT> ::= "break" ";" \\
 
-\begin{align*}
-\text{E3}
-  &\to \text{E2}\;\text{E3\_Prime}\\[6pt]
-\text{E3\_Prime}
-  &\to <<\;\text{E2}\;\text{E3\_Prime}\\
-  &\to >>\;\text{E2}\;\text{E3\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<CONTINUE_STMT> ::= "continue" ";" \\
 
-\begin{align*}
-\text{E2}
-  &\to \text{E1}\;\text{E2\_Prime}\\[6pt]
-\text{E2\_Prime}
-  &\to +\;\text{E1}\;\text{E2\_Prime}\\
-  &\to -\;\text{E1}\;\text{E2\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<RETURN_STMT> ::= "return" <OPT_EXPR> ";" \\
 
-\begin{align*}
-\text{E1}
-  &\to \text{E\_UNARY\_PRE}\;\text{E1\_Prime}\\[6pt]
-\text{E1\_Prime}
-  &\to *\;\text{E\_UNARY\_PRE}\;\text{E1\_Prime}\\
-  &\to /\;\text{E\_UNARY\_PRE}\;\text{E1\_Prime}\\
-  &\to %\;\text{E\_UNARY\_PRE}\;\text{E1\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<EXPR_STMT> ::= <EXPR_OR_VAR_DECL> ";"
+\end{grammar}
 
-\begin{align*}
-\text{E\_UNARY\_PRE}
-  &\to +\;\text{E\_UNARY\_PRE}\\
-  &\to -\;\text{E\_UNARY\_PRE}\\
-  &\to !\;\text{E\_UNARY\_PRE}\\
-  &\to \sim\;\text{E\_UNARY\_PRE}\\
-  &\to ++\;\text{E\_UNARY\_PRE}\\
-  &\to --\;\text{E\_UNARY\_PRE}\\
-  &\to *\;\text{E\_UNARY\_PRE}\\
-  &\to &\;\text{E\_UNARY\_PRE}\\
-  &\to \text{E\_CALL\_INDEX\_MEMBER\_POST}
-\end{align*}
+\section{Expressions and Variable Declarations}
+\begin{grammar}
+<EXPR_OR_VAR_DECL> ::= <VAR_DECLS> \ | \ <EXPRS> \\
 
-\begin{align*}
-\text{E\_CALL\_INDEX\_MEMBER\_POST}
-  &\to \text{F}\;\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}\\[6pt]
-\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}
-  &\to \text{E\_CALL}\;\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}\\
-  &\to \text{E\_INDEX}\;\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}\\
-  &\to \text{E\_MEMBER}\;\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}\\
-  &\to \text{E\_POST}\;\text{E\_CALL\_INDEX\_MEMBER\_POST\_Prime}\\
-  &\to \varepsilon
-\end{align*}
+<VAR_DECLS> ::= <VAR_DECL> <VAR_DECLS_TAIL> \\
 
-\begin{align*}
-\text{E\_CALL}
-  &\to (\;\text{OPT\_EXPR\_LIST}\;)\\[6pt]
-\text{OPT\_EXPR\_LIST}
-  &\to \text{EXPR}\;\text{EXPR\_TAIL\_LIST}\\
-  &\to \varepsilon\\[6pt]
-\text{EXPR\_TAIL\_LIST}
-  &\to ,\;\text{EXPR}\;\text{EXPR\_TAIL\_LIST}\\
-  &\to \varepsilon
-\end{align*}
+<VAR_DECLS_TAIL> ::= "," <VAR_DECL> <VAR_DECLS_TAIL> \ | \ \epsilon \\
 
-\begin{align*}
-\text{E\_INDEX}
-  &\to [\;\text{EXPR}\;]\\[6pt]
-\text{E\_MEMBER}
-  &\to .\;\text{identifier}\\
-  &\to \sim>\;\text{identifier}\\[6pt]
-\text{E\_POST}
-  &\to ++\\
-  &\to --
-\end{align*}
+<VAR_DECL> ::= <TYPE> identifier <OPT_ARRAY_SIZE> <OPT_INIT> \\
 
-\begin{align*}
-\text{F}
-  &\to \text{integer\_literal}\\
-  &\to \text{double\_literal}\\
-  &\to \text{char\_literal}\\
-  &\to \text{string\_literal}\\
-  &\to \text{identifier}\\
-  &\to (\;\text{EXPR}\;)\\
-  &\to \text{E\_CAST}\\[6pt]
-\text{E\_CAST}
-  &\to \text{cast}\;<\;\text{TYPE}\;>\;(\;\text{EXPR}\;)
-\end{align*}
+<OPT_ARRAY_SIZE> ::= "[" <E9> "]" \ | \ \epsilon \\
+
+<OPT_INIT> ::= "=" <EXPR> \ | \ \epsilon \\
+
+<EXPRS> ::= <EXPR> <EXPRS_TAIL> \\
+
+<EXPRS_TAIL> ::= "," <EXPR> <EXPRS_TAIL> \ | \ \epsilon \\
+
+<EXPR> ::= <E9> <EXPR_TAIL> \\
+
+<EXPR_TAIL> ::= "=" <EXPR> \ | \ \epsilon \\
+
+<E9> ::= <E8> <E9_Prime> \\
+<E9_Prime> ::= "||" <E8> <E9_Prime> \ | \ \epsilon \\
+
+<E8> ::= <E7> <E8_Prime> \\
+<E8_Prime> ::= "&&" <E7> <E8_Prime> \ | \ \epsilon \\
+
+<E7> ::= <E6> <E7_Prime> \\
+<E7_Prime> ::= "|" <E6> <E7_Prime> \ | \ \epsilon \\
+
+<E6> ::= <E5> <E6_Prime> \\
+<E6_Prime> ::= "&" <E5> <E6_Prime> \ | \ \epsilon \\
+
+<E5> ::= <E4> <E5_Prime> \\
+<E5_Prime> ::= "==" <E4> <E5_Prime> \ | \ "!=" <E4> <E5_Prime> \ | \ \epsilon \\
+
+<E4> ::= <E3> <E4_Prime> \\
+<E4_Prime> ::= "<" <E3> <E4_Prime> \ | \ "<=" <E3> <E4_Prime> \ | \ ">" <E3> <E4_Prime> \ | \ ">=" <E3> <E4_Prime> \ | \ \epsilon \\
+
+<E3> ::= <E2> <E3_Prime> \\
+<E3_Prime> ::= "<<" <E2> <E3_Prime> \ | \ ">>" <E2> <E3_Prime> \ | \ \epsilon \\
+
+<E2> ::= <E1> <E2_Prime> \\
+<E2_Prime> ::= "+" <E1> <E2_Prime> \ | \ "-" <E1> <E2_Prime> \ | \ \epsilon \\
+
+\end{grammar}

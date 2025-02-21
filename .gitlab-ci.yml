@@ -1,15 +1,17 @@
-image: texlive/texlive:latest
+# Comment the pipeline for now
 
-LuaLaTeX:
-  script:
-    - latexmk -pdflua paper/thesis.tex
-  artifacts:
-    paths:
-      - paper/thesis.pdf
+# image: texlive/texlive:latest
 
-XeLaTeX:
-  script:
-    - latexmk -pdfxe paper/thesis.tex
-  artifacts:
-    paths:
-      - paper/thesis.pdf
+# LuaLaTeX:
+#   script:
+#     - latexmk -pdflua paper/thesis.tex
+#   artifacts:
+#     paths:
+#       - paper/thesis.pdf
+
+# XeLaTeX:
+#   script:
+#     - latexmk -pdfxe paper/thesis.tex
+#   artifacts:
+#     paths:
+#       - paper/thesis.pdf

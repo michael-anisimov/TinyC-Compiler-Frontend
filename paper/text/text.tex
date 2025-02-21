@@ -1,302 +1,150 @@
-% Do not forget to include Introduction
-%---------------------------------------------------------------
-\chapter{Introduction}
-% uncomment the following line to create an unnumbered chapter
-%\chapter*{Introduction}\addcontentsline{toc}{chapter}{Introduction}\markboth{Introduction}{Introduction}
-%---------------------------------------------------------------
-\setcounter{page}{1}
+\chapter{2nd exercise}
 
-% The following environment can be used as a mini-introduction for a chapter. Use that any way it pleases you (or comment it out). It can contain, for instance, a summary of the chapter. Or, there can be a quotation.
-\begin{chapterabstract}
-	\lipsum[1]
-\end{chapterabstract}
+Each (sub)chapter should have some introductory text.
 
-\lipsum[2][1-4]{} [1]
+\section{Microtypography}
 
-\lipsum[4]
+A text -- especially a professional one such as this work - must be divided into paragraphs. Each paragraph should relate to one topic or idea\dots{} Paragraphs must be visually separated from each other. There are several suitable styles for this, which we described in the last lecture. Paragraphs can be set in different ways. In professional texts, the ``block'' typesetting is common. It is necessary to change the interword spaces appropriately. Their recommended size is 0.25--0.33 square.
 
-%---------------------------------------------------------------
-\section{Ut enim ad minim veniam}
-%---------------------------------------------------------------
+\section{Source code}
 
-\lipsum[6-8]
+% The main part of our program's operation can be found in Listing 3.1\ref{lst:main} . It is worth noting that the main function has a return type of int, which is, of course, very atypical, and therefore, it is worth documenting. We will only include code samples in the work when it really brings something new, not just for the sake of having a code sample.
 
-\begin{figure}
-\centering
-%\includegraphics[scale=0.4]{pic/index}
-\resizebox{\textwidth}{!}{
-\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]
-\node [circle,draw] (z){$n$}
-  child {node [circle,draw] (a) {$\frac{n}{2}$}
-    child {node [circle,draw] (b) {$\frac{n}{2^2}$}
-      child {node {$\vdots$}
-        child {node [circle,draw] (d) {$\frac{n}{2^k}$}}
-        child {node [circle,draw] (e) {$\frac{n}{2^k}$}}
-      } 
-      child {node {$\vdots$}}
-    }
-    child {node [circle,draw] (g) {$\frac{n}{2^2}$}
-      child {node {$\vdots$}}
-      child {node {$\vdots$}}
-    }
-  }
-  child {node [circle,draw] (j) {$\frac{n}{2}$}
-    child {node [circle,draw] (k) {$\frac{n}{2^2}$}
-      child {node {$\vdots$}}
-      child {node {$\vdots$}}
-    }
-  child {node [circle,draw] (l) {$\frac{n}{2^2}$}
-    child {node {$\vdots$}}
-    child {node (c){$\vdots$}
-      child {node [circle,draw] (o) {$\frac{n}{2^k}$}}
-      child {node [circle,draw] (p) {$\frac{n}{2^k}$}
-          child [grow=right] {node (q) {$ = O_{k = \lg n}(n)$} edge from parent[draw=none]
-            child [grow=up] {node (r) {$\vdots$} edge from parent[draw=none]
-              child [grow=up] {node (s) {$O_2(n)$} edge from parent[draw=none]
-                child [grow=up] {node (t) {$O_1(n)$} edge from parent[draw=none]
-                  child [grow=up] {node (u) {$O_0(n)$} edge from parent[draw=none]}
-                }
-              }
-            }
-            child [grow=down] {node (v) {$O(n \cdot \lg n)$}edge from parent[draw=none]}
-        }
-      }
-    }
-  }
-};
-\path (a) -- (j) node [midway] {+};
-\path (b) -- (g) node [midway] {+};
-\path (k) -- (l) node [midway] {+};
-\path (k) -- (g) node [midway] {+};
-\path (d) -- (e) node [midway] {+};
-\path (o) -- (p) node [midway] {+};
-\path (o) -- (e) node (x) [midway] {$\cdots$}
-  child [grow=down] {
-    node (y) {$O\left(\displaystyle\sum_{i = 0}^k 2^i \cdot \frac{n}{2^i}\right)$}
-    edge from parent[draw=none]
-  };
-\path (q) -- (r) node [midway] {+};
-\path (s) -- (r) node [midway] {+};
-\path (s) -- (t) node [midway] {+};
-\path (s) -- (l) node [midway] {=};
-\path (t) -- (u) node [midway] {+};
-\path (z) -- (u) node [midway] {=};
-\path (j) -- (t) node [midway] {=};
-\path (y) -- (x) node [midway] {$\Downarrow$};
-\path (v) -- (y)
-  node (w) [midway] {$O\left(\displaystyle\sum_{i = 0}^k n\right) = O(k \cdot n)$};
-\path (q) -- (v) node [midway] {=};
-\path (e) -- (x) node [midway] {+};
-\path (o) -- (x) node [midway] {+};
-\path (y) -- (w) node [midway] {$=$};
-\path (v) -- (w) node [midway] {$\Leftrightarrow$};
-\path (r) -- (c) node [midway] {$\cdots$};
-\end{tikzpicture}}
-\caption{Lorem ipsum dolor sit amet}\label{img:index}
-\end{figure}
-
-%---------------------------------------------------------------
-\section{Ut enim ad minim veniam}
-%---------------------------------------------------------------
-
-\lipsum[2-4]
-
-%---------------------------------------------------------------
-\subsection{Ut enim ad minim veniam}
-%---------------------------------------------------------------
-
-Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Duis condimentum augue id magna semper rutrum. Aliquam ornare wisi eu metus. Fusce aliquam vestibulum ipsum. Vivamus ac leo pretium faucibus\ref{img:index}.
-
-\begin{itemize}
-    \item Ut enim ad minim veniam, quis nostrud
-    \item Ut enim ad minim 
-    \item Ut enim ad minim veniam, quis 
-    \begin{itemize}
-        \item Ut enim ad
-        \item Ut enim ad
-        \begin{itemize}
-            \item Ut enim 
-            \item Ut enim 
-            \begin{itemize}
-            \item Ut enim 
-            \item Ut enim 
-        \end{itemize}
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\section{Class aptent taciti}
-
-
-Even though dark mode can be very nice for websites and apps, it does not look good when printed. Consider using white mode when print-screening dark-moded content. The contrast with the white page is too big, as seen in Figure~\ref{fig:Darkmode}.
-
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=\linewidth]{images/darkmode}
-    \caption{White and dark mode comparison.}
-    \label{fig:Darkmode}
-\end{figure}
-
-
-\subsection{Class aptent taciti}
-
-\lipsum[6-7]
-
-\begin{enumerate}
-    \item Ut enim ad minim veniam, quis nostrud
-    \item Ut enim ad minim 
-    \item Ut enim ad minim veniam, quis 
-    \begin{enumerate}
-        \item Ut enim ad
-        \item Ut enim ad
-        \begin{enumerate}
-            \item Ut enim 
-            \item Ut enim 
-            \begin{enumerate}
-            \item Ut enim 
-            \item Ut enim 
-        \end{enumerate}
-        \end{enumerate}
-    \end{enumerate}
-\end{enumerate}
-
-
-%---------------------------------------------------------------
-\section{Ut enim ad minim veniam, quis nostrud}
-%---------------------------------------------------------------
-
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nulla non arcu lacinia neque faucibus fringilla. Vestibulum erat nulla, ullamcorper nec, rutrum non, nonummy ac, erat. Aliquam erat volutpat. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo.\footnote{Ut enim ad minim veniam, quis nostrud exercitation.} Etiam dictum tincidunt diam. In laoreet, magna id viverra tincidunt, sem odio bibendum justo, vel imperdiet sapien wisi sed libero. Nulla est. Maecenas fermentum, sem in pharetra pellentesque, velit turpis volutpat ante, in pharetra metus odio a lectus. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-
-\begin{lstlisting}[caption={Zbytečný kód},label=list:8-6,captionpos=b,float,abovecaptionskip=-\medskipamount,abovecaptionskip=\medskipamount,language=C]
-    #include<stdio.h>
-    #include<iostream>
-    // A comment
-    int main(void)
-    {
-        printf("Hello World\n");
-        return 0;
-    }
-\end{lstlisting}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% alternative using package minted for source highlighting
-% package minted requires execution with `-shell-escape'
-% e.g., `xelatex -shell-escape ctufit-thesis.tex'
 % \begin{listing}
-% \begin{minted}{C}
-%     #include<stdio.h>
-%     #include<iostream>
-%     // A comment
-%     int main(void)
-%     {
-%         printf("Hello World\n");
-%         return 0;
-%     }
-% \end{minted}
-% \caption{Zbytečný kód}\label{list:8-6}
+%   \begin{minted}{c++}
+% #include<iostream>
+% using namespace std;int main()
+% {
+%   cout << "Hello, world!" << endl;
+%   return 0;
+% }
+%   \end{minted}
+%   \caption{The main function of the program}
+%   \label{lst:main}
 % \end{listing}
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Nullam feugiat, turpis at pulvinar vulputate, erat libero tristique tellus, nec bibendum odio risus sit amet ante. Aenean id metus id velit ullamcorper pulvinar. Fusce wisi. Integer lacinia. Aliquam id dolor. Pellentesque pretium lectus id turpis. Suspendisse sagittis ultrices augue. In laoreet, magna id viverra tincidunt, sem odio bibendum justo, vel imperdiet sapien wisi sed libero. Sed ac dolor sit amet purus malesuada congue.~\cite{Crochemore2002}
+    
+% Don't you like that it's black and white? Try copying the code sample again, pasting it under this paragraph, and we'll make it prettier by using a different package:
 
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci. Duis viverra diam non justo. Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Duis condimentum augue id magna semper rutrum. Aliquam ornare wisi eu metus. Fusce aliquam vestibulum ipsum. Vivamus ac leo pretium faucibus.~\cite{Motwani2014}
+% Tables
 
-%---------------------------------------------------------------
-\subsection{Ut enim ad minim veniam, quis nostrud}
-%---------------------------------------------------------------
+% In Table 3.1, you will find options for earning points in the BI-TDP subject. Although it's not as good a table as the chocolate table, it will have to be enough for us to get credit. I'm not saying that you should bribe your students with chocolate bars! But I'm also not saying that you shouldn't.
 
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nulla non arcu lacinia neque faucibus fringilla. Vestibulum erat nulla, ullamcorper nec, rutrum non, nonummy ac, erat. Aliquam erat volutpat. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo. Etiam dictum tincidunt diam. In laoreet, magna id viverra tincidunt, sem odio bibendum justo.~\cite{Sestakova2018} 
+% Graded activities in TDP
 
-\begin{table}\centering
-\begin{tabular}{l|l|c|c}
-	Typ		& Prostředí		& \LaTeX{}ovská zkratka	& \TeX{}ovská zkratka	\tabularnewline \hline 
- 	Text		& \verb|math|		& \verb|\(...\)|	& \verb|$...$|	\tabularnewline \hline
- 	Displayed	& \verb|displaymath|	& \verb|\[...\]|	& \verb|$$...$$|	\tabularnewline 
-\end{tabular}
-\caption[Příklad tabulky]{Zadávání matematiky}
-\label{tab:matematika}
-\end{table}
+% activity | points | mandatory
+% Processing and submitting a credit project (bachelor's thesis in progress) | 30 | YES
+% Typography test | 10 | YES
+% Citation test | 10 | YES
+% Awarding points from the thesis supervisor | 20 | NO
 
+% \begin{table}[ht]
+% \centering
+% \begin{tabular}{|c|c|}
+% \hline
+% This text will be too long and will not fit on one line. & This text will be too long and will not fit on one line. \\\hline
+% This text will be too long and will not fit on one line. & This text will be too long and will not fit on one line. \\\hline
+% \end{tabular}
+% \caption{Caption}
+% \label{tab:wideTable}
+% \end{table}
 
-Nulla est. Maecenas fermentum, sem in pharetra pellentesque, velit turpis volutpat ante, in pharetra metus odio a lectus. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Nullam feugiat, turpis at pulvinar vulputate, erat libero tristique tellus, nec bibendum odio risus sit amet ante. Aenean id metus id velit ullamcorper pulvinar. 
+% \begin{tabular}{|c|c|}
+% \hline
+% \textbf{Heading 1} & \textbf{Heading 2}\\ \hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% data & text\\\hline
+% \end{tabular}
 
-\subsubsection{Class aptent taciti}
-
-\begin{definition}[Optional label]
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{definition}
-
-\begin{example}
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{example}
-
-\paragraph{Nadpis 5. úrovně}
-
-\begin{theorem}
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{theorem}
-
-\begin{proof}
-Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{proof}
-
-\paragraph{Level 5 heading}
-
-\begin{corollary}
-Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{corollary}
-
-\begin{proposition}
-Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{proposition}
-
-\begin{note}
-Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{note}
-
-\begin{remark}
-Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{remark}
-
-\begin{lemma}
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
-\end{lemma}
-
-\lipsum[1-2]
-
-% \subsection{Class aptent taciti sociosqu}
-% 
-% \lipsum[4-5]
-
-%---------------------------------------------------------------
-\chapter{Lorem ipsum}
-%---------------------------------------------------------------
-
-\begin{chapterabstract}
-	Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. 
-\end{chapterabstract}
-
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.~\cite{Kopka2004}
-
-\section{Donec odio tempus molestie}
-
-\lipsum[2]~\cite{def:1, def:2}
-
-\subsection{Class aptent taciti}
-
-\lipsum[2-3]
-
-\begin{description}
-\item[Kapitola 1] Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis.
-
-\item[Kapitola 2] Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis.
-
-\item[Kapitola 3] Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis.
-
-\item[Kapitola 4] Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis.~\cite{jakZiskatAcko}
-\end{description}
-
-\lipsum[2]
-
-\section{Lorem ipsum dolor sit amet}
-
-\lipsum[3-5]
