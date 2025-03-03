@@ -4,28 +4,30 @@ Each (sub)chapter should have some introductory text.
 
 \section{Microtypography}
 
-A text -- especially a professional one such as this work - must be divided into paragraphs. Each paragraph should relate to one topic or idea\dots{} Paragraphs must be visually separated from each other. There are several suitable styles for this, which we described in the last lecture. Paragraphs can be set in different ways. In professional texts, the ``block'' typesetting is common. It is necessary to change the interword spaces appropriately. Their recommended size is 0.25--0.33 square.
+A text -- especially a professional one such as this work - must be divided into paragraphs. Each paragraph should relate to one topic or idea\dots{} Paragraphs must be visually separated from each other. There are several suitable styles for this, which we described in  the last lecture. Paragraphs can be set in different ways. In professional texts, the ``block'' typesetting is common. It is necessary to change the interword spaces appropriately. Their recommended size is 0.25--0.33 square.
+
 
 \section{Source code}
 
-% The main part of our program's operation can be found in Listing 3.1\ref{lst:main} . It is worth noting that the main function has a return type of int, which is, of course, very atypical, and therefore, it is worth documenting. We will only include code samples in the work when it really brings something new, not just for the sake of having a code sample.
+The main part of our program's operation can be found in Listing~\ref{code:cpp}. It is worth noting that the main function has a return type of int, which is, of course, very atypical, and therefore, it is worth documenting. We will only include code samples in the work when it really brings something new, not just for the sake of having a code sample.
 
-% \begin{listing}
-%   \begin{minted}{c++}
-% #include<iostream>
-% using namespace std;int main()
-% {
-%   cout << "Hello, world!" << endl;
-%   return 0;
-% }
-%   \end{minted}
-%   \caption{The main function of the program}
-%   \label{lst:main}
-% \end{listing}
-    
-% Don't you like that it's black and white? Try copying the code sample again, pasting it under this paragraph, and we'll make it prettier by using a different package:
+\begin{listing}
+    \begin{minted}{c++}
+#include<iostream>
 
-% Tables
+using namespace std;
+
+int main()
+{
+    cout << "Hello, world!" << endl;
+    return 0;
+}
+    \end{minted}
+    \caption{The main function of our program}
+    \label{code:cpp}
+\end{listing}
+
+\section{Tables}
 
 % In Table 3.1, you will find options for earning points in the BI-TDP subject. Although it's not as good a table as the chocolate table, it will have to be enough for us to get credit. I'm not saying that you should bribe your students with chocolate bars! But I'm also not saying that you shouldn't.
 

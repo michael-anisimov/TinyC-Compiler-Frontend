@@ -1,8 +1,11 @@
 .DS_Store
+.vscode
 
 # TinyC project:
 tinyc/
 
+# project:
+build/
 
 # Latex specific
 *.aux
@@ -17,6 +20,7 @@ tinyc/
 *.lol
 *.lot
 _minted-ctufit-thesis/
+_minted-thesis
 *.out
 *.ps
 *.run.xml

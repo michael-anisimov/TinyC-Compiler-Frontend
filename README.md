@@ -6,6 +6,7 @@
 
 ### First fortnight tasks
 
+
 1. Conversion of [Initial Grammar](project/grammar/Grammar_reference.md) into its [LL(1) form](project/grammar/Grammar_LL1.txt).
    The syntax used is suited for [LL(1) Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl)
 2. The test file with TinyC code can be found [here](project/grammar/LL1%20tests.txt). You can put it into the [LL(1) Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl) to check if it's working.
