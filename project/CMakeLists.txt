@@ -16,10 +16,36 @@ endif()
 # Include directories
 include_directories(include)
 
-# Source files
-set(SOURCES
+# Source files - Lexer
+set(LEXER_SOURCES
     src/lexer/Token.cpp
     src/lexer/Lexer.cpp
+)
+
+# Source files - Parser
+set(PARSER_SOURCES
+    src/parser/Parser.cpp
+    src/parser/ParserTypeNodes.cpp
+    src/parser/ParserDeclarationNodes.cpp
+    src/parser/ParserStatementNodes.cpp
+    src/parser/ParserExpressionNodes.cpp
+)
+
+# Source files - AST
+set(AST_SOURCES
+    src/ast/ProgramNode.cpp
+    src/ast/BaseNodes.cpp
+    src/ast/TypeNodes.cpp
+    src/ast/DeclarationNodes.cpp
+    src/ast/StatementNodes.cpp
+    src/ast/ExpressionNodes.cpp
+)
+
+# Combine all sources
+set(SOURCES
+    ${LEXER_SOURCES}
+    ${PARSER_SOURCES}
+    ${AST_SOURCES}
 )
 
 # Library target
@@ -38,12 +64,17 @@ find_package(GTest REQUIRED)
 include(GoogleTest)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-# Add test executable
+# Add lexer test executable
 add_executable(lexer_tests tests/unit/lexer/LexerTest.cpp)
 target_link_libraries(lexer_tests tinyc ${GTEST_LIBRARIES} pthread)
 
-# Register tests
+# Add parser test executable
+add_executable(parser_tests tests/unit/parser/ParserTest.cpp)
+target_link_libraries(parser_tests tinyc ${GTEST_LIBRARIES} pthread)
+
+# Register tests with CTest
 gtest_discover_tests(lexer_tests)
+gtest_discover_tests(parser_tests)
 
 # Install targets
 install(TARGETS tinyc tinyc-compiler
