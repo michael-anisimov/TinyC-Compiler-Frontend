@@ -2,6 +2,8 @@
 .vscode
 .idea
 
+cmake-build-debug/
+
 # TinyC project:
 tinyc/
 

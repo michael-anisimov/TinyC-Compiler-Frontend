@@ -7,45 +7,45 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add compile options
-if(MSVC)
-  add_compile_options(/W4 /WX)
-else()
-  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-endif()
+if (MSVC)
+    add_compile_options(/W4 /WX)
+else ()
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif ()
 
 # Include directories
 include_directories(include)
 
 # Source files - Lexer
 set(LEXER_SOURCES
-    src/lexer/Token.cpp
-    src/lexer/Lexer.cpp
+        src/lexer/Token.cpp
+        src/lexer/Lexer.cpp
 )
 
 # Source files - Parser
 set(PARSER_SOURCES
-    src/parser/Parser.cpp
-    src/parser/ParserTypeNodes.cpp
-    src/parser/ParserDeclarationNodes.cpp
-    src/parser/ParserStatementNodes.cpp
-    src/parser/ParserExpressionNodes.cpp
+        src/parser/Parser.cpp
+        src/parser/ParserTypeNodes.cpp
+        src/parser/ParserDeclarationNodes.cpp
+        src/parser/ParserStatementNodes.cpp
+        src/parser/ParserExpressionNodes.cpp
 )
 
 # Source files - AST
 set(AST_SOURCES
-    src/ast/ProgramNode.cpp
-    src/ast/BaseNodes.cpp
-    src/ast/TypeNodes.cpp
-    src/ast/DeclarationNodes.cpp
-    src/ast/StatementNodes.cpp
-    src/ast/ExpressionNodes.cpp
+        src/ast/ProgramNode.cpp
+        src/ast/BaseNodes.cpp
+        src/ast/TypeNodes.cpp
+        src/ast/DeclarationNodes.cpp
+        src/ast/StatementNodes.cpp
+        src/ast/ExpressionNodes.cpp
 )
 
 # Combine all sources
 set(SOURCES
-    ${LEXER_SOURCES}
-    ${PARSER_SOURCES}
-    ${AST_SOURCES}
+        ${LEXER_SOURCES}
+        ${PARSER_SOURCES}
+        ${AST_SOURCES}
 )
 
 # Library target
@@ -62,15 +62,56 @@ enable_testing()
 # Find GTest
 find_package(GTest REQUIRED)
 include(GoogleTest)
+
+# Make sure we can find GTest headers
+message(STATUS "GTest include dirs: ${GTEST_INCLUDE_DIRS}")
+
+# Add the GTest include directories to all targets
 include_directories(${GTEST_INCLUDE_DIRS})
+
+# For macOS with Homebrew, try an additional include path if needed
+if (APPLE)
+    include_directories(SYSTEM /opt/homebrew/include)
+endif ()
+
+# Define test libraries (using variables from FindGTest)
+set(TEST_LIBRARIES tinyc ${GTEST_BOTH_LIBRARIES} pthread)
 
 # Add lexer test executable
 add_executable(lexer_tests tests/unit/lexer/LexerTest.cpp)
-target_link_libraries(lexer_tests tinyc ${GTEST_LIBRARIES} pthread)
+target_link_libraries(lexer_tests ${TEST_LIBRARIES})
+target_include_directories(lexer_tests PRIVATE ${GTEST_INCLUDE_DIRS})
 
-# Add parser test executable
+# Add original parser test executable
 add_executable(parser_tests tests/unit/parser/ParserTest.cpp)
-target_link_libraries(parser_tests tinyc ${GTEST_LIBRARIES} pthread)
+target_link_libraries(parser_tests ${TEST_LIBRARIES})
+target_include_directories(parser_tests PRIVATE ${GTEST_INCLUDE_DIRS})
+
+# Create directory structure if it doesn't exist
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/parser)
+
+# Add new parser test executables (excluding ParserTypeTests.cpp)
+set(PARSER_TEST_SOURCES
+        tests/unit/parser/ParserExpressionTests.cpp
+        tests/unit/parser/ParserStatementTests.cpp
+        tests/unit/parser/ParserDeclarationTests.cpp
+        tests/unit/parser/ParserProgramTests.cpp
+        tests/unit/parser/ParserErrorTests.cpp
+)
+
+# Create individual test executables for each test file
+foreach (TEST_SOURCE ${PARSER_TEST_SOURCES})
+    # Extract the file name without extension
+    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+
+    # Create an executable for this test file
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} ${TEST_LIBRARIES})
+    target_include_directories(${TEST_NAME} PRIVATE ${GTEST_INCLUDE_DIRS})
+
+    # Register the test with CTest
+    gtest_discover_tests(${TEST_NAME})
+endforeach ()
 
 # Register tests with CTest
 gtest_discover_tests(lexer_tests)
