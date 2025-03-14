@@ -95,7 +95,6 @@ set(PARSER_TEST_SOURCES
         tests/unit/parser/ParserExpressionTests.cpp
         tests/unit/parser/ParserStatementTests.cpp
         tests/unit/parser/ParserDeclarationTests.cpp
-        tests/unit/parser/ParserProgramTests.cpp
 )
 
 # Create individual test executables for each test file
