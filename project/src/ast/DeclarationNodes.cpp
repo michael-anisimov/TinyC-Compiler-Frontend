@@ -157,15 +157,15 @@ namespace tinyc::ast {
 		std::ostringstream json;
 
 		json << "{"
-			 << R"("nodeType": ")" << (isDefinition() ? "FunctionDefinition" : "FunctionDeclaration") << "\", "
-			 << R"("name": ")" << name << "\", "
-			 << "\"returnType\": " << returnType->toJSON() << ", "
-			 << "\"parameters\": [";
+			 << R"("nodeType": ")" << (isDefinition() ? "FunctionDefinition" : "FunctionDeclaration") << "\", \n"
+			 << R"("name": ")" << name << "\", \n"
+			 << "\"returnType\": " << returnType->toJSON() << ", \n"
+			 << "\"parameters\": [\n";
 
 		for (size_t i = 0; i < parameters.size(); ++i) {
 			json << parameters[i]->toJSON();
 			if (i < parameters.size() - 1) {
-				json << ", ";
+				json << ", \n";
 			}
 		}
 

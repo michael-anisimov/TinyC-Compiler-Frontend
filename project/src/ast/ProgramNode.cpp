@@ -40,14 +40,14 @@ namespace tinyc::ast {
 		json << "{\n";
 		json << "  \"nodeType\": \"Program\",\n";
 		json << R"(  "location": ")" << location << "\",\n";
-		json << "  \"declarations\": [\n";
+		json << "  \"declarations\": [\n\n";
 
 		for (size_t i = 0; i < declarations.size(); ++i) {
 			json << "    " << declarations[i]->toJSON();
 			if (i < declarations.size() - 1) {
 				json << ",";
 			}
-			json << "\n";
+			json << "\n\n";
 		}
 
 		json << "  ]\n";

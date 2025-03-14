@@ -1,0 +1,15 @@
+// If statement examples
+int max(int a, int b) {
+    if (a > b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+// If without else
+void check_positive(int x) {
+    if (x > 0) {
+        return x;
+    }
+}

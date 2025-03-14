@@ -4,61 +4,49 @@
 #include "tinyc/ast/StatementNodes.h"
 #include "tinyc/ast/ExpressionNodes.h"
 
-namespace tinyc
-{
-    namespace ast
-    {
 
-        // Base class implementations
+namespace tinyc::ast {
 
-        // TypeNode implementation
-        TypeNode::TypeNode(const lexer::SourceLocation &location)
-            : location(location)
-        {
-        }
+	// Base class implementations
 
-        lexer::SourceLocation TypeNode::getLocation() const
-        {
-            return location;
-        }
+	// TypeNode implementation
+	TypeNode::TypeNode(const lexer::SourceLocation &location)
+			: location(location) {
+	}
 
-        // DeclarationNode implementation
-        DeclarationNode::DeclarationNode(const std::string &name, const lexer::SourceLocation &location)
-            : name(name), location(location)
-        {
-        }
+	lexer::SourceLocation TypeNode::getLocation() const {
+		return location;
+	}
 
-        const std::string &DeclarationNode::getName() const
-        {
-            return name;
-        }
+	// DeclarationNode implementation
+	DeclarationNode::DeclarationNode(const std::string &name, const lexer::SourceLocation &location)
+			: name(name), location(location) {
+	}
 
-        lexer::SourceLocation DeclarationNode::getLocation() const
-        {
-            return location;
-        }
+	const std::string &DeclarationNode::getName() const {
+		return name;
+	}
 
-        // StatementNode implementation
-        StatementNode::StatementNode(const lexer::SourceLocation &location)
-            : location(location)
-        {
-        }
+	lexer::SourceLocation DeclarationNode::getLocation() const {
+		return location;
+	}
 
-        lexer::SourceLocation StatementNode::getLocation() const
-        {
-            return location;
-        }
+	// StatementNode implementation
+	StatementNode::StatementNode(const lexer::SourceLocation &location)
+			: location(location) {
+	}
 
-        // ExpressionNode implementation
-        ExpressionNode::ExpressionNode(const lexer::SourceLocation &location)
-            : location(location)
-        {
-        }
+	lexer::SourceLocation StatementNode::getLocation() const {
+		return location;
+	}
 
-        lexer::SourceLocation ExpressionNode::getLocation() const
-        {
-            return location;
-        }
+	// ExpressionNode implementation
+	ExpressionNode::ExpressionNode(const lexer::SourceLocation &location)
+			: location(location) {
+	}
 
-    } // namespace ast
-} // namespace tinyc
+	lexer::SourceLocation ExpressionNode::getLocation() const {
+		return location;
+	}
+
+} // namespace tinyc::ast
