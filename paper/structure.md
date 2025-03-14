@@ -3,61 +3,97 @@
 ## 1. Introduction
 
 - **1.1 Problem Statement & Motivation**: Why students need a reliable TinyC frontend
-- **1.2 Project Goals**: Clear enumeration of objectives (parser, AST representation, etc.)
+- **1.2 Project Goals & Objectives**: Clear enumeration of deliverables
 - **1.3 TinyC Language Overview**: Brief introduction to TinyC and its educational purpose
-- **1.4 Thesis Structure**: Brief overview of remaining chapters
+- **1.4 Target Audience**: Discussion of how this will be used by students
+- **1.5 Thesis Structure**: Overview of remaining chapters
 
-## 2. Background & State of the Art
+## 2. Theoretical Background
 
-- **2.1 Compiler Architecture**: Overview of compiler components (frontend, middle-end, backend)
-- **2.2 Parsing Techniques**: Discussion of parsing approaches (LL, LR, recursive descent, etc.)
-- **2.3 AST Representations**: Review of different AST designs in modern compilers
-- **2.4 Parser Generators vs. Handwritten Parsers**: Analysis of tradeoffs
-- **2.5 Existing Tools**: Review of tools like LLVM, ANTLR, Bison, etc.
-- **2.6 Quality Metrics for Parsers**: Exploring metrics for parser quality (performance, error recovery, etc.)
+- **2.1 Compiler Architecture Fundamentals**: Overview of compiler components
+- **2.2 Lexical Analysis Theory**: Tokens, regular expressions, finite automata
+- **2.3 Parsing Theory**: Context-free grammars, derivations, parse trees
+    - **2.3.1 Top-down Parsing**: LL(1), recursive descent, predictive parsing
+    - **2.3.2 Bottom-up Parsing**: LR, and so on
+- **2.4 Abstract Syntax Trees**: Purpose, design principles, traversal techniques
 
-## 3. Design
+## 3. Analysis of Existing Solutions
 
-- **3.1 Requirements Analysis**: Detailed functional and non-functional requirements
-- **3.2 Architecture Overview**: High-level design of the complete frontend
-- **3.3 Lexical Analysis Design**: Token design and scanner approach
-- **3.4 AST Class Hierarchy**: Detailed design of AST nodes following OOP principles
-- **3.5 JSON Representation**: Design of the JSON format for serializing the AST
-- **3.6 Error Handling Strategy**: Approach to syntax errors and recovery
-- **3.7 API Design**: Interface design for either library or standalone use
+- **3.1 Parser Categories & Comparison Criteria**: Establishing evaluation framework
+    - **3.1.1 Parser Generators**: ANTLR, Bison, YACC
+    - **3.1.2 Hand-written Parsers**: Recursive descent, Pratt parsing
+    - **3.1.3 Parser Combinators**: Approaches in functional languages
+- **3.2 Language-Agnostic AST Representations**:
+    - **3.2.1 JavaScript Ecosystem**: Babel/parser, ESTree, TypeScript Compiler API
+    - **3.2.2 LLVM IR & Clang AST**: Structure and design philosophy
+    - **3.2.3 Roslyn (C# Compiler Platform)**: .NET approach to language services
+    - **3.2.4 Tree-sitter**: Universal parsing approach
+- **3.3 AST Serialization Formats**:
+    - **3.3.1 JSON-based AST Representations**: Benefits and limitations
+    - **3.3.2 Binary Formats**: Protobuf, Flatbuffers, Cap'n Proto
+    - **3.3.3 Custom DSLs**: Domain-specific notations for ASTs
+- **3.4 Source Location & Error Reporting**:
+    - **3.4.1 Location Tracking Techniques**: Different approaches
+    - **3.4.2 Error Recovery Strategies**: How parsers handle syntax errors
+- **3.5 Educational Compiler Frontends**:
+    - **3.5.1 Case Studies**: Notable examples from academia
+    - **3.5.2 Design Patterns**: Common patterns in educational compilers
 
-## 4. Implementation
+## 4. Design Requirements & Architecture
 
-- **4.1 Development Environment & Tools**: C++ version, libraries, build system
-- **4.2 Lexer Implementation**: Implementation details of the scanner
-- **4.3 Parser Implementation**: Details of the recursive descent parser implementation
-- **4.4 AST Construction**: How parse rules map to AST creation
-- **4.5 JSON Serialization**: Implementation of the AST to JSON conversion
-- **4.6 Error Reporting**: Implementation of error detection and recovery
-- **4.7 Testing Framework**: Unit testing approach and framework
+- **4.1 Functional Requirements**: What the compiler frontend must do
+- **4.2 Non-functional Requirements**: Performance, extensibility, educational value
+- **4.3 TinyC Grammar Analysis**:
+    - **4.3.1 Grammar Transformations**: Converting to LL(1) form
+    - **4.3.2 Parsing Challenges**: Difficult aspects of TinyC grammar
+- **4.4 System Architecture**: High-level components and their interactions
+- **4.5 AST Design**:
+    - **4.5.1 Node Class Hierarchy**: Core design decisions and OOP principles applied
+    - **4.5.2 Visitor Pattern Implementation**: Design for traversal
+    - **4.5.3 JSON Representation Design**: Mapping between AST and JSON
+- **4.6 API Design**: How users will interact with the frontend
+    - **4.6.1 Library API**: Class interfaces for direct usage
+    - **4.6.2 CLI Design**: Command-line interface for standalone usage
 
-## 5. Evaluation
+## 5. Implementation
 
-- **5.1 Testing Methodology**: Approach to validation and verification
-- **5.2 Test Coverage Analysis**: Metrics on test coverage
-- **5.3 Comparison with Existing Solutions**: Comparison with current parsers used in the course
-- **5.4 Performance Metrics**: Speed and memory usage benchmarks
-- **5.5 Code Quality Metrics**: Analysis of code maintainability, complexity
-- **5.6 Educational Value**: Evaluation of how well it serves educational purposes
+- **5.1 Development Environment**: Tools, libraries, and workflow
+- **5.2 Lexical Analyzer Implementation**: Scanner details
+- **5.3 Parser Implementation**: Parsing algorithm details
+- **5.4 AST Construction**: Building the tree during parsing
+- **5.5 Source Location Tracking**: Implementation details
+- **5.6 Error Handling & Recovery**: How errors are detected and reported
+- **5.7 JSON Serialization**: Implementation details
+- **5.8 Testing Framework**: Unit and integration testing approach
 
-## 6. Conclusion & Future Work
+## 6. Evaluation
 
-- **6.1 Summary of Contributions**: Review of achievements
-- **6.2 Limitations**: Current limitations of the implementation
-- **6.3 Future Developments**: Potential extensions:
-    - Semantic analysis (type checking, symbol resolution)
-    - Middle-end integration (intermediate representation)
-    - Back-end connection
-    - Performance optimizations
+- **6.1 Methodology**: Approach to validating the implementation
+- **6.2 Test Coverage Analysis**: Metrics and results
+- **6.3 Correctness Validation**: How parser correctness is verified
+- **6.4 Comparison with Alternative Implementations**: Evaluating against existing parsers
+    - **6.4.1 Feature Comparison**: Capabilities comparison
+    - **6.4.2 Performance Analysis**: Speed and memory benchmarks
+    - **6.4.3 Maintainability Metrics**: Code quality metrics
+- **6.5 User Feedback**: Preliminary student or instructor feedback
+- **6.6 Educational Value Assessment**: Evaluating how well it serves its purpose
+
+## 7. Conclusion & Future Work
+
+- **7.1 Summary of Contributions**: What was accomplished
+- **7.2 Lessons Learned**: Insights gained during development
+- **7.3 Limitations of Current Implementation**: Known issues or constraints
+- **7.4 Future Extensions**:
+    - **7.4.1 Semantic Analysis**: Type checking, name resolution
+    - **7.4.2 Optimization Passes**: Middle-end potential
+    - **7.4.3 Code Generation Interfaces**: Backend integration
+    - **7.4.4 IDE Integration**: Developer tooling possibilities
+    - **7.4.5 Language Extensions**: Potential TinyC enhancements
 
 ## Appendices
 
-- **A. Grammar Specification**: Complete formal grammar for TinyC
-- **B. API Documentation**: Detailed API reference
-- **C. JSON Schema**: Schema specification for the AST JSON format
-- **D. Example Programs & ASTs**: Sample TinyC programs and their AST representations
+- **A. Complete TinyC Grammar**: Formal grammar specification
+- **B. API Documentation**: Detailed interface reference
+- **C. JSON Schema**: Schema for AST serialization
+- **D. Sample Programs**: Example TinyC programs with corresponding ASTs
+- **E. User Guide**: Documentation for students and instructors
