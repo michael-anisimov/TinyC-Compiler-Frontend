@@ -16,6 +16,36 @@ namespace tinyc::parser {
 				return baseType;
 			}
 
+			case lexer::TokenType::IDENTIFIER: {
+				// Rule 74: TYPE -> TYPENAME STAR_SEQ
+				auto identifierToken = consume();
+				std::string name = identifierToken->getLexeme();
+
+				ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
+						name,
+						identifierToken->getLocation());
+
+				parseStarSeq(namedType);
+				return namedType;
+			}
+
+			case lexer::TokenType::KW_STRUCT: {
+				// Handle "struct Name" as a type
+				auto structToken = consume(); // Consume "struct"
+				auto nameToken = expect(lexer::TokenType::IDENTIFIER, "Expected struct name after 'struct'");
+				std::string name = nameToken->getLexeme();
+
+				// Create a named type node that represents a struct type
+				// We can use a special format like "struct:Name" or just use the name directly
+				// For simplicity, we'll use "struct:Name" to distinguish from regular named types
+				ast::ASTNodePtr structType = std::make_shared<ast::NamedTypeNode>(
+						"struct:" + name,
+						structToken->getLocation());
+
+				parseStarSeq(structType);
+				return structType;
+			}
+
 			case lexer::TokenType::KW_VOID: {
 				// Rule 75: TYPE -> void STAR_PLUS
 				auto voidToken = consume(); // Consume "void"
@@ -32,7 +62,7 @@ namespace tinyc::parser {
 			}
 
 			default:
-				error("Expected type (int, double, char, void)");
+				error("Expected type (int, double, char, void, struct, or identifier)");
 		}
 	}
 
@@ -47,10 +77,24 @@ namespace tinyc::parser {
 				return baseType;
 			}
 
+			case lexer::TokenType::IDENTIFIER: {
+				// Rule 77: NON_VOID_TYPE -> TYPENAME STAR_SEQ
+				auto identifierToken = consume();
+				std::string name = identifierToken->getLexeme();
+
+				ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
+						name,
+						identifierToken->getLocation());
+
+				parseStarSeq(namedType);
+				return namedType;
+			}
+
 			default:
-				error("Expected non-void type (int, double, char)");
+				error("Expected non-void type (int, double, char, or identifier)");
 		}
 	}
+
 
 	ast::ASTNodePtr Parser::parseBaseType() {
 		lexer::TokenPtr token = currentToken;
@@ -155,12 +199,8 @@ namespace tinyc::parser {
 
 		// Parse optional struct body
 		std::vector<ast::ASTNodePtr> fields;
-		bool isDefinition = false;
 
 		if (match(lexer::TokenType::LBRACE)) {
-			// This is a struct definition, not just a forward declaration
-			isDefinition = true;
-
 			// Parse struct fields
 			while (!check(lexer::TokenType::RBRACE)) {
 				// Parse field type
@@ -188,13 +228,11 @@ namespace tinyc::parser {
 
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after struct declaration");
 
-		auto structDecl = std::make_shared<ast::StructDeclarationNode>(
+		// Create struct declaration node
+		return std::make_shared<ast::StructDeclarationNode>(
 				name,
 				fields,
 				structToken->getLocation());
-			
-		// Create struct declaration node
-		return;
 	}
 
 	ast::ASTNodePtr Parser::parseFunPtrDecl() {
