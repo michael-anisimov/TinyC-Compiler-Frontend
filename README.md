@@ -4,13 +4,16 @@
 
 **Supervisor:** Ing. Petr Máj, Ph.D
 
-### First fortnight tasks
+### Second fortnight tasks
 
-
-1. Conversion of [Initial Grammar](project/grammar/Grammar_reference.md) into its [LL(1) form](project/grammar/Grammar_LL1.txt).
-   The syntax used is suited for [LL(1) Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl)
-2. The test file with TinyC code can be found [here](project/grammar/LL1%20tests.txt). You can put it into the [LL(1) Parsing Table](https://pages.fit.cvut.cz/peckato1/parsingtbl) to check if it's working.
-3. I put the LL(1) grammar into the [thesis template](paper/thesis.pdf)
+1. Lexer, Tokens
+2. Unit tests for Lexer
+3. Location info about each node
+4. Interactive Lexer in console for development
+5. AST nodes, includes with comments for future library
+6. Recursive descent parser, dump function for development, which outputs AST in console
+7. Some tests for LL(1) parser
+8. Paper structure
 
 ## Description
 
