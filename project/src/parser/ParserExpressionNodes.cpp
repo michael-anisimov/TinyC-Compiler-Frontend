@@ -670,8 +670,8 @@ namespace tinyc::parser {
 
 				// Create integer literal
 				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::INTEGER,
 						std::to_string(token->getIntValue()),
+						ast::LiteralNode::Kind::INTEGER,
 						token->getLocation());
 			}
 
@@ -681,8 +681,8 @@ namespace tinyc::parser {
 
 				// Create double literal
 				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::DOUBLE,
 						std::to_string(token->getDoubleValue()),
+						ast::LiteralNode::Kind::DOUBLE,
 						token->getLocation());
 			}
 
@@ -695,8 +695,8 @@ namespace tinyc::parser {
 				value.push_back(token->getCharValue());
 
 				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::CHAR,
 						value,
+						ast::LiteralNode::Kind::CHAR,
 						token->getLocation());
 			}
 
@@ -706,8 +706,8 @@ namespace tinyc::parser {
 
 				// Create string literal
 				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::STRING,
 						token->getLexeme(),
+						ast::LiteralNode::Kind::STRING,
 						token->getLocation());
 			}
 

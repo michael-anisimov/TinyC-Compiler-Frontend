@@ -6,7 +6,7 @@ namespace tinyc::parser {
 	// Declaration parsing methods
 
 	ast::ASTNodePtr Parser::parseNotVoidFunctionOrVariable(
-			ast::ASTNodePtr type,
+			const ast::ASTNodePtr &type,
 			const std::string &name,
 			const lexer::SourceLocation &location) {
 		// Rule 7: NOT_VOID_FUNCTION_OR_VARIABLE -> VARIABLE_TAIL
@@ -78,7 +78,7 @@ namespace tinyc::parser {
 
 	ast::ASTNodePtr Parser::parseVariableTail(
 			const ast::ASTNodePtr &type,
-			const std::string &name,
+			const std::string &identifier,
 			const lexer::SourceLocation &location) {
 		// Rule 13: VARIABLE_TAIL -> OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS ;
 
@@ -89,12 +89,12 @@ namespace tinyc::parser {
 		ast::ASTNodePtr initializer = parseOptInit();
 
 		// Create variable declaration node
-		auto varDecl = std::make_shared<ast::VariableDeclarationNode>(
+		auto varDecl = std::make_shared<ast::VariableNode>(
+				identifier,
 				type,
-				name,
+				location,
 				arraySize,
-				initializer,
-				location);
+				initializer);
 
 		// If there are more variables, collect them all
 		std::vector<ast::ASTNodePtr> declarations = {varDecl};
@@ -157,8 +157,8 @@ namespace tinyc::parser {
 		// Rule 17: MORE_GLOBAL_VARS -> , identifier OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS
 		// Rule 18: MORE_GLOBAL_VARS -> ε
 		if (match(lexer::TokenType::COMMA)) {
-			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable name");
-			std::string name = identifierToken->getLexeme();
+			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable identifier");
+			std::string identifier = identifierToken->getLexeme();
 
 			// Parse optional array size
 			ast::ASTNodePtr arraySize = parseOptArraySize();
@@ -167,12 +167,12 @@ namespace tinyc::parser {
 			ast::ASTNodePtr initializer = parseOptInit();
 
 			// Create variable declaration node
-			auto varDecl = std::make_shared<ast::VariableDeclarationNode>(
+			auto varDecl = std::make_shared<ast::VariableNode>(
+					identifier,
 					type,
-					name,
+					identifierToken->getLocation(),
 					arraySize,
-					initializer,
-					identifierToken->getLocation());
+					initializer);
 
 			declarations.push_back(varDecl);
 
@@ -219,13 +219,13 @@ namespace tinyc::parser {
 		// Rule 23: FUN_ARG -> TYPE identifier
 		ast::ASTNodePtr type = parseType();
 
-		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected parameter name");
-		std::string name = identifierToken->getLexeme();
+		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected parameter identifier");
+		std::string identifier = identifierToken->getLexeme();
 
 		// Create parameter node
 		return std::make_shared<ast::ParameterNode>(
+				identifier,
 				type,
-				name,
 				identifierToken->getLocation());
 	}
 

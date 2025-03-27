@@ -91,9 +91,9 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test simple variable declaration
 	{
 		auto stmt = parseStatement("int x;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(stmt);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "x");
+		EXPECT_EQ(varDecl->getIdentifier(), "x");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -105,9 +105,9 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test variable declaration with initializer
 	{
 		auto stmt = parseStatement("double pi = 3.14159;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(stmt);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "pi");
+		EXPECT_EQ(varDecl->getIdentifier(), "pi");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -122,9 +122,9 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test array declaration
 	{
 		auto stmt = parseStatement("int numbers[10];");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(stmt);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "numbers");
+		EXPECT_EQ(varDecl->getIdentifier(), "numbers");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -142,9 +142,9 @@ TEST(ParserStatementTest, VariableDeclaration) {
 		auto stmt = parseStatement("int a = 1, b = 2, c = 3;");
 
 		// In the current implementation, the first variable is returned
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(stmt);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "a");
+		EXPECT_EQ(varDecl->getIdentifier(), "a");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -182,9 +182,9 @@ TEST(ParserStatementTest, BlockStatement) {
 		ASSERT_NE(block, nullptr);
 		ASSERT_EQ(block->getStatements().size(), 3);
 
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(block->getStatements()[0]);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(block->getStatements()[0]);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "x");
+		EXPECT_EQ(varDecl->getIdentifier(), "x");
 
 		auto exprStmt1 = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(block->getStatements()[1]);
 		ASSERT_NE(exprStmt1, nullptr);
@@ -204,9 +204,9 @@ TEST(ParserStatementTest, BlockStatement) {
 		ASSERT_NE(innerBlock, nullptr);
 		ASSERT_EQ(innerBlock->getStatements().size(), 1);
 
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(innerBlock->getStatements()[0]);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(innerBlock->getStatements()[0]);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "y");
+		EXPECT_EQ(varDecl->getIdentifier(), "y");
 	}
 }
 
@@ -375,9 +375,9 @@ TEST(ParserStatementTest, ForStatement) {
 		auto forStmt = std::dynamic_pointer_cast<ast::ForStatementNode>(stmt);
 		ASSERT_NE(forStmt, nullptr);
 
-		auto init = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(forStmt->getInitialization());
+		auto init = std::dynamic_pointer_cast<ast::VariableNode>(forStmt->getInitialization());
 		ASSERT_NE(init, nullptr);
-		EXPECT_EQ(init->getName(), "i");
+		EXPECT_EQ(init->getIdentifier(), "i");
 
 		auto condition = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(forStmt->getCondition());
 		ASSERT_NE(condition, nullptr);
@@ -446,7 +446,7 @@ TEST(ParserStatementTest, SwitchStatement) {
 
 		auto expr = std::dynamic_pointer_cast<ast::IdentifierNode>(switchStmt->getExpression());
 		ASSERT_NE(expr, nullptr);
-		EXPECT_EQ(expr->getName(), "x");
+		EXPECT_EQ(expr->getIdentifier(), "x");
 
 		ASSERT_EQ(switchStmt->getCases().size(), 2);
 

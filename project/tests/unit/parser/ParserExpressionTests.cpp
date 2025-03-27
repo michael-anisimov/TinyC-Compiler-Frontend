@@ -96,7 +96,7 @@ TEST(ParserExpressionTest, IdentifierExpressions) {
 	auto expr = parseExpression("variable");
 	auto identifier = std::dynamic_pointer_cast<ast::IdentifierNode>(expr);
 	ASSERT_NE(identifier, nullptr);
-	EXPECT_EQ(identifier->getName(), "variable");
+	EXPECT_EQ(identifier->getIdentifier(), "variable");
 }
 
 /**
@@ -118,7 +118,7 @@ TEST(ParserExpressionTest, UnaryExpressions) {
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::POSITIVE);
 		auto operand = std::dynamic_pointer_cast<ast::IdentifierNode>(unary->getOperand());
 		ASSERT_NE(operand, nullptr);
-		EXPECT_EQ(operand->getName(), "x");
+		EXPECT_EQ(operand->getIdentifier(), "x");
 	}
 
 	// Test unary minus
@@ -220,11 +220,11 @@ TEST(ParserExpressionTest, BinaryExpressions) {
 
 		auto left = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getLeft());
 		ASSERT_NE(left, nullptr);
-		EXPECT_EQ(left->getName(), "a");
+		EXPECT_EQ(left->getIdentifier(), "a");
 
 		auto right = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getRight());
 		ASSERT_NE(right, nullptr);
-		EXPECT_EQ(right->getName(), "b");
+		EXPECT_EQ(right->getIdentifier(), "b");
 	}
 
 	// Test division
@@ -378,7 +378,7 @@ TEST(ParserExpressionTest, OperatorPrecedence) {
 
 		auto left = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getLeft());
 		ASSERT_NE(left, nullptr);
-		EXPECT_EQ(left->getName(), "a");
+		EXPECT_EQ(left->getIdentifier(), "a");
 
 		auto right = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(binary->getRight());
 		ASSERT_NE(right, nullptr);
@@ -398,7 +398,7 @@ TEST(ParserExpressionTest, OperatorPrecedence) {
 
 		auto right = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getRight());
 		ASSERT_NE(right, nullptr);
-		EXPECT_EQ(right->getName(), "c");
+		EXPECT_EQ(right->getIdentifier(), "c");
 	}
 
 	// Test complex expression with mixed operators
@@ -437,7 +437,7 @@ TEST(ParserExpressionTest, MemberExpressions) {
 
 		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member->getObject());
 		ASSERT_NE(object, nullptr);
-		EXPECT_EQ(object->getName(), "point");
+		EXPECT_EQ(object->getIdentifier(), "point");
 	}
 
 	// Test arrow operator
@@ -450,7 +450,7 @@ TEST(ParserExpressionTest, MemberExpressions) {
 
 		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member->getObject());
 		ASSERT_NE(object, nullptr);
-		EXPECT_EQ(object->getName(), "ptr");
+		EXPECT_EQ(object->getIdentifier(), "ptr");
 	}
 
 	// Test chained member access
@@ -468,7 +468,7 @@ TEST(ParserExpressionTest, MemberExpressions) {
 
 		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member2->getObject());
 		ASSERT_NE(object, nullptr);
-		EXPECT_EQ(object->getName(), "obj");
+		EXPECT_EQ(object->getIdentifier(), "obj");
 	}
 }
 
@@ -489,7 +489,7 @@ TEST(ParserExpressionTest, IndexExpressions) {
 
 		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index->getArray());
 		ASSERT_NE(array, nullptr);
-		EXPECT_EQ(array->getName(), "arr");
+		EXPECT_EQ(array->getIdentifier(), "arr");
 
 		auto indexExpr = std::dynamic_pointer_cast<ast::LiteralNode>(index->getIndex());
 		ASSERT_NE(indexExpr, nullptr);
@@ -505,7 +505,7 @@ TEST(ParserExpressionTest, IndexExpressions) {
 
 		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index->getArray());
 		ASSERT_NE(array, nullptr);
-		EXPECT_EQ(array->getName(), "arr");
+		EXPECT_EQ(array->getIdentifier(), "arr");
 
 		auto indexExpr = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(index->getIndex());
 		ASSERT_NE(indexExpr, nullptr);
@@ -523,7 +523,7 @@ TEST(ParserExpressionTest, IndexExpressions) {
 
 		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index2->getArray());
 		ASSERT_NE(array, nullptr);
-		EXPECT_EQ(array->getName(), "matrix");
+		EXPECT_EQ(array->getIdentifier(), "matrix");
 	}
 }
 
@@ -544,7 +544,7 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
 		ASSERT_NE(callee, nullptr);
-		EXPECT_EQ(callee->getName(), "foo");
+		EXPECT_EQ(callee->getIdentifier(), "foo");
 
 		EXPECT_EQ(call->getArguments().size(), 0);
 	}
@@ -557,7 +557,7 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
 		ASSERT_NE(callee, nullptr);
-		EXPECT_EQ(callee->getName(), "bar");
+		EXPECT_EQ(callee->getIdentifier(), "bar");
 
 		ASSERT_EQ(call->getArguments().size(), 2);
 
@@ -580,7 +580,7 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
 		ASSERT_NE(callee, nullptr);
-		EXPECT_EQ(callee->getName(), "compute");
+		EXPECT_EQ(callee->getIdentifier(), "compute");
 
 		ASSERT_EQ(call->getArguments().size(), 2);
 
@@ -601,7 +601,7 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 		auto outerCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(outerCall->getCallee());
 		ASSERT_NE(outerCallee, nullptr);
-		EXPECT_EQ(outerCallee->getName(), "outer");
+		EXPECT_EQ(outerCallee->getIdentifier(), "outer");
 
 		ASSERT_EQ(outerCall->getArguments().size(), 1);
 
@@ -610,7 +610,7 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 		auto innerCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(innerCall->getCallee());
 		ASSERT_NE(innerCallee, nullptr);
-		EXPECT_EQ(innerCallee->getName(), "inner");
+		EXPECT_EQ(innerCallee->getIdentifier(), "inner");
 	}
 }
 
@@ -653,7 +653,7 @@ TEST(ParserExpressionTest, CastExpressions) {
 
 		auto expression = std::dynamic_pointer_cast<ast::IdentifierNode>(cast->getExpression());
 		ASSERT_NE(expression, nullptr);
-		EXPECT_EQ(expression->getName(), "ptr");
+		EXPECT_EQ(expression->getIdentifier(), "ptr");
 	}
 
 	// Test cast with complex expression
@@ -718,7 +718,7 @@ TEST(ParserExpressionTest, ComplexExpressions) {
 
 		auto indexCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(indexExpr->getCallee());
 		ASSERT_NE(indexCallee, nullptr);
-		EXPECT_EQ(indexCallee->getName(), "getIndex");
+		EXPECT_EQ(indexCallee->getIdentifier(), "getIndex");
 
 		// Array should be a member access with ARROW operator
 		auto innerMember = std::dynamic_pointer_cast<ast::MemberExpressionNode>(index->getArray());
@@ -732,7 +732,7 @@ TEST(ParserExpressionTest, ComplexExpressions) {
 
 		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
 		ASSERT_NE(callee, nullptr);
-		EXPECT_EQ(callee->getName(), "getData");
+		EXPECT_EQ(callee->getIdentifier(), "getData");
 	}
 
 	// Test complex expression with arithmetic, logical, and comparison operators

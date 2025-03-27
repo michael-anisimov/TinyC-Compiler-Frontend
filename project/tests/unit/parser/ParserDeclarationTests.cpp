@@ -39,9 +39,9 @@ TEST(ParserDeclarationTest, VariableDeclarations) {
 	// Test simple variable declaration
 	{
 		auto decl = parseDeclaration("int counter;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(decl);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(decl);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "counter");
+		EXPECT_EQ(varDecl->getIdentifier(), "counter");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -53,9 +53,9 @@ TEST(ParserDeclarationTest, VariableDeclarations) {
 	// Test variable declaration with initializer
 	{
 		auto decl = parseDeclaration("double pi = 3.14159;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(decl);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(decl);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "pi");
+		EXPECT_EQ(varDecl->getIdentifier(), "pi");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -70,9 +70,9 @@ TEST(ParserDeclarationTest, VariableDeclarations) {
 	// Test pointer variable declaration
 	{
 		auto decl = parseDeclaration("char* str;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(decl);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(decl);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "str");
+		EXPECT_EQ(varDecl->getIdentifier(), "str");
 
 		auto type = std::dynamic_pointer_cast<ast::PointerTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -85,9 +85,9 @@ TEST(ParserDeclarationTest, VariableDeclarations) {
 	// Test array variable declaration
 	{
 		auto decl = parseDeclaration("int numbers[10];");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(decl);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(decl);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "numbers");
+		EXPECT_EQ(varDecl->getIdentifier(), "numbers");
 
 		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -103,9 +103,9 @@ TEST(ParserDeclarationTest, VariableDeclarations) {
 	// Test void pointer declaration
 	{
 		auto decl = parseDeclaration("void* ptr;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(decl);
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(decl);
 		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getName(), "ptr");
+		EXPECT_EQ(varDecl->getIdentifier(), "ptr");
 
 		auto type = std::dynamic_pointer_cast<ast::PointerTypeNode>(varDecl->getType());
 		ASSERT_NE(type, nullptr);
@@ -131,7 +131,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		auto decl = parseDeclaration("int getNumber();");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "getNumber");
+		EXPECT_EQ(funcDecl->getIdentifier(), "getNumber");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -146,7 +146,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		auto decl = parseDeclaration("int add(int a, int b);");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "add");
+		EXPECT_EQ(funcDecl->getIdentifier(), "add");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -157,7 +157,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		// Check first parameter
 		auto param1 = std::dynamic_pointer_cast<ast::ParameterNode>(funcDecl->getParameters()[0]);
 		ASSERT_NE(param1, nullptr);
-		EXPECT_EQ(param1->getName(), "a");
+		EXPECT_EQ(param1->getIdentifier(), "a");
 
 		auto param1Type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(param1->getType());
 		ASSERT_NE(param1Type, nullptr);
@@ -166,7 +166,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		// Check second parameter
 		auto param2 = std::dynamic_pointer_cast<ast::ParameterNode>(funcDecl->getParameters()[1]);
 		ASSERT_NE(param2, nullptr);
-		EXPECT_EQ(param2->getName(), "b");
+		EXPECT_EQ(param2->getIdentifier(), "b");
 	}
 
 	// Test void function declaration
@@ -174,7 +174,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		auto decl = parseDeclaration("void logMessage(char* msg);");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "logMessage");
+		EXPECT_EQ(funcDecl->getIdentifier(), "logMessage");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -185,7 +185,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		// Check parameter
 		auto param = std::dynamic_pointer_cast<ast::ParameterNode>(funcDecl->getParameters()[0]);
 		ASSERT_NE(param, nullptr);
-		EXPECT_EQ(param->getName(), "msg");
+		EXPECT_EQ(param->getIdentifier(), "msg");
 
 		auto paramType = std::dynamic_pointer_cast<ast::PointerTypeNode>(param->getType());
 		ASSERT_NE(paramType, nullptr);
@@ -200,7 +200,7 @@ TEST(ParserDeclarationTest, FunctionDeclarations) {
 		auto decl = parseDeclaration("int* createArray(int size);");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "createArray");
+		EXPECT_EQ(funcDecl->getIdentifier(), "createArray");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PointerTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -226,7 +226,7 @@ TEST(ParserDeclarationTest, FunctionDefinitions) {
 		auto decl = parseDeclaration("int identity(int x) { return x; }");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "identity");
+		EXPECT_EQ(funcDecl->getIdentifier(), "identity");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -257,7 +257,7 @@ TEST(ParserDeclarationTest, FunctionDefinitions) {
         )");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "max");
+		EXPECT_EQ(funcDecl->getIdentifier(), "max");
 
 		ASSERT_EQ(funcDecl->getParameters().size(), 2);
 		EXPECT_TRUE(funcDecl->isDefinition());
@@ -282,7 +282,7 @@ TEST(ParserDeclarationTest, FunctionDefinitions) {
         )");
 		auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(decl);
 		ASSERT_NE(funcDecl, nullptr);
-		EXPECT_EQ(funcDecl->getName(), "swap");
+		EXPECT_EQ(funcDecl->getIdentifier(), "swap");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -311,23 +311,23 @@ TEST(ParserDeclarationTest, StructDeclarations) {
 		auto decl = parseDeclaration("struct Point { int x; int y; };");
 		auto structDecl = std::dynamic_pointer_cast<ast::StructDeclarationNode>(decl);
 		ASSERT_NE(structDecl, nullptr);
-		EXPECT_EQ(structDecl->getName(), "Point");
+		EXPECT_EQ(structDecl->getIdentifier(), "Point");
 		EXPECT_TRUE(structDecl->isDefinition());
 		ASSERT_EQ(structDecl->getFields().size(), 2);
 
 		// Check first field
-		auto field1 = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(structDecl->getFields()[0]);
+		auto field1 = std::dynamic_pointer_cast<ast::VariableNode>(structDecl->getFields()[0]);
 		ASSERT_NE(field1, nullptr);
-		EXPECT_EQ(field1->getName(), "x");
+		EXPECT_EQ(field1->getIdentifier(), "x");
 
 		auto field1Type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(field1->getType());
 		ASSERT_NE(field1Type, nullptr);
 		EXPECT_EQ(field1Type->getKind(), ast::PrimitiveTypeNode::Kind::INT);
 
 		// Check second field
-		auto field2 = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(structDecl->getFields()[1]);
+		auto field2 = std::dynamic_pointer_cast<ast::VariableNode>(structDecl->getFields()[1]);
 		ASSERT_NE(field2, nullptr);
-		EXPECT_EQ(field2->getName(), "y");
+		EXPECT_EQ(field2->getIdentifier(), "y");
 	}
 
 	// Test struct forward declaration
@@ -335,7 +335,7 @@ TEST(ParserDeclarationTest, StructDeclarations) {
 		auto decl = parseDeclaration("struct Node;");
 		auto structDecl = std::dynamic_pointer_cast<ast::StructDeclarationNode>(decl);
 		ASSERT_NE(structDecl, nullptr);
-		EXPECT_EQ(structDecl->getName(), "Node");
+		EXPECT_EQ(structDecl->getIdentifier(), "Node");
 		EXPECT_FALSE(structDecl->isDefinition());
 		EXPECT_EQ(structDecl->getFields().size(), 0);
 	}
@@ -345,19 +345,19 @@ TEST(ParserDeclarationTest, StructDeclarations) {
 		auto decl = parseDeclaration("struct LinkedList { int value; struct LinkedList* next; };");
 		auto structDecl = std::dynamic_pointer_cast<ast::StructDeclarationNode>(decl);
 		ASSERT_NE(structDecl, nullptr);
-		EXPECT_EQ(structDecl->getName(), "LinkedList");
+		EXPECT_EQ(structDecl->getIdentifier(), "LinkedList");
 		EXPECT_TRUE(structDecl->isDefinition());
 		ASSERT_EQ(structDecl->getFields().size(), 2);
 
 		// Check first field
-		auto field1 = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(structDecl->getFields()[0]);
+		auto field1 = std::dynamic_pointer_cast<ast::VariableNode>(structDecl->getFields()[0]);
 		ASSERT_NE(field1, nullptr);
-		EXPECT_EQ(field1->getName(), "value");
+		EXPECT_EQ(field1->getIdentifier(), "value");
 
 		// Check second field (pointer)
-		auto field2 = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(structDecl->getFields()[1]);
+		auto field2 = std::dynamic_pointer_cast<ast::VariableNode>(structDecl->getFields()[1]);
 		ASSERT_NE(field2, nullptr);
-		EXPECT_EQ(field2->getName(), "next");
+		EXPECT_EQ(field2->getIdentifier(), "next");
 
 		auto field2Type = std::dynamic_pointer_cast<ast::PointerTypeNode>(field2->getType());
 		ASSERT_NE(field2Type, nullptr);
@@ -378,7 +378,7 @@ TEST(ParserDeclarationTest, FunctionPointerDeclarations) {
 		auto decl = parseDeclaration("typedef void (*Callback)();");
 		auto funcPtrDecl = std::dynamic_pointer_cast<ast::FunctionPointerDeclarationNode>(decl);
 		ASSERT_NE(funcPtrDecl, nullptr);
-		EXPECT_EQ(funcPtrDecl->getName(), "Callback");
+		EXPECT_EQ(funcPtrDecl->getIdentifier(), "Callback");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcPtrDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -392,7 +392,7 @@ TEST(ParserDeclarationTest, FunctionPointerDeclarations) {
 		auto decl = parseDeclaration("typedef int (*Comparator)(int, int);");
 		auto funcPtrDecl = std::dynamic_pointer_cast<ast::FunctionPointerDeclarationNode>(decl);
 		ASSERT_NE(funcPtrDecl, nullptr);
-		EXPECT_EQ(funcPtrDecl->getName(), "Comparator");
+		EXPECT_EQ(funcPtrDecl->getIdentifier(), "Comparator");
 
 		auto returnType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(funcPtrDecl->getReturnType());
 		ASSERT_NE(returnType, nullptr);
@@ -415,7 +415,7 @@ TEST(ParserDeclarationTest, FunctionPointerDeclarations) {
 		auto decl = parseDeclaration("typedef void* (*Allocator)(int, void*);");
 		auto funcPtrDecl = std::dynamic_pointer_cast<ast::FunctionPointerDeclarationNode>(decl);
 		ASSERT_NE(funcPtrDecl, nullptr);
-		EXPECT_EQ(funcPtrDecl->getName(), "Allocator");
+		EXPECT_EQ(funcPtrDecl->getIdentifier(), "Allocator");
 
 		// Check return type (void*)
 		auto returnType = std::dynamic_pointer_cast<ast::PointerTypeNode>(funcPtrDecl->getReturnType());
@@ -473,22 +473,22 @@ TEST(ParserDeclarationTest, MultipleDeclarations) {
 	// Check struct declaration
 	auto structDecl = std::dynamic_pointer_cast<ast::StructDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(structDecl, nullptr);
-	EXPECT_EQ(structDecl->getName(), "Point");
+	EXPECT_EQ(structDecl->getIdentifier(), "Point");
 
 	// Check function pointer declaration
 	auto funcPtrDecl = std::dynamic_pointer_cast<ast::FunctionPointerDeclarationNode>(program->getDeclarations()[1]);
 	ASSERT_NE(funcPtrDecl, nullptr);
-	EXPECT_EQ(funcPtrDecl->getName(), "Comparator");
+	EXPECT_EQ(funcPtrDecl->getIdentifier(), "Comparator");
 
 	// Check function declaration
 	auto funcDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[2]);
 	ASSERT_NE(funcDecl, nullptr);
-	EXPECT_EQ(funcDecl->getName(), "compare");
+	EXPECT_EQ(funcDecl->getIdentifier(), "compare");
 	EXPECT_FALSE(funcDecl->isDefinition());
 
 	// Check function definition
 	auto mainDecl = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[3]);
 	ASSERT_NE(mainDecl, nullptr);
-	EXPECT_EQ(mainDecl->getName(), "main");
+	EXPECT_EQ(mainDecl->getIdentifier(), "main");
 	EXPECT_TRUE(mainDecl->isDefinition());
 }

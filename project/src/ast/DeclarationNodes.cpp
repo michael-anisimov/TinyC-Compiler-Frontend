@@ -1,4 +1,4 @@
-#include "tinyc/ast/DeclarationNodes.h"
+#include "tinyc/ast/ASTNode.h"
 #include <sstream>
 #include <utility>
 

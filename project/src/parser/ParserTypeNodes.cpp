@@ -198,7 +198,7 @@ namespace tinyc::parser {
 		std::string name = identifierToken->getLexeme();
 
 		// Parse optional struct body
-		std::vector<ast::ASTNodePtr> fields;
+		std::vector <ast::ASTNodePtr> fields;
 
 		if (match(lexer::TokenType::LBRACE)) {
 			// Parse struct fields
@@ -208,15 +208,15 @@ namespace tinyc::parser {
 
 				// Parse field name
 				auto fieldNameToken = expect(lexer::TokenType::IDENTIFIER, "Expected field name");
-				std::string fieldName = fieldNameToken->getLexeme();
+				std::string fieldIdentifier = fieldNameToken->getLexeme();
 
 				// Create variable declaration node for the field
-				auto field = std::make_shared<ast::VariableDeclarationNode>(
+				auto field = std::make_shared<ast::VariableNode>(
+						fieldIdentifier,
 						type,
-						fieldName,
+						fieldNameToken->getLocation(),
 						nullptr, // No array size
-						nullptr, // No initializer
-						fieldNameToken->getLocation());
+						nullptr); // No initializer
 
 				fields.push_back(field);
 

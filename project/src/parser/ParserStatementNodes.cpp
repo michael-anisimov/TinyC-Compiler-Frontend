@@ -417,10 +417,10 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after expression");
 
 		// If the expression is already a statement or a declaration, return it directly
-		if (dynamic_cast<ast::StatementNode *>(expr.get()) ||
-			dynamic_cast<ast::DeclarationNode *>(expr.get())) {
-			return expr;
-		}
+//		if (dynamic_cast<ast::StatementNode *>(expr.get()) ||
+//			dynamic_cast<ast::DeclarationNode *>(expr.get())) {
+//			return expr;
+//		}
 
 		// Otherwise, wrap it in an expression statement
 		return std::make_shared<ast::ExpressionStatementNode>(
@@ -483,7 +483,7 @@ namespace tinyc::parser {
 		// Rule 64: VAR_DECLS_TAIL -> ε
 		if (match(lexer::TokenType::COMMA)) {
 			// Get the type from the first declaration
-			auto firstDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(declarations[0]);
+			auto firstDecl = std::dynamic_pointer_cast<ast::VariableNode>(declarations[0]);
 			if (!firstDecl) {
 				error("Internal error: first declaration is not a variable declaration");
 			}
@@ -491,8 +491,8 @@ namespace tinyc::parser {
 			auto type = firstDecl->getType();
 
 			// Now parse just the identifier, array size, and initializer
-			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable name");
-			std::string name = identifierToken->getLexeme();
+			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable identifier");
+			std::string identifier = identifierToken->getLexeme();
 
 			// Parse optional array size
 			ast::ASTNodePtr arraySize = parseOptArraySize();
@@ -501,12 +501,12 @@ namespace tinyc::parser {
 			ast::ASTNodePtr initializer = parseOptInit();
 
 			// Create variable declaration node using the type from the first declaration
-			auto varDecl = std::make_shared<ast::VariableDeclarationNode>(
+			auto varDecl = std::make_shared<ast::VariableNode>(
+					identifier,
 					type,
-					name,
+					identifierToken->getLocation(),
 					arraySize,
-					initializer,
-					identifierToken->getLocation());
+					initializer);
 
 			declarations.push_back(varDecl);
 
@@ -522,8 +522,8 @@ namespace tinyc::parser {
 		// Rule 65: VAR_DECL -> TYPE identifier OPT_ARRAY_SIZE OPT_INIT
 		ast::ASTNodePtr type = parseType();
 
-		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable name");
-		std::string name = identifierToken->getLexeme();
+		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable identifier");
+		std::string identifier = identifierToken->getLexeme();
 
 		// Parse optional array size
 		ast::ASTNodePtr arraySize = parseOptArraySize();
@@ -532,12 +532,12 @@ namespace tinyc::parser {
 		ast::ASTNodePtr initializer = parseOptInit();
 
 		// Create variable declaration node
-		return std::make_shared<ast::VariableDeclarationNode>(
+		return std::make_shared<ast::VariableNode>(
+				identifier,
 				type,
-				name,
+				identifierToken->getLocation(),
 				arraySize,
-				initializer,
-				identifierToken->getLocation());
+				initializer);
 	}
 
 	ast::ASTNodePtr Parser::parseOptArraySize() {
