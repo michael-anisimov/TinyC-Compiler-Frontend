@@ -56,8 +56,8 @@ BLOCK_STMT -> { STATEMENT_STAR }
 STATEMENT_STAR -> STATEMENT STATEMENT_STAR
 STATEMENT_STAR -> ε
 
-# !!! remove curly braces in real grammar, now it silences the LL1 error 
-IF_STMT -> if ( EXPR ) { STATEMENT } ELSE_PART 
+# !!! remove curly braces in real grammar, here it silences the LL1 error
+IF_STMT -> if ( EXPR ) { STATEMENT } ELSE_PART
 
 ELSE_PART -> else STATEMENT
 ELSE_PART -> ε
@@ -134,8 +134,6 @@ TYPE_FUN_RET -> FUN_RET_TYPES STAR_SEQ
 FUN_RET_TYPES -> void
 FUN_RET_TYPES -> BASE_TYPE
 FUN_RET_TYPES -> TYPENAME
-
-# !!! Do I add a string here?
 
 STAR_PLUS -> * STAR_SEQ
 STAR_SEQ -> * STAR_SEQ

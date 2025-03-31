@@ -134,7 +134,7 @@
               ]
             },
             "baseType": {
-              "$ref": "#/definitions/Type",
+              "$ref": "#/definitions/NamedType",
               "description": "Base type of the pointer"
             }
           },
@@ -248,7 +248,7 @@
             },
             "operator": {
               "type": "string",
-              "description": "Unary operator (+, -, !, ~, ++, --, *, &)"
+              "description": "Unary operator (+, -, !, ~, ++, --, *, &, )"
             },
               "prefix": {
               "type": "string",
@@ -954,9 +954,6 @@
         "Program"
       ]
     },
-    "location": {
-      "$ref": "#/definitions/SourceLocation"
-    },
     "declarations": {
       "type": "array",
       "items": {
@@ -976,11 +973,14 @@
         ]
       },
       "description": "Top-level declarations in the program"
+    },
+    "location": {
+      "$ref": "#/definitions/SourceLocation"
     }
   },
   "required": [
     "nodeType",
-    "location",
-    "declarations"
+    "declarations",
+    "location"
   ]
 }
