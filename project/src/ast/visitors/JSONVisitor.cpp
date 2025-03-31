@@ -4,7 +4,7 @@
 
 namespace tinyc::ast {
 
-	JSONVisitor::JSONVisitor() : indentLevel(0), prettyPrint(true) {}
+	JSONVisitor::JSONVisitor(bool prettyPrint) : indentLevel(0), prettyPrint(prettyPrint) {}
 
 	std::string JSONVisitor::getJSON() const {
 		return json.str();
@@ -14,6 +14,7 @@ namespace tinyc::ast {
 		if (!prettyPrint) {
 			return "";
 		}
+		// 2 spaces per indent level
 		return std::string(indentLevel * 2, ' ');
 	}
 
@@ -22,9 +23,7 @@ namespace tinyc::ast {
 	}
 
 	void JSONVisitor::decreaseIndent() {
-		if (indentLevel > 0) {
-			indentLevel--;
-		}
+		if (indentLevel > 0) indentLevel--;
 	}
 
 	void JSONVisitor::startObject() {
@@ -45,65 +44,37 @@ namespace tinyc::ast {
 
 	void JSONVisitor::startArray(const std::string &name) {
 		json << getIndent() << "\"" << name << "\": [";
-		if (prettyPrint) {
-			json << "\n";
-		}
+		if (prettyPrint) json << "\n";
 		increaseIndent();
 	}
 
-	void JSONVisitor::endArray(bool isLast) {
+	void JSONVisitor::endArray() {
 		decreaseIndent();
 		if (prettyPrint) {
 			json << getIndent();
 		}
 		json << "]";
-		if (!isLast) {
-			json << ",";
-		}
-		if (prettyPrint) {
-			json << "\n";
-		}
+		json << ",";
+		if (prettyPrint) json << "\n";
 	}
 
-	void JSONVisitor::addField(const std::string &name, const std::string &value, bool isLast) {
+	void JSONVisitor::addField(const std::string &name, const std::string &value) {
 		json << getIndent() << "\"" << name << "\": \"" << escapeString(value) << "\"";
-		if (!isLast) {
-			json << ",";
-		}
-		if (prettyPrint) {
-			json << "\n";
-		}
+		json << ",";
+		if (prettyPrint) json << "\n";
 	}
 
-	void JSONVisitor::addNodeField(const std::string &name, const ASTNode &node, bool isLast) {
+	void JSONVisitor::addBooleanField(const std::string& name, bool value) {
+		json << getIndent() << "\"" << name << "\": " << (value ? "true" : "false");
+		json << ",";
+		if (prettyPrint) json << "\n";
+	}
+
+	void JSONVisitor::addNodeField(const std::string &name, const ASTNode &node) {
 		json << getIndent() << "\"" << name << "\": ";
 		node.accept(*this);
-		if (!isLast) {
-			json << ",";
-		}
-		if (prettyPrint) {
-			json << "\n";
-		}
-	}
-
-	template<typename T>
-	void JSONVisitor::addNodeArrayField(const std::string &name, const std::vector<T> &nodes, bool isLast) {
-		startArray(name);
-
-		for (size_t i = 0; i < nodes.size(); ++i) {
-			if (prettyPrint) {
-				json << getIndent();
-			}
-			nodes[i]->accept(*this);
-			if (i < nodes.size() - 1) {
-				json << ",";
-			}
-			if (prettyPrint) {
-				json << "\n";
-			}
-		}
-
-		endArray(isLast);
+		json << ",";
+		if (prettyPrint) json << "\n";
 	}
 
 	std::string JSONVisitor::escapeString(const std::string &s) {
@@ -148,56 +119,35 @@ namespace tinyc::ast {
 		return result;
 	}
 
-	void JSONVisitor::addLocationField(const std::string &name, const lexer::SourceLocation &location, bool isLast) {
-		json << getIndent() << "\"" << name << "\": {";
-		if (prettyPrint) {
-			json << "\n";
-		}
+	void JSONVisitor::addLocationField(const lexer::SourceLocation &location) {
+		json << getIndent() << "\"" << "location" << "\": {";
+		if (prettyPrint) json << "\n";
 		increaseIndent();
 
-		// Add filename
-		json << getIndent() << "\"filename\": \"" << escapeString(location.filename) << "\",";
-		if (prettyPrint) {
-			json << "\n";
-		}
+		// Printing location as an JSON object
+		json << getIndent() << R"("filename": ")" << escapeString(location.filename) << "\",";
+		if (prettyPrint) json << "\n";
 
-		// Add line
 		json << getIndent() << "\"line\": " << location.line << ",";
-		if (prettyPrint) {
-			json << "\n";
-		}
+		if (prettyPrint) json << "\n";
 
-		// Add column
 		json << getIndent() << "\"column\": " << location.column;
-		if (prettyPrint) {
-			json << "\n";
-		}
+		if (prettyPrint) json << "\n";
 
 		decreaseIndent();
 		json << getIndent() << "}";
-		if (!isLast) {
-			json << ",";
-		}
 	}
 
 	// Program node
 	void JSONVisitor::visit(const ProgramNode &node) {
 		startObject();
 
-		addField("nodeType", "Program", false);
-		lexer::SourceLocation programLocation;
-		if (!node.getDeclarations().empty()) {
-			programLocation.filename = node.getDeclarations()[0]->getLocation().filename;
-			programLocation.line = 0;      // 0 indicates whole file
-			programLocation.column = 0;    // 0 indicates whole file
-		}
+		addField("nodeType", "Program");
 
-		addLocationField("location", programLocation, false);
 
 		// Process declarations
+		startArray("declarations");
 		if (!node.getDeclarations().empty()) {
-			startArray("declarations");
-
 			for (size_t i = 0; i < node.getDeclarations().size(); ++i) {
 				if (prettyPrint) {
 					json << getIndent();
@@ -210,11 +160,11 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
-			endArray(true);
-		} else {
-			addField("declarations", "[]", true);
 		}
+		endArray();
+
+		// Location
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -223,23 +173,23 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const VariableNode &node) {
 		startObject();
 
-		addField("nodeType", "VariableDeclaration", false);
-		addField("identifier", node.getIdentifier(), false);
+		addField("nodeType", "VariableDeclaration");
+		addField("identifier", node.getIdentifier());
 
 		// Add type
-		addNodeField("type", *node.getType(), false);
+		addNodeField("type", *node.getType());
 
 		// Add array size if present
 		if (node.isArray()) {
-			addNodeField("arraySize", *node.getArraySize(), false);
+			addNodeField("arraySize", *node.getArraySize());
 		}
 
 		// Add initializer if present
 		if (node.hasInitializer()) {
-			addNodeField("initializer", *node.getInitializer(), false);
+			addNodeField("initializer", *node.getInitializer());
 		}
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -247,10 +197,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const ParameterNode &node) {
 		startObject();
 
-		addField("nodeType", "Parameter", false);
-		addField("identifier", node.getIdentifier(), false);
-		addNodeField("type", *node.getType(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "Parameter");
+		addField("identifier", node.getIdentifier());
+		addNodeField("type", *node.getType());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -258,16 +208,15 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const FunctionDeclarationNode &node) {
 		startObject();
 
-		addField("nodeType", node.isDefinition() ? "FunctionDefinition" : "FunctionDeclaration", false);
-		addField("identifier", node.getIdentifier(), false);
+		addField("nodeType", node.isDefinition() ? "FunctionDefinition" : "FunctionDeclaration");
+		addField("identifier", node.getIdentifier());
 
 		// Return type
-		addNodeField("returnType", *node.getReturnType(), false);
+		addNodeField("returnType", *node.getReturnType());
 
 		// Parameters
+		startArray("parameters");
 		if (!node.getParameters().empty()) {
-			startArray("parameters");
-
 			for (size_t i = 0; i < node.getParameters().size(); ++i) {
 				if (prettyPrint) {
 					json << getIndent();
@@ -280,18 +229,16 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
-			endArray(false);
-		} else {
-			addField("parameters", "[]", node.isDefinition() ? false : true);
 		}
+
+		endArray();
 
 		// Body (for definitions)
 		if (node.isDefinition()) {
-			addNodeField("body", *node.getBody(), false);
+			addNodeField("body", *node.getBody());
 		}
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -299,13 +246,12 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const StructDeclarationNode &node) {
 		startObject();
 
-		addField("nodeType", node.isDefinition() ? "StructDefinition" : "StructDeclaration", false);
-		addField("identifier", node.getIdentifier(), false);
+		addField("nodeType", node.isDefinition() ? "StructDefinition" : "StructDeclaration");
+		addField("identifier", node.getIdentifier());
 
 		// Fields (for definitions)
+		startArray("fields");
 		if (node.isDefinition() && !node.getFields().empty()) {
-			startArray("fields");
-
 			for (size_t i = 0; i < node.getFields().size(); ++i) {
 				if (prettyPrint) {
 					json << getIndent();
@@ -318,13 +264,10 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
-			endArray(false);
-		} else if (node.isDefinition()) {
-			addField("fields", "[]", false);
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -332,15 +275,15 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const FunctionPointerDeclarationNode &node) {
 		startObject();
 
-		addField("nodeType", "FunctionPointerDeclaration", false);
-		addField("identifier", node.getIdentifier(), false);
+		addField("nodeType", "FunctionPointerDeclaration");
+		addField("identifier", node.getIdentifier());
 
 		// Return type
-		addNodeField("returnType", *node.getReturnType(), false);
+		addNodeField("returnType", *node.getReturnType());
 
 		// Parameter types
+		startArray("parameterTypes");
 		if (!node.getParameterTypes().empty()) {
-			startArray("parameterTypes");
 
 			for (size_t i = 0; i < node.getParameterTypes().size(); ++i) {
 				if (prettyPrint) {
@@ -355,12 +298,11 @@ namespace tinyc::ast {
 				}
 			}
 
-			endArray(false);
-		} else {
-			addField("parameterTypes", "[]", false);
+			endArray();
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -369,9 +311,9 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const PrimitiveTypeNode &node) {
 		startObject();
 
-		addField("nodeType", "PrimitiveType", false);
-		addField("kind", node.getKindString(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "PrimitiveType");
+		addField("kind", node.getKindString());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -379,9 +321,9 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const NamedTypeNode &node) {
 		startObject();
 
-		addField("nodeType", "NamedType", false);
-		addField("identifier", node.getIdentifier(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "NamedType");
+		addField("identifier", node.getIdentifier());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -389,9 +331,9 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const PointerTypeNode &node) {
 		startObject();
 
-		addField("nodeType", "PointerType", false);
-		addNodeField("baseType", *node.getBaseType(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "PointerType");
+		addNodeField("baseType", *node.getBaseType());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -400,10 +342,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const LiteralNode &node) {
 		startObject();
 
-		addField("nodeType", "Literal", false);
-		addField("kind", node.getKindString(), false);
-		addField("value", node.getValue(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "Literal");
+		addField("kind", node.getKindString());
+		addField("value", node.getValue());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -411,9 +353,9 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const IdentifierNode &node) {
 		startObject();
 
-		addField("nodeType", "Identifier", false);
-		addField("identifier", node.getIdentifier(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "Identifier");
+		addField("identifier", node.getIdentifier());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -421,11 +363,11 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const BinaryExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "BinaryExpression", false);
-		addField("operator", node.getOperatorString(), false);
-		addNodeField("left", *node.getLeft(), false);
-		addNodeField("right", *node.getRight(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "BinaryExpression");
+		addField("operator", node.getOperatorString());
+		addNodeField("left", *node.getLeft());
+		addNodeField("right", *node.getRight());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -433,11 +375,27 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const UnaryExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "UnaryExpression", false);
-		addField("operator", node.getOperatorString(), false);
-		addField("prefix", node.isPrefix() ? "true" : "false", false);
-		addNodeField("operand", *node.getOperand(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "UnaryExpression");
+		// Special handling for increment/decrement operators in JSON
+		std::string opStr;
+		switch (node.getOperator()) {
+			case UnaryExpressionNode::Operator::PRE_INCREMENT:
+			case UnaryExpressionNode::Operator::POST_INCREMENT:
+				opStr = "++";
+				break;
+			case UnaryExpressionNode::Operator::PRE_DECREMENT:
+			case UnaryExpressionNode::Operator::POST_DECREMENT:
+				opStr = "--";
+				break;
+			default:
+				opStr = node.getOperatorString();
+				break;
+		}
+
+		addField("operator", opStr);
+		addBooleanField("prefix", node.isPrefix());
+		addNodeField("operand", *node.getOperand());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -445,10 +403,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const CastExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "CastExpression", false);
-		addNodeField("targetType", *node.getTargetType(), false);
-		addNodeField("expression", *node.getExpression(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "CastExpression");
+		addNodeField("targetType", *node.getTargetType());
+		addNodeField("expression", *node.getExpression());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -456,12 +414,12 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const CallExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "CallExpression", false);
-		addNodeField("callee", *node.getCallee(), false);
+		addField("nodeType", "CallExpression");
+		addNodeField("callee", *node.getCallee());
 
 		// Arguments
+		startArray("arguments");
 		if (!node.getArguments().empty()) {
-			startArray("arguments");
 
 			for (size_t i = 0; i < node.getArguments().size(); ++i) {
 				if (prettyPrint) {
@@ -476,12 +434,10 @@ namespace tinyc::ast {
 				}
 			}
 
-			endArray(false);
-		} else {
-			addField("arguments", "[]", false);
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -489,10 +445,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const IndexExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "IndexExpression", false);
-		addNodeField("array", *node.getArray(), false);
-		addNodeField("index", *node.getIndex(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "IndexExpression");
+		addNodeField("array", *node.getArray());
+		addNodeField("index", *node.getIndex());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -500,11 +456,11 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const MemberExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "MemberExpression", false);
-		addField("kind", node.getKind() == MemberExpressionNode::Kind::DOT ? "dot" : "arrow", false);
-		addNodeField("object", *node.getObject(), false);
-		addField("member", node.getMember(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "MemberExpression");
+		addField("kind", node.getKind() == MemberExpressionNode::Kind::DOT ? "dot" : "arrow");
+		addNodeField("object", *node.getObject());
+		addField("member", node.getMember());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -512,11 +468,11 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const CommaExpressionNode &node) {
 		startObject();
 
-		addField("nodeType", "CommaExpression", false);
+		addField("nodeType", "CommaExpression");
 
 		// Expressions
+		startArray("expressions");
 		if (!node.getExpressions().empty()) {
-			startArray("expressions");
 
 			for (size_t i = 0; i < node.getExpressions().size(); ++i) {
 				if (prettyPrint) {
@@ -531,12 +487,10 @@ namespace tinyc::ast {
 				}
 			}
 
-			endArray(false);
-		} else {
-			addField("expressions", "[]", false);
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -545,11 +499,11 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const BlockStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "BlockStatement", false);
+		addField("nodeType", "BlockStatement");
 
 		// Statements
+		startArray("statements");
 		if (!node.getStatements().empty()) {
-			startArray("statements");
 
 			for (size_t i = 0; i < node.getStatements().size(); ++i) {
 				if (prettyPrint) {
@@ -564,12 +518,10 @@ namespace tinyc::ast {
 				}
 			}
 
-			endArray(false);
-		} else {
-			addField("statements", "[]", false);
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -577,9 +529,9 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const ExpressionStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "ExpressionStatement", false);
-		addNodeField("expression", *node.getExpression(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "ExpressionStatement");
+		addNodeField("expression", *node.getExpression());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -587,15 +539,15 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const IfStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "IfStatement", false);
-		addNodeField("condition", *node.getCondition(), false);
-		addNodeField("thenBranch", *node.getThenBranch(), false);
+		addField("nodeType", "IfStatement");
+		addNodeField("condition", *node.getCondition());
+		addNodeField("thenBranch", *node.getThenBranch());
 
 		if (node.hasElseBranch()) {
-			addNodeField("elseBranch", *node.getElseBranch(), false);
+			addNodeField("elseBranch", *node.getElseBranch());
 		}
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -603,10 +555,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const WhileStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "WhileStatement", false);
-		addNodeField("condition", *node.getCondition(), false);
-		addNodeField("body", *node.getBody(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "WhileStatement");
+		addNodeField("condition", *node.getCondition());
+		addNodeField("body", *node.getBody());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -614,10 +566,10 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const DoWhileStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "DoWhileStatement", false);
-		addNodeField("body", *node.getBody(), false);
-		addNodeField("condition", *node.getCondition(), false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "DoWhileStatement");
+		addNodeField("body", *node.getBody());
+		addNodeField("condition", *node.getCondition());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -625,22 +577,22 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const ForStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "ForStatement", false);
+		addField("nodeType", "ForStatement");
 
 		if (node.hasInitialization()) {
-			addNodeField("initialization", *node.getInitialization(), false);
+			addNodeField("initialization", *node.getInitialization());
 		}
 
 		if (node.hasCondition()) {
-			addNodeField("condition", *node.getCondition(), false);
+			addNodeField("condition", *node.getCondition());
 		}
 
 		if (node.hasUpdate()) {
-			addNodeField("update", *node.getUpdate(), false);
+			addNodeField("update", *node.getUpdate());
 		}
 
-		addNodeField("body", *node.getBody(), false);
-		addLocationField("location", node.getLocation(), true);
+		addNodeField("body", *node.getBody());
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -648,17 +600,12 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const SwitchStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "SwitchStatement", false);
-		addNodeField("expression", *node.getExpression(), false);
+		addField("nodeType", "SwitchStatement");
+		addNodeField("expression", *node.getExpression());
 
 		// Cases
+		startArray("cases");
 		if (!node.getCases().empty()) {
-			json << getIndent() << "\"cases\": [";
-			if (prettyPrint) {
-				json << "\n";
-			}
-			increaseIndent();
-
 			for (size_t i = 0; i < node.getCases().size(); ++i) {
 				const auto &caseItem = node.getCases()[i];
 
@@ -723,17 +670,10 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
-			decreaseIndent();
-			json << getIndent() << "],";
-			if (prettyPrint) {
-				json << "\n";
-			}
-		} else {
-			addField("cases", "[]", false);
 		}
+		endArray();
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -741,8 +681,8 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const BreakStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "BreakStatement", false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "BreakStatement");
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -750,8 +690,8 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const ContinueStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "ContinueStatement", false);
-		addLocationField("location", node.getLocation(), true);
+		addField("nodeType", "ContinueStatement");
+		addLocationField(node.getLocation());
 
 		endObject();
 	}
@@ -759,13 +699,13 @@ namespace tinyc::ast {
 	void JSONVisitor::visit(const ReturnStatementNode &node) {
 		startObject();
 
-		addField("nodeType", "ReturnStatement", false);
+		addField("nodeType", "ReturnStatement");
 
 		if (node.hasValue()) {
-			addNodeField("expression", *node.getExpression(), false);
+			addNodeField("expression", *node.getExpression());
 		}
 
-		addLocationField("location", node.getLocation(), true);
+		addLocationField(node.getLocation());
 
 		endObject();
 	}

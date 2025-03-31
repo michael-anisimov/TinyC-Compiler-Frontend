@@ -53,7 +53,7 @@ void runParserMode(const std::string &source, const std::string &filename) {
 //	DumpVisitor printer(std::cout);
 //	ast->accept(printer);
 
-	JSONVisitor jsonVisitor;
+	JSONVisitor jsonVisitor(true);
 	ast->accept(jsonVisitor);
 	std::string json = jsonVisitor.getJSON();
 	std::cout << json << std::endl;

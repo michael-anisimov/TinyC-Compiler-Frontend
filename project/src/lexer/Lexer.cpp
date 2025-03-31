@@ -64,6 +64,23 @@ namespace tinyc::lexer {
 		return lexOperatorOrPunctuation();
 	}
 
+	TokenPtr Lexer::peekNextToken() {
+		// Save current position
+		int savedPosition = position;
+		int savedLine = line;
+		int savedColumn = column;
+
+		// Get the next token
+		auto peekedToken = nextToken();
+
+		// Restore position
+		position = savedPosition;
+		line = savedLine;
+		column = savedColumn;
+
+		return peekedToken;
+	}
+
 	std::vector<TokenPtr> Lexer::tokenize() {
 		std::vector<TokenPtr> tokens;
 		TokenPtr token;
@@ -74,6 +91,10 @@ namespace tinyc::lexer {
 		} while (token->getType() != TokenType::END_OF_FILE);
 
 		return tokens;
+	}
+
+	std::string Lexer::getSourceName() const {
+		return filename;
 	}
 
 	SourceLocation Lexer::getCurrentLocation() const {
