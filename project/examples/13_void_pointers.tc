@@ -1,0 +1,31 @@
+/* Void pointers */
+
+// Generic swap function using void pointers
+void swap_bytes(void* a, void* b, int size) {
+    char* temp = cast<char*>(a);
+    char* temp2 = cast<char*>(b);
+    char tmp;
+
+    // Swap byte by byte
+    for (int i = 0; i < size; i++) {
+        tmp = temp[i];
+        temp[i] = temp2[i];
+        temp2[i] = tmp;
+    }
+}
+
+int main() {
+    int a = 5;
+    int b = 10;
+
+    // Use generic swap for ints
+    swap_bytes(&a, &b, sizeof(int));
+
+    double x = 3.14;
+    double y = 2.71;
+
+    // Use same function for doubles
+    swap_bytes(&x, &y, sizeof(double));
+
+    return 0;
+}

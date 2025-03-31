@@ -1,0 +1,19 @@
+/* Variable declarations and initializations */
+
+int global_var = 10;  // Global variable with initialization
+char global_array[10];  // Global array
+
+int main() {
+    int a;  // Declaration without initialization
+    int b = 5;  // Declaration with initialization
+    double c = 3.14;  // Double type
+    char d = 'x';  // Char type
+    
+    int nums[5];  // Array declaration
+    nums[0] = 1;  // Array indexing
+    
+    int *ptr = &b;  // Pointer declaration
+    *ptr = 7;
+    
+    return 0;
+}

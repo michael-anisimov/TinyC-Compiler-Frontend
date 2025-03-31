@@ -1,0 +1,33 @@
+/* Switch-case statement */
+
+int main() {
+    int day = 3;
+    char* day_name;
+
+    switch (day) {
+        case 1:
+            day_name = "Monday";
+            break;
+        case 2:
+            day_name = "Tuesday";
+            break;
+        case 3:
+            day_name = "Wednesday";
+            break;
+        case 4:
+            day_name = "Thursday";
+            break;
+        case 5:
+            day_name = "Friday";
+            break;
+        case 6:
+        case 7:
+            day_name = "Weekend";
+            break;
+        default:
+            day_name = "Invalid day";
+            break;
+    }
+
+    return 0;
+}
