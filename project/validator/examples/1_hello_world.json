@@ -106,7 +106,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/1_hello_world.tc",
                 "line": 7,

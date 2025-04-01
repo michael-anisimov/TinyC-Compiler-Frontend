@@ -41,10 +41,10 @@ The program node is the root of the AST and represents an entire TinyC program.
 ```json
 {
   "nodeType": "Program",
-  "location": { "filename": "example.c", "line": 0, "column": 0 },
   "declarations": [
     // Array of top-level declarations
-  ]
+  ],
+  "location": { "filename": "example.c", "line": 0, "column": 0 }
 }
 ```
 

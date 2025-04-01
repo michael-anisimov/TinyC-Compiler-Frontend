@@ -267,7 +267,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/13_void_pointers.tc",
                   "line": 10,
@@ -562,7 +562,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "5",
+                "value": 5,
                 "location": {
                   "filename": "../examples/13_void_pointers.tc",
                   "line": 18,
@@ -598,7 +598,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/13_void_pointers.tc",
                   "line": 19,
@@ -672,7 +672,7 @@
                 {
                   "nodeType": "Literal",
                   "kind": "integer",
-                  "value": "4",
+                  "value": 4,
                   "location": {
                     "filename": "../examples/13_void_pointers.tc",
                     "line": 22,
@@ -709,7 +709,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "double",
-                "value": "3.140000",
+                "value": 3.14,
                 "location": {
                   "filename": "../examples/13_void_pointers.tc",
                   "line": 24,
@@ -745,7 +745,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "double",
-                "value": "2.710000",
+                "value": 2.71,
                 "location": {
                   "filename": "../examples/13_void_pointers.tc",
                   "line": 25,
@@ -819,7 +819,7 @@
                 {
                   "nodeType": "Literal",
                   "kind": "integer",
-                  "value": "8",
+                  "value": 8,
                   "location": {
                     "filename": "../examples/13_void_pointers.tc",
                     "line": 28,
@@ -844,7 +844,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/13_void_pointers.tc",
                 "line": 30,

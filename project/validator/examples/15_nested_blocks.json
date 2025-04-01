@@ -35,7 +35,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/15_nested_blocks.tc",
                   "line": 4,
@@ -74,7 +74,7 @@
                   "initializer": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "20",
+                    "value": 20,
                     "location": {
                       "filename": "../examples/15_nested_blocks.tc",
                       "line": 7,
@@ -110,7 +110,7 @@
                   "initializer": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "30",
+                    "value": 30,
                     "location": {
                       "filename": "../examples/15_nested_blocks.tc",
                       "line": 8,
@@ -149,7 +149,7 @@
                       "initializer": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "40",
+                        "value": 40,
                         "location": {
                           "filename": "../examples/15_nested_blocks.tc",
                           "line": 11,
@@ -185,7 +185,7 @@
                       "right": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "50",
+                        "value": 50,
                         "location": {
                           "filename": "../examples/15_nested_blocks.tc",
                           "line": 12,
@@ -302,7 +302,7 @@
                       "initializer": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "60",
+                        "value": 60,
                         "location": {
                           "filename": "../examples/15_nested_blocks.tc",
                           "line": 18,
@@ -338,7 +338,7 @@
                       "right": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "70",
+                        "value": 70,
                         "location": {
                           "filename": "../examples/15_nested_blocks.tc",
                           "line": 19,

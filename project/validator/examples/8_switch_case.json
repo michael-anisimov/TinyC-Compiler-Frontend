@@ -35,7 +35,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "3",
+                "value": 3,
                 "location": {
                   "filename": "../examples/8_switch_case.tc",
                   "line": 4,
@@ -466,7 +466,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/8_switch_case.tc",
                 "line": 32,

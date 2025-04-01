@@ -35,7 +35,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "42",
+                "value": 42,
                 "location": {
                   "filename": "../examples/12_casting.tc",
                   "line": 4,
@@ -71,7 +71,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "double",
-                "value": "3.140000",
+                "value": 3.14,
                 "location": {
                   "filename": "../examples/12_casting.tc",
                   "line": 5,
@@ -388,7 +388,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/12_casting.tc",
                 "line": 17,

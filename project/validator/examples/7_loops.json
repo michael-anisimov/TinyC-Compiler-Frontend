@@ -61,7 +61,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 5,
@@ -97,7 +97,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 8,
@@ -125,7 +125,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 8,
@@ -243,7 +243,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 13,
@@ -279,7 +279,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 14,
@@ -405,7 +405,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 20,
@@ -531,7 +531,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 24,
@@ -567,7 +567,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 27,
@@ -595,7 +595,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "20",
+                "value": 20,
                 "location": {
                   "filename": "../examples/7_loops.tc",
                   "line": 27,
@@ -650,7 +650,7 @@
                       "right": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "2",
+                        "value": 2,
                         "location": {
                           "filename": "../examples/7_loops.tc",
                           "line": 28,
@@ -666,7 +666,7 @@
                     "right": {
                       "nodeType": "Literal",
                       "kind": "integer",
-                      "value": "0",
+                      "value": 0,
                       "location": {
                         "filename": "../examples/7_loops.tc",
                         "line": 28,
@@ -710,7 +710,7 @@
                     "right": {
                       "nodeType": "Literal",
                       "kind": "integer",
-                      "value": "10",
+                      "value": 10,
                       "location": {
                         "filename": "../examples/7_loops.tc",
                         "line": 29,

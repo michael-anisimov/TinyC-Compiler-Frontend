@@ -309,7 +309,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "5",
+                "value": 5,
                 "location": {
                   "filename": "../examples/10_pointers.tc",
                   "line": 15,
@@ -345,7 +345,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/10_pointers.tc",
                   "line": 16,
@@ -478,7 +478,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "7",
+                "value": 7,
                 "location": {
                   "filename": "../examples/10_pointers.tc",
                   "line": 20,
@@ -634,7 +634,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "3",
+                "value": 3,
                 "location": {
                   "filename": "../examples/10_pointers.tc",
                   "line": 30,
@@ -719,7 +719,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/10_pointers.tc",
                 "line": 35,

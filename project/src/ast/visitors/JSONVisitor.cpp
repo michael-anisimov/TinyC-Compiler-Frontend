@@ -70,6 +70,18 @@ namespace tinyc::ast {
 		if (prettyPrint) json << "\n";
 	}
 
+	void JSONVisitor::addNumberField(const std::string& name, int value) {
+		json << getIndent() << "\"" << name << "\": " << value;
+		json << ",";
+		if (prettyPrint) json << "\n";
+	}
+
+	void JSONVisitor::addNumberField(const std::string& name, double value) {
+		json << getIndent() << "\"" << name << "\": " << value;
+		json << ",";
+		if (prettyPrint) json << "\n";
+	}
+
 	void JSONVisitor::addNodeField(const std::string &name, const ASTNode &node) {
 		json << getIndent() << "\"" << name << "\": ";
 		node.accept(*this);
@@ -371,7 +383,28 @@ namespace tinyc::ast {
 
 		addField("nodeType", "Literal");
 		addField("kind", node.getKindString());
-		addField("value", node.getValue());
+
+		if (node.getKind() == LiteralNode::Kind::INTEGER) {
+			try {
+				int intValue = std::stoi(node.getValue());
+				addNumberField("value", intValue);
+			} catch (const std::exception&) {
+				// If conversion fails, fall back to string representation
+				addField("value", node.getValue());
+			}
+		} else if (node.getKind() == LiteralNode::Kind::DOUBLE) {
+			try {
+				double doubleValue = std::stod(node.getValue());
+				addNumberField("value", doubleValue);
+			} catch (const std::exception&) {
+				// If conversion fails, fall back to string representation
+				addField("value", node.getValue());
+			}
+		} else {
+			// For character and string literals, keep as strings
+			addField("value", node.getValue());
+		}
+
 		addLocationField(node.getLocation());
 
 		endObject();

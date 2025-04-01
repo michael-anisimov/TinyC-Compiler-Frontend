@@ -35,7 +35,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "5",
+                "value": 5,
                 "location": {
                   "filename": "../examples/4_logical.tc",
                   "line": 4,
@@ -71,7 +71,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "3",
+                "value": 3,
                 "location": {
                   "filename": "../examples/4_logical.tc",
                   "line": 5,
@@ -122,7 +122,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "0",
+                    "value": 0,
                     "location": {
                       "filename": "../examples/4_logical.tc",
                       "line": 8,
@@ -150,7 +150,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "0",
+                    "value": 0,
                     "location": {
                       "filename": "../examples/4_logical.tc",
                       "line": 8,
@@ -213,7 +213,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "10",
+                    "value": 10,
                     "location": {
                       "filename": "../examples/4_logical.tc",
                       "line": 9,
@@ -241,7 +241,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "0",
+                    "value": 0,
                     "location": {
                       "filename": "../examples/4_logical.tc",
                       "line": 9,
@@ -780,7 +780,7 @@
                 "right": {
                   "nodeType": "Literal",
                   "kind": "integer",
-                  "value": "1",
+                  "value": 1,
                   "location": {
                     "filename": "../examples/4_logical.tc",
                     "line": 23,
@@ -834,7 +834,7 @@
                 "right": {
                   "nodeType": "Literal",
                   "kind": "integer",
-                  "value": "1",
+                  "value": 1,
                   "location": {
                     "filename": "../examples/4_logical.tc",
                     "line": 24,
@@ -864,7 +864,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/4_logical.tc",
                 "line": 26,

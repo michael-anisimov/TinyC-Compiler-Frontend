@@ -372,7 +372,7 @@
                   {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "5",
+                    "value": 5,
                     "location": {
                       "filename": "../examples/11_function_pointers.tc",
                       "line": 22,
@@ -382,7 +382,7 @@
                   {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "3",
+                    "value": 3,
                     "location": {
                       "filename": "../examples/11_function_pointers.tc",
                       "line": 22,
@@ -472,7 +472,7 @@
                   {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "10",
+                    "value": 10,
                     "location": {
                       "filename": "../examples/11_function_pointers.tc",
                       "line": 25,
@@ -482,7 +482,7 @@
                   {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "4",
+                    "value": 4,
                     "location": {
                       "filename": "../examples/11_function_pointers.tc",
                       "line": 25,
@@ -575,7 +575,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/11_function_pointers.tc",
                 "line": 30,

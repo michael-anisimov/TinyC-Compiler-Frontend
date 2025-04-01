@@ -136,7 +136,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "5",
+                "value": 5,
                 "location": {
                   "filename": "../examples/14_complex_expression.tc",
                   "line": 8,
@@ -172,7 +172,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/14_complex_expression.tc",
                   "line": 9,
@@ -208,7 +208,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "15",
+                "value": 15,
                 "location": {
                   "filename": "../examples/14_complex_expression.tc",
                   "line": 10,
@@ -244,7 +244,7 @@
               "arraySize": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "5",
+                "value": 5,
                 "location": {
                   "filename": "../examples/14_complex_expression.tc",
                   "line": 11,
@@ -307,7 +307,7 @@
                       "right": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "2",
+                        "value": 2,
                         "location": {
                           "filename": "../examples/14_complex_expression.tc",
                           "line": 14,
@@ -335,7 +335,7 @@
                       "right": {
                         "nodeType": "Literal",
                         "kind": "integer",
-                        "value": "2",
+                        "value": 2,
                         "location": {
                           "filename": "../examples/14_complex_expression.tc",
                           "line": 14,
@@ -370,7 +370,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "7",
+                    "value": 7,
                     "location": {
                       "filename": "../examples/14_complex_expression.tc",
                       "line": 14,
@@ -569,7 +569,7 @@
                     {
                       "nodeType": "Literal",
                       "kind": "integer",
-                      "value": "1",
+                      "value": 1,
                       "location": {
                         "filename": "../examples/14_complex_expression.tc",
                         "line": 22,
@@ -579,7 +579,7 @@
                     {
                       "nodeType": "Literal",
                       "kind": "integer",
-                      "value": "2",
+                      "value": 2,
                       "location": {
                         "filename": "../examples/14_complex_expression.tc",
                         "line": 22,
@@ -733,7 +733,7 @@
                   "right": {
                     "nodeType": "Literal",
                     "kind": "integer",
-                    "value": "2",
+                    "value": 2,
                     "location": {
                       "filename": "../examples/14_complex_expression.tc",
                       "line": 25,
@@ -844,7 +844,7 @@
                     "right": {
                       "nodeType": "Literal",
                       "kind": "integer",
-                      "value": "1",
+                      "value": 1,
                       "location": {
                         "filename": "../examples/14_complex_expression.tc",
                         "line": 28,
@@ -923,7 +923,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/14_complex_expression.tc",
                 "line": 30,

@@ -167,8 +167,15 @@
               "description": "Kind of literal"
             },
             "value": {
-              "type": "string",
-              "description": "String representation of the literal value"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "description": "Literal value (string for text, number for numeric literals)"
             }
           },
           "required": [

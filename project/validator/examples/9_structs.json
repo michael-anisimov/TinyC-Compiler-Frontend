@@ -176,7 +176,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 20,
@@ -222,7 +222,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "20",
+                "value": 20,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 21,
@@ -278,7 +278,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 24,
@@ -334,7 +334,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "0",
+                "value": 0,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 25,
@@ -390,7 +390,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "100",
+                "value": 100,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 26,
@@ -446,7 +446,7 @@
               "right": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "100",
+                "value": 100,
                 "location": {
                   "filename": "../examples/9_structs.tc",
                   "line": 27,
@@ -470,7 +470,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/9_structs.tc",
                 "line": 29,

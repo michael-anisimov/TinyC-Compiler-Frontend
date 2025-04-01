@@ -35,7 +35,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "10",
+                "value": 10,
                 "location": {
                   "filename": "../examples/6_if_else.tc",
                   "line": 4,
@@ -71,7 +71,7 @@
               "initializer": {
                 "nodeType": "Literal",
                 "kind": "integer",
-                "value": "20",
+                "value": 20,
                 "location": {
                   "filename": "../examples/6_if_else.tc",
                   "line": 5,
@@ -531,7 +531,7 @@
             "expression": {
               "nodeType": "Literal",
               "kind": "integer",
-              "value": "0",
+              "value": 0,
               "location": {
                 "filename": "../examples/6_if_else.tc",
                 "line": 29,
