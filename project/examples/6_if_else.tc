@@ -1,0 +1,30 @@
+/* If-else statements */
+
+int main() {
+    int a = 10;
+    int b = 20;
+    int max;
+
+    // Simple if statement
+    if (a > b) {
+        max = a;
+    }
+
+    // If-else statement
+    if (a > b) {
+        max = a;
+    } else {
+        max = b;
+    }
+
+    // If-else-if ladder
+    if (a > b) {
+        max = a;
+    } else if (a == b) {
+        max = a;  // or b, they're equal
+    } else {
+        max = b;
+    }
+
+    return 0;
+}

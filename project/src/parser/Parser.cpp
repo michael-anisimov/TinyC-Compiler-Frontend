@@ -1,7 +1,6 @@
 #include "tinyc/parser/Parser.h"
 #include <sstream>
 
-
 namespace tinyc::parser {
 
 	Parser::Parser(lexer::Lexer &lexer) : lexer(lexer) {
@@ -9,22 +8,10 @@ namespace tinyc::parser {
 		currentToken = lexer.nextToken();
 	}
 
-	ast::ASTNodePtr Parser::parseProgram() {
-		// Create program node
-		auto program = std::make_shared<ast::ProgramNode>();
-
-		// Parse declarations until EOF
-		while (!check(lexer::TokenType::END_OF_FILE)) {
-			auto item = parseProgramItem();
-			program->addDeclaration(item);
-		}
-
-		return program;
-	}
-
 	lexer::TokenPtr Parser::consume() {
 		lexer::TokenPtr oldToken = currentToken;
 		currentToken = lexer.nextToken();
+
 		return oldToken;
 	}
 
@@ -51,7 +38,17 @@ namespace tinyc::parser {
 		throw ParserError(message, currentToken->getLocation());
 	}
 
-	// PROGRAM_ITEM parsing
+	ast::ASTNodePtr Parser::parseProgram() {
+		auto program = std::make_unique<ast::ProgramNode>(lexer.getSourceName());
+
+		// Parse declarations until EOF
+		while (!check(lexer::TokenType::END_OF_FILE)) {
+			auto item = parseProgramItem();
+			program->addDeclaration(std::move(item));
+		}
+
+		return program;
+	}
 
 	ast::ASTNodePtr Parser::parseProgramItem() {
 		switch (currentToken->getType()) {
@@ -65,13 +62,15 @@ namespace tinyc::parser {
 											  "Expected identifier after type");
 				std::string name = identifierToken->getLexeme();
 
-				return parseNotVoidFunctionOrVariable(type, name, identifierToken->getLocation());
+				return parseNotVoidFunctionOrVariable(std::move(type), name, identifierToken->getLocation());
 			}
 
 			case lexer::TokenType::KW_VOID: {
 				// Rule 4: PROGRAM_ITEM -> void VOID_DECL_TAIL
+				// Save location before consuming
+				auto voidLocation = currentToken->getLocation();
 				auto voidToken = consume(); // Consume "void"
-				return parseVoidDeclTail();
+				return parseVoidDeclTail(voidLocation);
 			}
 
 			case lexer::TokenType::KW_STRUCT: {

@@ -1,5 +1,5 @@
 #include "tinyc/parser/Parser.h"
-
+#include <iostream>
 
 namespace tinyc::parser {
 
@@ -18,13 +18,7 @@ namespace tinyc::parser {
 
 			case lexer::TokenType::IDENTIFIER: {
 				// Rule 74: TYPE -> TYPENAME STAR_SEQ
-				auto identifierToken = consume();
-				std::string name = identifierToken->getLexeme();
-
-				ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
-						name,
-						identifierToken->getLocation());
-
+				ast::ASTNodePtr namedType = parseNamedType();
 				parseStarSeq(namedType);
 				return namedType;
 			}
@@ -38,7 +32,7 @@ namespace tinyc::parser {
 				// Create a named type node that represents a struct type
 				// We can use a special format like "struct:Name" or just use the name directly
 				// For simplicity, we'll use "struct:Name" to distinguish from regular named types
-				ast::ASTNodePtr structType = std::make_shared<ast::NamedTypeNode>(
+				ast::ASTNodePtr structType = std::make_unique<ast::NamedTypeNode>(
 						"struct:" + name,
 						structToken->getLocation());
 
@@ -51,7 +45,7 @@ namespace tinyc::parser {
 				auto voidToken = consume(); // Consume "void"
 
 				// Create void type
-				ast::ASTNodePtr voidType = std::make_shared<ast::PrimitiveTypeNode>(
+				ast::ASTNodePtr voidType = std::make_unique<ast::PrimitiveTypeNode>(
 						ast::PrimitiveTypeNode::Kind::VOID,
 						voidToken->getLocation());
 
@@ -82,7 +76,7 @@ namespace tinyc::parser {
 				auto identifierToken = consume();
 				std::string name = identifierToken->getLexeme();
 
-				ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
+				ast::ASTNodePtr namedType = std::make_unique<ast::NamedTypeNode>(
 						name,
 						identifierToken->getLocation());
 
@@ -96,6 +90,22 @@ namespace tinyc::parser {
 	}
 
 
+	ast::ASTNodePtr Parser::parseNamedType() {
+		lexer::TokenPtr token = currentToken;
+
+		if (token->getType() != lexer::TokenType::IDENTIFIER) {
+			error("Expected identifier for named type");
+		}
+		auto identifierToken = consume();
+		std::string identifier = identifierToken->getLexeme();
+
+		ast::ASTNodePtr namedType = std::make_unique<ast::NamedTypeNode>(
+				identifier,
+				identifierToken->getLocation());
+
+		return namedType;
+	}
+
 	ast::ASTNodePtr Parser::parseBaseType() {
 		lexer::TokenPtr token = currentToken;
 
@@ -103,21 +113,21 @@ namespace tinyc::parser {
 			case lexer::TokenType::KW_INT:
 				// Rule 78: BASE_TYPE -> int
 				consume();
-				return std::make_shared<ast::PrimitiveTypeNode>(
+				return std::make_unique<ast::PrimitiveTypeNode>(
 						ast::PrimitiveTypeNode::Kind::INT,
 						token->getLocation());
 
 			case lexer::TokenType::KW_DOUBLE:
 				// Rule 79: BASE_TYPE -> double
 				consume();
-				return std::make_shared<ast::PrimitiveTypeNode>(
+				return std::make_unique<ast::PrimitiveTypeNode>(
 						ast::PrimitiveTypeNode::Kind::DOUBLE,
 						token->getLocation());
 
 			case lexer::TokenType::KW_CHAR:
 				// Rule 80: BASE_TYPE -> char
 				consume();
-				return std::make_shared<ast::PrimitiveTypeNode>(
+				return std::make_unique<ast::PrimitiveTypeNode>(
 						ast::PrimitiveTypeNode::Kind::CHAR,
 						token->getLocation());
 
@@ -150,7 +160,7 @@ namespace tinyc::parser {
 			case lexer::TokenType::KW_VOID:
 				// Rule 82: FUN_RET_TYPES -> void
 				consume();
-				return std::make_shared<ast::PrimitiveTypeNode>(
+				return std::make_unique<ast::PrimitiveTypeNode>(
 						ast::PrimitiveTypeNode::Kind::VOID,
 						token->getLocation());
 
@@ -170,8 +180,8 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::OP_MULTIPLY, "Expected '*' for pointer type");
 
 		// Create pointer type
-		baseType = std::make_shared<ast::PointerTypeNode>(
-				baseType,
+		baseType = std::make_unique<ast::PointerTypeNode>(
+				std::move(baseType),
 				currentToken->getLocation());
 
 		// Parse additional stars if any
@@ -183,8 +193,8 @@ namespace tinyc::parser {
 		// Rule 87: STAR_SEQ -> ε
 		while (match(lexer::TokenType::OP_MULTIPLY)) {
 			// Create pointer type for each star
-			baseType = std::make_shared<ast::PointerTypeNode>(
-					baseType,
+			baseType = std::make_unique<ast::PointerTypeNode>(
+					std::move(baseType),
 					currentToken->getLocation());
 		}
 
@@ -198,7 +208,7 @@ namespace tinyc::parser {
 		std::string name = identifierToken->getLexeme();
 
 		// Parse optional struct body
-		std::vector<ast::ASTNodePtr> fields;
+		std::vector <ast::ASTNodePtr> fields;
 
 		if (match(lexer::TokenType::LBRACE)) {
 			// Parse struct fields
@@ -208,17 +218,17 @@ namespace tinyc::parser {
 
 				// Parse field name
 				auto fieldNameToken = expect(lexer::TokenType::IDENTIFIER, "Expected field name");
-				std::string fieldName = fieldNameToken->getLexeme();
+				std::string fieldIdentifier = fieldNameToken->getLexeme();
 
 				// Create variable declaration node for the field
-				auto field = std::make_shared<ast::VariableDeclarationNode>(
-						type,
-						fieldName,
+				auto field = std::make_unique<ast::VariableNode>(
+						fieldIdentifier,
+						std::move(type),
+						fieldNameToken->getLocation(),
 						nullptr, // No array size
-						nullptr, // No initializer
-						fieldNameToken->getLocation());
+						nullptr); // No initializer
 
-				fields.push_back(field);
+				fields.push_back(std::move(field));
 
 				expect(lexer::TokenType::SEMICOLON, "Expected ';' after struct field");
 			}
@@ -229,9 +239,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after struct declaration");
 
 		// Create struct declaration node
-		return std::make_shared<ast::StructDeclarationNode>(
+		return std::make_unique<ast::StructDeclarationNode>(
 				name,
-				fields,
+				std::move(fields),
 				structToken->getLocation());
 	}
 
@@ -256,10 +266,10 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after function pointer declaration");
 
 		// Create function pointer declaration node
-		return std::make_shared<ast::FunctionPointerDeclarationNode>(
-				returnType,
+		return std::make_unique<ast::FunctionPointerDeclarationNode>(
+				std::move(returnType),
 				name,
-				parameterTypes,
+				std::move(parameterTypes),
 				typedefToken->getLocation());
 	}
 
@@ -283,8 +293,9 @@ namespace tinyc::parser {
 		// Rule 97: FUNPTR_ARGS -> TYPE FUNPTR_ARGS_TAIL
 		ast::ASTNodePtr type = parseType();
 
-		std::vector<ast::ASTNodePtr> types = {type};
-		return parseFunPtrArgsTail(types);
+		std::vector<ast::ASTNodePtr> types;
+		types.push_back(std::move(type));
+		return parseFunPtrArgsTail(std::move(types));
 	}
 
 	std::vector<ast::ASTNodePtr> Parser::parseFunPtrArgsTail(std::vector<ast::ASTNodePtr> types) {
@@ -292,8 +303,8 @@ namespace tinyc::parser {
 		// Rule 99: FUNPTR_ARGS_TAIL -> ε
 		if (match(lexer::TokenType::COMMA)) {
 			ast::ASTNodePtr type = parseType();
-			types.push_back(type);
-			return parseFunPtrArgsTail(types);
+			types.push_back(std::move(type));
+			return parseFunPtrArgsTail(std::move(types));
 		}
 
 		// No more parameters

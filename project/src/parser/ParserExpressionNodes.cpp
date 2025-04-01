@@ -10,18 +10,19 @@ namespace tinyc::parser {
 		ast::ASTNodePtr expr = parseExpr();
 
 		// Parse comma-separated expressions if any
-		std::vector<ast::ASTNodePtr> expressions = {expr};
-		expressions = parseExprsTail(expressions);
+		std::vector<ast::ASTNodePtr> expressions;
+		expressions.push_back(std::move(expr));
+		expressions = parseExprsTail(std::move(expressions));
 
 		// If only one expression, return it directly
 		if (expressions.size() == 1) {
-			return expressions[0];
+			return std::move(expressions[0]);
 		}
 
 		// Create comma expression node
-		return std::make_shared<ast::CommaExpressionNode>(
-				expressions,
-				expr->getLocation());
+		return std::make_unique<ast::CommaExpressionNode>(
+				std::move(expressions),
+				expressions[0]->getLocation());
 	}
 
 	std::vector<ast::ASTNodePtr> Parser::parseExprsTail(std::vector<ast::ASTNodePtr> expressions) {
@@ -29,8 +30,8 @@ namespace tinyc::parser {
 		// Rule 72: EXPRS_TAIL -> ε
 		if (match(lexer::TokenType::COMMA)) {
 			ast::ASTNodePtr expr = parseExpr();
-			expressions.push_back(expr);
-			return parseExprsTail(expressions);
+			expressions.push_back(std::move(expr));
+			return parseExprsTail(std::move(expressions));
 		}
 
 		// No more expressions
@@ -40,7 +41,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseExpr() {
 		// Rule 100: EXPR -> E9 EXPR_TAIL
 		ast::ASTNodePtr left = parseE9();
-		return parseExprTail(left);
+		return parseExprTail(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseExprTail(ast::ASTNodePtr left) {
@@ -50,10 +51,10 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseExpr();
 
 			// Create assignment expression
-			return std::make_shared<ast::BinaryExpressionNode>(
+			return std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::ASSIGN,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 		}
 
@@ -64,7 +65,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE9() {
 		// Rule 103: E9 -> E8 E9_Prime
 		ast::ASTNodePtr left = parseE8();
-		return parseE9Prime(left);
+		return parseE9Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE9Prime(ast::ASTNodePtr left) {
@@ -74,13 +75,13 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE8();
 
 			// Create logical OR expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::LOGICAL_OR,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE9Prime(newLeft);
+			return parseE9Prime(std::move(newLeft));
 		}
 
 		// No logical OR
@@ -90,7 +91,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE8() {
 		// Rule 106: E8 -> E7 E8_Prime
 		ast::ASTNodePtr left = parseE7();
-		return parseE8Prime(left);
+		return parseE8Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE8Prime(ast::ASTNodePtr left) {
@@ -100,13 +101,13 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE7();
 
 			// Create logical AND expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::LOGICAL_AND,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE8Prime(newLeft);
+			return parseE8Prime(std::move(newLeft));
 		}
 
 		// No logical AND
@@ -116,7 +117,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE7() {
 		// Rule 109: E7 -> E6 E7_Prime
 		ast::ASTNodePtr left = parseE6();
-		return parseE7Prime(left);
+		return parseE7Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE7Prime(ast::ASTNodePtr left) {
@@ -126,13 +127,13 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE6();
 
 			// Create bitwise OR expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::BITWISE_OR,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE7Prime(newLeft);
+			return parseE7Prime(std::move(newLeft));
 		}
 
 		// No bitwise OR
@@ -142,7 +143,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE6() {
 		// Rule 112: E6 -> E5 E6_Prime
 		ast::ASTNodePtr left = parseE5();
-		return parseE6Prime(left);
+		return parseE6Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE6Prime(ast::ASTNodePtr left) {
@@ -152,13 +153,13 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE5();
 
 			// Create bitwise AND expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::BITWISE_AND,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE6Prime(newLeft);
+			return parseE6Prime(std::move(newLeft));
 		}
 
 		// No bitwise AND
@@ -168,7 +169,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE5() {
 		// Rule 115: E5 -> E4 E5_Prime
 		ast::ASTNodePtr left = parseE4();
-		return parseE5Prime(left);
+		return parseE5Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE5Prime(ast::ASTNodePtr left) {
@@ -179,24 +180,24 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE4();
 
 			// Create equality expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::EQUAL,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE5Prime(newLeft);
+			return parseE5Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_NOT_EQUAL)) {
 			ast::ASTNodePtr right = parseE4();
 
 			// Create inequality expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::NOT_EQUAL,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE5Prime(newLeft);
+			return parseE5Prime(std::move(newLeft));
 		}
 
 		// No equality/inequality
@@ -206,7 +207,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE4() {
 		// Rule 119: E4 -> E3 E4_Prime
 		ast::ASTNodePtr left = parseE3();
-		return parseE4Prime(left);
+		return parseE4Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE4Prime(ast::ASTNodePtr left) {
@@ -220,46 +221,46 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE3();
 
 			// Create less-than expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::LESS,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE4Prime(newLeft);
+			return parseE4Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_LESS_EQUAL)) {
 			ast::ASTNodePtr right = parseE3();
 
 			// Create less-than-or-equal expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::LESS_EQUAL,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE4Prime(newLeft);
+			return parseE4Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_GREATER)) {
 			ast::ASTNodePtr right = parseE3();
 
 			// Create greater-than expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::GREATER,
-					left,
-					right,
+					std::move(left),
+				  	std::move(right),
 					left->getLocation());
 
-			return parseE4Prime(newLeft);
+			return parseE4Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_GREATER_EQUAL)) {
 			ast::ASTNodePtr right = parseE3();
 
 			// Create greater-than-or-equal expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::GREATER_EQUAL,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE4Prime(newLeft);
+			return parseE4Prime(std::move(newLeft));
 		}
 
 		// No comparison
@@ -269,7 +270,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE3() {
 		// Rule 125: E3 -> E2 E3_Prime
 		ast::ASTNodePtr left = parseE2();
-		return parseE3Prime(left);
+		return parseE3Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE3Prime(ast::ASTNodePtr left) {
@@ -281,24 +282,24 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE2();
 
 			// Create left shift expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::LEFT_SHIFT,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE3Prime(newLeft);
+			return parseE3Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_RIGHT_SHIFT)) {
 			ast::ASTNodePtr right = parseE2();
 
 			// Create right shift expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::RIGHT_SHIFT,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE3Prime(newLeft);
+			return parseE3Prime(std::move(newLeft));
 		}
 
 		// No shift
@@ -308,7 +309,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE2() {
 		// Rule 129: E2 -> E1 E2_Prime
 		ast::ASTNodePtr left = parseE1();
-		return parseE2Prime(left);
+		return parseE2Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE2Prime(ast::ASTNodePtr left) {
@@ -320,24 +321,24 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseE1();
 
 			// Create addition expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::ADD,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE2Prime(newLeft);
+			return parseE2Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_MINUS)) {
 			ast::ASTNodePtr right = parseE1();
 
 			// Create subtraction expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::SUBTRACT,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE2Prime(newLeft);
+			return parseE2Prime(std::move(newLeft));
 		}
 
 		// No addition/subtraction
@@ -347,7 +348,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseE1() {
 		// Rule 133: E1 -> E_UNARY_PRE E1_Prime
 		ast::ASTNodePtr left = parseEUnaryPre();
-		return parseE1Prime(left);
+		return parseE1Prime(std::move(left));
 	}
 
 	ast::ASTNodePtr Parser::parseE1Prime(ast::ASTNodePtr left) {
@@ -360,35 +361,35 @@ namespace tinyc::parser {
 			ast::ASTNodePtr right = parseEUnaryPre();
 
 			// Create multiplication expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::MULTIPLY,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE1Prime(newLeft);
+			return parseE1Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_DIVIDE)) {
 			ast::ASTNodePtr right = parseEUnaryPre();
 
 			// Create division expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::DIVIDE,
-					left,
-					right,
+					std::move(left),
+					std::move(right),
 					left->getLocation());
 
-			return parseE1Prime(newLeft);
+			return parseE1Prime(std::move(newLeft));
 		} else if (match(lexer::TokenType::OP_MODULO)) {
 			ast::ASTNodePtr right = parseEUnaryPre();
 
 			// Create modulo expression
-			ast::ASTNodePtr newLeft = std::make_shared<ast::BinaryExpressionNode>(
+			ast::ASTNodePtr newLeft = std::make_unique<ast::BinaryExpressionNode>(
 					ast::BinaryExpressionNode::Operator::MODULO,
-					left,
-					right,
+					std::move(left),
+				  	std::move(right),
 					left->getLocation());
 
-			return parseE1Prime(newLeft);
+			return parseE1Prime(std::move(newLeft));
 		}
 
 		// No multiplication/division/modulo
@@ -406,9 +407,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create unary plus expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::POSITIVE,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -418,9 +419,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create unary minus expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::NEGATIVE,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -430,9 +431,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create logical not expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::LOGICAL_NOT,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -442,9 +443,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create bitwise not expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::BITWISE_NOT,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -454,9 +455,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create pre-increment expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::PRE_INCREMENT,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -466,9 +467,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create pre-decrement expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::PRE_DECREMENT,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -478,9 +479,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create dereference expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::DEREFERENCE,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -490,9 +491,9 @@ namespace tinyc::parser {
 				ast::ASTNodePtr operand = parseEUnaryPre();
 
 				// Create address-of expression
-				return std::make_shared<ast::UnaryExpressionNode>(
+				return std::make_unique<ast::UnaryExpressionNode>(
 						ast::UnaryExpressionNode::Operator::ADDRESS_OF,
-						operand,
+						std::move(operand),
 						token->getLocation());
 			}
 
@@ -505,7 +506,7 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseECallIndexMemberPost() {
 		// Rule 147: E_CALL_INDEX_MEMBER_POST -> F E_CALL_INDEX_MEMBER_POST_Prime
 		ast::ASTNodePtr expr = parseF();
-		return parseECallIndexMemberPostPrime(expr);
+		return parseECallIndexMemberPostPrime(std::move(expr));
 	}
 
 	ast::ASTNodePtr Parser::parseECallIndexMemberPostPrime(ast::ASTNodePtr expr) {
@@ -513,25 +514,25 @@ namespace tinyc::parser {
 		switch (currentToken->getType()) {
 			case lexer::TokenType::LPAREN:
 				// Rule 148: E_CALL_INDEX_MEMBER_POST_Prime -> E_CALL E_CALL_INDEX_MEMBER_POST_Prime
-				expr = parseECall(expr);
-				return parseECallIndexMemberPostPrime(expr);
+				expr = parseECall(std::move(expr));
+				return parseECallIndexMemberPostPrime(std::move(expr));
 
 			case lexer::TokenType::LBRACKET:
 				// Rule 149: E_CALL_INDEX_MEMBER_POST_Prime -> E_INDEX E_CALL_INDEX_MEMBER_POST_Prime
-				expr = parseEIndex(expr);
-				return parseECallIndexMemberPostPrime(expr);
+				expr = parseEIndex(std::move(expr));
+				return parseECallIndexMemberPostPrime(std::move(expr));
 
 			case lexer::TokenType::OP_DOT:
 			case lexer::TokenType::OP_ARROW:
 				// Rule 150: E_CALL_INDEX_MEMBER_POST_Prime -> E_MEMBER E_CALL_INDEX_MEMBER_POST_Prime
-				expr = parseEMember(expr);
-				return parseECallIndexMemberPostPrime(expr);
+				expr = parseEMember(std::move(expr));
+				return parseECallIndexMemberPostPrime(std::move(expr));
 
 			case lexer::TokenType::OP_INCREMENT:
 			case lexer::TokenType::OP_DECREMENT:
 				// Rule 151: E_CALL_INDEX_MEMBER_POST_Prime -> E_POST E_CALL_INDEX_MEMBER_POST_Prime
-				expr = parseEPost(expr);
-				return parseECallIndexMemberPostPrime(expr);
+				expr = parseEPost(std::move(expr));
+				return parseECallIndexMemberPostPrime(std::move(expr));
 
 			default:
 				// Rule 152: E_CALL_INDEX_MEMBER_POST_Prime -> ε
@@ -549,9 +550,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::RPAREN, "Expected ')' after function arguments");
 
 		// Create call expression
-		return std::make_shared<ast::CallExpressionNode>(
-				callee,
-				arguments,
+		return std::make_unique<ast::CallExpressionNode>(
+				std::move(callee),
+				std::move(arguments),
 				callee->getLocation());
 	}
 
@@ -575,8 +576,9 @@ namespace tinyc::parser {
 			case lexer::TokenType::LPAREN:
 			case lexer::TokenType::KW_CAST: {
 				ast::ASTNodePtr expr = parseExpr();
-				std::vector<ast::ASTNodePtr> expressions = {expr};
-				return parseExprTailList(expressions);
+				std::vector<ast::ASTNodePtr> expressions;
+				expressions.push_back(std::move(expr));
+				return parseExprTailList(std::move(expressions));
 			}
 
 			default:
@@ -590,8 +592,8 @@ namespace tinyc::parser {
 		// Rule 157: EXPR_TAIL_LIST -> ε
 		if (match(lexer::TokenType::COMMA)) {
 			ast::ASTNodePtr expr = parseExpr();
-			expressions.push_back(expr);
-			return parseExprTailList(expressions);
+			expressions.push_back(std::move(expr));
+			return parseExprTailList(std::move(expressions));
 		}
 
 		// No more expressions
@@ -607,9 +609,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::RBRACKET, "Expected ']' after array index");
 
 		// Create index expression
-		return std::make_shared<ast::IndexExpressionNode>(
-				array,
-				index,
+		return std::make_unique<ast::IndexExpressionNode>(
+				std::move(array),
+				std::move(index),
 				array->getLocation());
 	}
 
@@ -631,9 +633,9 @@ namespace tinyc::parser {
 		std::string memberName = identifierToken->getLexeme();
 
 		// Create member expression
-		return std::make_shared<ast::MemberExpressionNode>(
+		return std::make_unique<ast::MemberExpressionNode>(
 				kind,
-				object,
+				std::move(object),
 				memberName,
 				object->getLocation());
 	}
@@ -653,9 +655,9 @@ namespace tinyc::parser {
 		}
 
 		// Create postfix expression
-		return std::make_shared<ast::UnaryExpressionNode>(
+		return std::make_unique<ast::UnaryExpressionNode>(
 				op,
-				operand,
+				std::move(operand),
 				operand->getLocation());
 	}
 
@@ -669,9 +671,9 @@ namespace tinyc::parser {
 				consume();
 
 				// Create integer literal
-				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::INTEGER,
+				return std::make_unique<ast::LiteralNode>(
 						std::to_string(token->getIntValue()),
+						ast::LiteralNode::Kind::INTEGER,
 						token->getLocation());
 			}
 
@@ -680,9 +682,9 @@ namespace tinyc::parser {
 				consume();
 
 				// Create double literal
-				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::DOUBLE,
+				return std::make_unique<ast::LiteralNode>(
 						std::to_string(token->getDoubleValue()),
+						ast::LiteralNode::Kind::DOUBLE,
 						token->getLocation());
 			}
 
@@ -694,9 +696,9 @@ namespace tinyc::parser {
 				std::string value;
 				value.push_back(token->getCharValue());
 
-				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::CHAR,
+				return std::make_unique<ast::LiteralNode>(
 						value,
+						ast::LiteralNode::Kind::CHAR,
 						token->getLocation());
 			}
 
@@ -705,9 +707,9 @@ namespace tinyc::parser {
 				consume();
 
 				// Create string literal
-				return std::make_shared<ast::LiteralNode>(
-						ast::LiteralNode::Kind::STRING,
+				return std::make_unique<ast::LiteralNode>(
 						token->getLexeme(),
+						ast::LiteralNode::Kind::STRING,
 						token->getLocation());
 			}
 
@@ -716,16 +718,16 @@ namespace tinyc::parser {
 				consume();
 
 				// Create identifier
-				return std::make_shared<ast::IdentifierNode>(
+				return std::make_unique<ast::IdentifierNode>(
 						token->getLexeme(),
 						token->getLocation());
 			}
 
 			case lexer::TokenType::LPAREN: {
-				// Rule 168: F -> ( EXPR )
+				// Rule 168: F -> ( EXPRS )
 				consume();
 
-				ast::ASTNodePtr expr = parseExpr();
+				ast::ASTNodePtr expr = parseExprs();
 
 				expect(lexer::TokenType::RPAREN, "Expected ')' after expression");
 
@@ -755,9 +757,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::RPAREN, "Expected ')' after cast expression");
 
 		// Create cast expression
-		return std::make_shared<ast::CastExpressionNode>(
-				targetType,
-				expression,
+		return std::make_unique<ast::CastExpressionNode>(
+				std::move(targetType),
+				std::move(expression),
 				castToken->getLocation());
 	}
 

@@ -13,12 +13,18 @@ ast::ASTNodePtr parseString(const std::string &source) {
 	return parser.parseProgram();
 }
 
+// Helper function to cast a node to a specific type
+template<typename T>
+T* as(const ast::ASTNodePtr& node) {
+	return dynamic_cast<T*>(node.get());
+}
+
 // Test empty program
 TEST(ParserTest, EmptyProgram) {
 	auto ast = parseString("");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// An empty program should have no declarations
@@ -30,28 +36,28 @@ TEST(ParserTest, VariableDeclarations) {
 	auto ast = parseString("int x; double y = 3.14; char z = 'a';");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 3 declarations
 	ASSERT_EQ(program->getDeclarations().size(), 3);
 
 	// Check first declaration (int x)
-	auto intDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(program->getDeclarations()[0]);
+	auto* intDecl = as<ast::VariableNode>(program->getDeclarations()[0]);
 	ASSERT_NE(intDecl, nullptr);
-	EXPECT_EQ(intDecl->getName(), "x");
+	EXPECT_EQ(intDecl->getIdentifier(), "x");
 	EXPECT_FALSE(intDecl->hasInitializer());
 
 	// Check second declaration (double y = 3.14)
-	auto doubleDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(program->getDeclarations()[1]);
+	auto* doubleDecl = as<ast::VariableNode>(program->getDeclarations()[1]);
 	ASSERT_NE(doubleDecl, nullptr);
-	EXPECT_EQ(doubleDecl->getName(), "y");
+	EXPECT_EQ(doubleDecl->getIdentifier(), "y");
 	EXPECT_TRUE(doubleDecl->hasInitializer());
 
 	// Check third declaration (char z = 'a')
-	auto charDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(program->getDeclarations()[2]);
+	auto* charDecl = as<ast::VariableNode>(program->getDeclarations()[2]);
 	ASSERT_NE(charDecl, nullptr);
-	EXPECT_EQ(charDecl->getName(), "z");
+	EXPECT_EQ(charDecl->getIdentifier(), "z");
 	EXPECT_TRUE(charDecl->hasInitializer());
 }
 
@@ -60,23 +66,23 @@ TEST(ParserTest, FunctionDeclarations) {
 	auto ast = parseString("int add(int a, int b); void print(char *msg);");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 2 declarations
 	ASSERT_EQ(program->getDeclarations().size(), 2);
 
 	// Check first declaration (int add(int a, int b))
-	auto addFunc = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
+	auto* addFunc = as<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(addFunc, nullptr);
-	EXPECT_EQ(addFunc->getName(), "add");
+	EXPECT_EQ(addFunc->getIdentifier(), "add");
 	EXPECT_FALSE(addFunc->isDefinition());
 	ASSERT_EQ(addFunc->getParameters().size(), 2);
 
 	// Check second declaration (void print(char *msg))
-	auto printFunc = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[1]);
+	auto* printFunc = as<ast::FunctionDeclarationNode>(program->getDeclarations()[1]);
 	ASSERT_NE(printFunc, nullptr);
-	EXPECT_EQ(printFunc->getName(), "print");
+	EXPECT_EQ(printFunc->getIdentifier(), "print");
 	EXPECT_FALSE(printFunc->isDefinition());
 	ASSERT_EQ(printFunc->getParameters().size(), 1);
 }
@@ -94,26 +100,26 @@ TEST(ParserTest, FunctionDefinition) {
     )");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 1 declaration
 	ASSERT_EQ(program->getDeclarations().size(), 1);
 
 	// Check function declaration
-	auto maxFunc = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
+	auto* maxFunc = as<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(maxFunc, nullptr);
-	EXPECT_EQ(maxFunc->getName(), "max");
+	EXPECT_EQ(maxFunc->getIdentifier(), "max");
 	EXPECT_TRUE(maxFunc->isDefinition());
 	ASSERT_EQ(maxFunc->getParameters().size(), 2);
 
 	// Check function body
-	auto body = std::dynamic_pointer_cast<ast::BlockStatementNode>(maxFunc->getBody());
+	auto* body = as<ast::BlockStatementNode>(maxFunc->getBody());
 	ASSERT_NE(body, nullptr);
 	ASSERT_EQ(body->getStatements().size(), 1);
 
 	// Check if statement
-	auto ifStmt = std::dynamic_pointer_cast<ast::IfStatementNode>(body->getStatements()[0]);
+	auto* ifStmt = as<ast::IfStatementNode>(body->getStatements()[0]);
 	ASSERT_NE(ifStmt, nullptr);
 	EXPECT_TRUE(ifStmt->hasElseBranch());
 }
@@ -129,20 +135,20 @@ TEST(ParserTest, Expressions) {
     )");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 1 declaration
 	ASSERT_EQ(program->getDeclarations().size(), 1);
 
 	// Check function declaration
-	auto testFunc = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
+	auto* testFunc = as<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(testFunc, nullptr);
-	EXPECT_EQ(testFunc->getName(), "test");
+	EXPECT_EQ(testFunc->getIdentifier(), "test");
 	EXPECT_TRUE(testFunc->isDefinition());
 
 	// Check function body
-	auto body = std::dynamic_pointer_cast<ast::BlockStatementNode>(testFunc->getBody());
+	auto* body = as<ast::BlockStatementNode>(testFunc->getBody());
 	ASSERT_NE(body, nullptr);
 	ASSERT_EQ(body->getStatements().size(), 3);
 }
@@ -159,23 +165,23 @@ TEST(ParserTest, StructDeclaration) {
     )");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 2 declarations
 	ASSERT_EQ(program->getDeclarations().size(), 2);
 
 	// Check first declaration (struct Point)
-	auto pointStruct = std::dynamic_pointer_cast<ast::StructDeclarationNode>(program->getDeclarations()[0]);
+	auto* pointStruct = as<ast::StructDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(pointStruct, nullptr);
-	EXPECT_EQ(pointStruct->getName(), "Point");
+	EXPECT_EQ(pointStruct->getIdentifier(), "Point");
 	EXPECT_TRUE(pointStruct->isDefinition());
 	ASSERT_EQ(pointStruct->getFields().size(), 2);
 
 	// Check second declaration (struct Point3D)
-	auto point3dStruct = std::dynamic_pointer_cast<ast::StructDeclarationNode>(program->getDeclarations()[1]);
+	auto* point3dStruct = as<ast::StructDeclarationNode>(program->getDeclarations()[1]);
 	ASSERT_NE(point3dStruct, nullptr);
-	EXPECT_EQ(point3dStruct->getName(), "Point3D");
+	EXPECT_EQ(point3dStruct->getIdentifier(), "Point3D");
 	EXPECT_FALSE(point3dStruct->isDefinition());
 	ASSERT_EQ(point3dStruct->getFields().size(), 0);
 }
@@ -185,16 +191,16 @@ TEST(ParserTest, FunctionPointerDeclaration) {
 	auto ast = parseString("typedef int (*Comparator)(int, int);");
 
 	// Check that we got a program node
-	auto program = std::dynamic_pointer_cast<ast::ProgramNode>(ast);
+	auto* program = as<ast::ProgramNode>(ast);
 	ASSERT_NE(program, nullptr);
 
 	// Should have 1 declaration
 	ASSERT_EQ(program->getDeclarations().size(), 1);
 
 	// Check function pointer declaration
-	auto funcPtr = std::dynamic_pointer_cast<ast::FunctionPointerDeclarationNode>(program->getDeclarations()[0]);
+	auto* funcPtr = as<ast::FunctionPointerDeclarationNode>(program->getDeclarations()[0]);
 	ASSERT_NE(funcPtr, nullptr);
-	EXPECT_EQ(funcPtr->getName(), "Comparator");
+	EXPECT_EQ(funcPtr->getIdentifier(), "Comparator");
 	ASSERT_EQ(funcPtr->getParameterTypes().size(), 2);
 }
 

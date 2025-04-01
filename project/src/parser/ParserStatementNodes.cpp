@@ -1,4 +1,5 @@
 #include "tinyc/parser/Parser.h"
+#include <iostream>
 
 
 namespace tinyc::parser {
@@ -81,8 +82,8 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::RBRACE, "Expected '}'");
 
 		// Create block statement node
-		return std::make_shared<ast::BlockStatementNode>(
-				statements,
+		return std::make_unique<ast::BlockStatementNode>(
+				std::move(statements),
 				lbraceToken->getLocation());
 	}
 
@@ -97,7 +98,7 @@ namespace tinyc::parser {
 			   currentToken->getType() != lexer::TokenType::KW_DEFAULT) {
 
 			ast::ASTNodePtr stmt = parseStatement();
-			statements.push_back(stmt);
+			statements.push_back(std::move(stmt));
 		}
 
 		return statements;
@@ -122,10 +123,10 @@ namespace tinyc::parser {
 		ast::ASTNodePtr elseBranch = parseElsePart();
 
 		// Create if statement node
-		return std::make_shared<ast::IfStatementNode>(
-				condition,
-				thenBranch,
-				elseBranch,
+		return std::make_unique<ast::IfStatementNode>(
+				std::move(condition),
+				std::move(thenBranch),
+				std::move(elseBranch),
 				ifToken->getLocation());
 	}
 
@@ -156,9 +157,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::RBRACE, "Expected '}' after switch body");
 
 		// Create switch statement node
-		return std::make_shared<ast::SwitchStatementNode>(
-				expression,
-				cases,
+		return std::make_unique<ast::SwitchStatementNode>(
+				std::move(expression),
+				std::move(cases),
 				switchToken->getLocation());
 	}
 
@@ -182,7 +183,7 @@ namespace tinyc::parser {
 					cases.push_back(parseDefaultCase());
 
 					// Parse any remaining cases
-					return parseCaseStmtStar(cases);
+					return parseCaseStmtStar(std::move(cases));
 				}
 			}
 		} else if (check(lexer::TokenType::KW_DEFAULT)) {
@@ -190,7 +191,7 @@ namespace tinyc::parser {
 			cases.push_back(parseDefaultCase());
 
 			// Parse any remaining cases
-			return parseCaseStmtStar(cases);
+			return parseCaseStmtStar(std::move(cases));
 		}
 
 		// If no cases, we're done (Rule 42)
@@ -224,7 +225,7 @@ namespace tinyc::parser {
 		ast::SwitchStatementNode::Case caseNode;
 		caseNode.value = value;
 		caseNode.isDefault = false;
-		caseNode.body = body;
+		caseNode.body = std::move(body);
 
 		return caseNode;
 	}
@@ -246,7 +247,7 @@ namespace tinyc::parser {
 		ast::SwitchStatementNode::Case defaultCase;
 		defaultCase.value = 0; // Default case value doesn't matter
 		defaultCase.isDefault = true;
-		defaultCase.body = body;
+		defaultCase.body = std::move(body);
 
 		return defaultCase;
 	}
@@ -262,9 +263,9 @@ namespace tinyc::parser {
 		ast::ASTNodePtr body = parseStatement();
 
 		// Create while statement node
-		return std::make_shared<ast::WhileStatementNode>(
-				condition,
-				body,
+		return std::make_unique<ast::WhileStatementNode>(
+				std::move(condition),
+				std::move(body),
 				whileToken->getLocation());
 	}
 
@@ -281,9 +282,9 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after do-while statement");
 
 		// Create do-while statement node
-		return std::make_shared<ast::DoWhileStatementNode>(
-				body,
-				condition,
+		return std::make_unique<ast::DoWhileStatementNode>(
+				std::move(body),
+				std::move(condition),
 				doToken->getLocation());
 	}
 
@@ -309,11 +310,11 @@ namespace tinyc::parser {
 		ast::ASTNodePtr body = parseStatement();
 
 		// Create for statement node
-		return std::make_shared<ast::ForStatementNode>(
-				initialization,
-				condition,
-				update,
-				body,
+		return std::make_unique<ast::ForStatementNode>(
+				std::move(initialization),
+				std::move(condition),
+				std::move(update),
+				std::move(body),
 				forToken->getLocation());
 	}
 
@@ -381,7 +382,7 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after 'break'");
 
 		// Create break statement node
-		return std::make_shared<ast::BreakStatementNode>(breakToken->getLocation());
+		return std::make_unique<ast::BreakStatementNode>(breakToken->getLocation());
 	}
 
 	ast::ASTNodePtr Parser::parseContinueStmt() {
@@ -390,7 +391,7 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after 'continue'");
 
 		// Create continue statement node
-		return std::make_shared<ast::ContinueStatementNode>(continueToken->getLocation());
+		return std::make_unique<ast::ContinueStatementNode>(continueToken->getLocation());
 	}
 
 	ast::ASTNodePtr Parser::parseReturnStmt() {
@@ -406,8 +407,8 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after return statement");
 
 		// Create return statement node
-		return std::make_shared<ast::ReturnStatementNode>(
-				expression,
+		return std::make_unique<ast::ReturnStatementNode>(
+				std::move(expression),
 				returnToken->getLocation());
 	}
 
@@ -417,14 +418,14 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after expression");
 
 		// If the expression is already a statement or a declaration, return it directly
-		if (dynamic_cast<ast::StatementNode *>(expr.get()) ||
-			dynamic_cast<ast::DeclarationNode *>(expr.get())) {
-			return expr;
-		}
+//		if (dynamic_cast<ast::StatementNode *>(expr.get()) ||
+//			dynamic_cast<ast::DeclarationNode *>(expr.get())) {
+//			return expr;
+//		}
 
 		// Otherwise, wrap it in an expression statement
-		return std::make_shared<ast::ExpressionStatementNode>(
-				expr,
+		return std::make_unique<ast::ExpressionStatementNode>(
+				std::move(expr),
 				expr->getLocation());
 	}
 
@@ -437,7 +438,14 @@ namespace tinyc::parser {
 			case lexer::TokenType::KW_CHAR:
 			case lexer::TokenType::KW_VOID:
 				return parseVarDecls();
+			case lexer::TokenType::IDENTIFIER: {
+				// Check if the next token is also an identifier, like "Point p"
+				if (lexer.peekNextToken()->getType() == lexer::TokenType::IDENTIFIER){
+					return parseVarDecls();
+				}
+				else return parseExprs();
 
+			}
 			case lexer::TokenType::OP_PLUS:
 			case lexer::TokenType::OP_MINUS:
 			case lexer::TokenType::OP_NOT:
@@ -450,7 +458,7 @@ namespace tinyc::parser {
 			case lexer::TokenType::DOUBLE_LITERAL:
 			case lexer::TokenType::CHAR_LITERAL:
 			case lexer::TokenType::STRING_LITERAL:
-			case lexer::TokenType::IDENTIFIER:
+//			case lexer::TokenType::IDENTIFIER:
 			case lexer::TokenType::LPAREN:
 			case lexer::TokenType::KW_CAST:
 				return parseExprs();
@@ -464,54 +472,31 @@ namespace tinyc::parser {
 		// Rule 62: VAR_DECLS -> VAR_DECL VAR_DECLS_TAIL
 		ast::ASTNodePtr decl = parseVarDecl();
 
-		std::vector<ast::ASTNodePtr> declarations = {decl};
-		declarations = parseVarDeclsTail(declarations);
+		std::vector<ast::ASTNodePtr> declarations;
+		declarations.push_back(std::move(decl));
+		declarations = parseVarDeclsTail(std::move(declarations));
 
 		// If only one declaration, return it directly
 		if (declarations.size() == 1) {
-			return declarations[0];
+			return std::move(declarations[0]);
 		}
 
-		// Otherwise, return a list of declarations
-		// We could create a special node for this, but for simplicity
-		// we'll just return the first one for now
-		return declarations[0];
+		// Create a multiple declaration node
+		return std::make_unique<ast::MultipleDeclarationNode>(
+				std::move(declarations),
+				declarations[0]->getLocation());
 	}
 
 	std::vector<ast::ASTNodePtr> Parser::parseVarDeclsTail(std::vector<ast::ASTNodePtr> declarations) {
 		// Rule 63: VAR_DECLS_TAIL -> , VAR_DECL VAR_DECLS_TAIL
 		// Rule 64: VAR_DECLS_TAIL -> ε
 		if (match(lexer::TokenType::COMMA)) {
-			// Get the type from the first declaration
-			auto firstDecl = std::dynamic_pointer_cast<ast::VariableDeclarationNode>(declarations[0]);
-			if (!firstDecl) {
-				error("Internal error: first declaration is not a variable declaration");
-			}
-
-			auto type = firstDecl->getType();
-
-			// Now parse just the identifier, array size, and initializer
-			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable name");
-			std::string name = identifierToken->getLexeme();
-
-			// Parse optional array size
-			ast::ASTNodePtr arraySize = parseOptArraySize();
-
-			// Parse optional initializer
-			ast::ASTNodePtr initializer = parseOptInit();
-
-			// Create variable declaration node using the type from the first declaration
-			auto varDecl = std::make_shared<ast::VariableDeclarationNode>(
-					type,
-					name,
-					arraySize,
-					initializer,
-					identifierToken->getLocation());
-
-			declarations.push_back(varDecl);
+			// In TinyC, each variable in a comma-separated list must have its own type
+			ast::ASTNodePtr varDecl = parseVarDecl();
+			declarations.push_back(std::move(varDecl));
 
 			// Continue parsing any remaining declarations
-			return parseVarDeclsTail(declarations);
+			return parseVarDeclsTail(std::move(declarations));
 		}
 
 		// No more declarations
@@ -522,8 +507,9 @@ namespace tinyc::parser {
 		// Rule 65: VAR_DECL -> TYPE identifier OPT_ARRAY_SIZE OPT_INIT
 		ast::ASTNodePtr type = parseType();
 
-		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable name");
-		std::string name = identifierToken->getLexeme();
+		auto identifierToken = expect(lexer::TokenType::IDENTIFIER,
+									  "parseVarDecl: Expected variable identifier");
+		std::string identifier = identifierToken->getLexeme();
 
 		// Parse optional array size
 		ast::ASTNodePtr arraySize = parseOptArraySize();
@@ -532,12 +518,12 @@ namespace tinyc::parser {
 		ast::ASTNodePtr initializer = parseOptInit();
 
 		// Create variable declaration node
-		return std::make_shared<ast::VariableDeclarationNode>(
-				type,
-				name,
-				arraySize,
-				initializer,
-				identifierToken->getLocation());
+		return std::make_unique<ast::VariableNode>(
+				std::move(identifier),
+				std::move(type),
+				identifierToken->getLocation(),
+				std::move(arraySize),
+				std::move(initializer));
 	}
 
 	ast::ASTNodePtr Parser::parseOptArraySize() {

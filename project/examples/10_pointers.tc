@@ -1,0 +1,36 @@
+/* Pointers and pointer operations */
+
+struct Point {
+    int x;
+    int y;
+};
+
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int main() {
+    int a = 5;
+    int b = 10;
+    int* p_int = &a;  // Pointer to integer
+    int* p_int;
+
+    *p_int = 7;  // a is now 7
+    p_int = &b;  // p_int now points to b
+
+    swap(*a, *b);  // Pass using pointers
+
+    // Pointers to structs
+    // struct Point pt;
+    // struct Point* p_pt = &pt;
+
+    // Arrow operator for struct pointer access
+    p_pt->x = 3;
+
+    // Pointer to pointer
+    int** pp_int = &p_int;
+
+    return 0;
+}

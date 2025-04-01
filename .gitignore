@@ -9,6 +9,9 @@ tinyc/
 
 # project:
 build/
+cmake-build-debug/
+_deps
+CMakeFiles
 
 # Latex specific
 *.aux
