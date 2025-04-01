@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "tinyc/ast/ASTNode.h"
 
 namespace tinyc::ast {
@@ -567,11 +569,11 @@ namespace tinyc::ast {
 	}
 
 	// ProgramNode implementation
-	ProgramNode::ProgramNode(std::string sourceName) : ASTNode(lexer::SourceLocation(sourceName, 0, 0)) {
+	ProgramNode::ProgramNode(std::string sourceName) : ASTNode(lexer::SourceLocation(std::move(sourceName), 0, 0)) {
 	}
 
-	void ProgramNode::addDeclaration(const ASTNodePtr &declaration) {
-		declarations.push_back(declaration);
+	void ProgramNode::addDeclaration(ASTNodePtr declaration) {
+		declarations.push_back(std::move(declaration));
 	}
 
 	const std::vector<ASTNodePtr> &ProgramNode::getDeclarations() const {

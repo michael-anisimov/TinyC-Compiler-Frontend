@@ -53,7 +53,6 @@ target_include_directories(tinyc PUBLIC include)
 add_executable(tinyc-compiler src/main.cpp)
 target_link_libraries(tinyc-compiler tinyc)
 
-
 # TESTS
 enable_testing()
 
@@ -75,27 +74,26 @@ endif ()
 # Define test libraries (using variables from FindGTest)
 set(TEST_LIBRARIES tinyc ${GTEST_BOTH_LIBRARIES} pthread)
 
+# Create directory structure if it doesn't exist
+file(MAKE_DIRECTORY tests/lexer)
+file(MAKE_DIRECTORY tests/parser)
+
 # Add lexer test executable
-add_executable(lexer_tests tests/unit/lexer/LexerTest.cpp)
+add_executable(lexer_tests tests/lexer/LexerTest.cpp)
 target_link_libraries(lexer_tests ${TEST_LIBRARIES})
 target_include_directories(lexer_tests PRIVATE ${GTEST_INCLUDE_DIRS})
+gtest_discover_tests(lexer_tests)
 
-# Add original parser test executable
-add_executable(parser_tests tests/unit/parser/ParserTest.cpp)
-target_link_libraries(parser_tests ${TEST_LIBRARIES})
-target_include_directories(parser_tests PRIVATE ${GTEST_INCLUDE_DIRS})
-
-# Create directory structure if it doesn't exist
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/parser)
-
-# Add new parser test executables (excluding ParserTypeTests.cpp)
+# Define parser test sources
 set(PARSER_TEST_SOURCES
-        tests/unit/parser/ParserExpressionTests.cpp
-        tests/unit/parser/ParserStatementTests.cpp
-        tests/unit/parser/ParserDeclarationTests.cpp
+        tests/parser/ParserTest.cpp
+        tests/parser/ParserTypeTests.cpp
+        tests/parser/ParserExpressionTests.cpp
+        tests/parser/ParserStatementTests.cpp
+        tests/parser/ParserDeclarationTests.cpp
 )
 
-# Create individual test executables for each test file
+# Create separate test executables for each parser test file
 foreach (TEST_SOURCE ${PARSER_TEST_SOURCES})
     # Extract the file name without extension
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
@@ -108,10 +106,6 @@ foreach (TEST_SOURCE ${PARSER_TEST_SOURCES})
     # Register the test with CTest
     gtest_discover_tests(${TEST_NAME})
 endforeach ()
-
-# Register tests with CTest
-gtest_discover_tests(lexer_tests)
-gtest_discover_tests(parser_tests)
 
 # Install targets
 install(TARGETS tinyc tinyc-compiler

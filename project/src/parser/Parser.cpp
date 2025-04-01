@@ -1,6 +1,5 @@
 #include "tinyc/parser/Parser.h"
 #include <sstream>
-#include <iostream>
 
 namespace tinyc::parser {
 
@@ -40,12 +39,12 @@ namespace tinyc::parser {
 	}
 
 	ast::ASTNodePtr Parser::parseProgram() {
-		auto program = std::make_shared<ast::ProgramNode>(lexer.getSourceName());
+		auto program = std::make_unique<ast::ProgramNode>(lexer.getSourceName());
 
 		// Parse declarations until EOF
 		while (!check(lexer::TokenType::END_OF_FILE)) {
 			auto item = parseProgramItem();
-			program->addDeclaration(item);
+			program->addDeclaration(std::move(item));
 		}
 
 		return program;
@@ -63,7 +62,7 @@ namespace tinyc::parser {
 											  "Expected identifier after type");
 				std::string name = identifierToken->getLexeme();
 
-				return parseNotVoidFunctionOrVariable(type, name, identifierToken->getLocation());
+				return parseNotVoidFunctionOrVariable(std::move(type), name, identifierToken->getLocation());
 			}
 
 			case lexer::TokenType::KW_VOID: {

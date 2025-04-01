@@ -16,28 +16,55 @@ using namespace tinyc;
  */
 
 namespace {
-	// Helper function to parse an expression statement within a function
+	/**
+	 * @brief Helper function to cast a node to a specific type
+	 * @tparam T The target node type
+	 * @param node The node to cast
+	 * @return Pointer to the node as type T, or nullptr if cast fails
+	 */
+	template<typename T>
+	T* as(const ast::ASTNode* node) {
+		return dynamic_cast<T*>(const_cast<ast::ASTNode*>(node));
+	}
+
+	/**
+	 * @brief Helper function to parse an expression statement within a function
+	 * @param expr The expression text to parse
+	 * @return The parsed AST
+	 */
 	ast::ASTNodePtr parseExpression(const std::string &expr) {
 		std::string source = "void test() { " + expr + "; }";
 		lexer::Lexer lexer(source);
 		parser::Parser parser(lexer);
-		auto program = std::dynamic_pointer_cast<ast::ProgramNode>(parser.parseProgram());
+		return parser.parseProgram();
+	}
+
+	/**
+	 * @brief Helper function to get the expression from a parsed AST
+	 * @param ast The AST returned by parseExpression
+	 * @return Pointer to the expression node
+	 */
+	const ast::ASTNode* getExpressionNode(const ast::ASTNodePtr& ast) {
+		const auto* program = as<ast::ProgramNode>(ast.get());
 		EXPECT_NE(program, nullptr);
-		EXPECT_EQ(program->getDeclarations().size(), 1);
+		if (!program) return nullptr;
 
-		auto func = std::dynamic_pointer_cast<ast::FunctionDeclarationNode>(program->getDeclarations()[0]);
+		const auto* func = as<ast::FunctionDeclarationNode>(program->getDeclarations()[0].get());
 		EXPECT_NE(func, nullptr);
+		if (!func) return nullptr;
 
-		auto body = std::dynamic_pointer_cast<ast::BlockStatementNode>(func->getBody());
+		const auto* body = as<ast::BlockStatementNode>(func->getBody().get());
 		EXPECT_NE(body, nullptr);
-		EXPECT_EQ(body->getStatements().size(), 1);
+		if (!body) return nullptr;
 
-		auto exprStmt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(body->getStatements()[0]);
+		const auto* exprStmt = as<ast::ExpressionStatementNode>(body->getStatements()[0].get());
 		EXPECT_NE(exprStmt, nullptr);
+		if (!exprStmt) return nullptr;
 
-		return exprStmt->getExpression();
+		return exprStmt->getExpression().get();
 	}
 }
+
 
 /**
  * @test LiteralExpressions
@@ -49,8 +76,9 @@ namespace {
 TEST(ParserExpressionTest, LiteralExpressions) {
 	// Test integer literal
 	{
-		auto expr = parseExpression("42");
-		auto literal = std::dynamic_pointer_cast<ast::LiteralNode>(expr);
+		auto ast = parseExpression("42");
+		const auto* expr = getExpressionNode(ast);
+		const auto* literal = as<ast::LiteralNode>(expr);
 		ASSERT_NE(literal, nullptr);
 		EXPECT_EQ(literal->getKind(), ast::LiteralNode::Kind::INTEGER);
 		EXPECT_EQ(literal->getValue(), "42");
@@ -58,8 +86,9 @@ TEST(ParserExpressionTest, LiteralExpressions) {
 
 	// Test double literal
 	{
-		auto expr = parseExpression("3.14");
-		auto literal = std::dynamic_pointer_cast<ast::LiteralNode>(expr);
+		auto ast = parseExpression("3.14");
+		const auto* expr = getExpressionNode(ast);
+		const auto* literal = as<ast::LiteralNode>(expr);
 		ASSERT_NE(literal, nullptr);
 		EXPECT_EQ(literal->getKind(), ast::LiteralNode::Kind::DOUBLE);
 		// Value might be represented with different precision
@@ -68,8 +97,9 @@ TEST(ParserExpressionTest, LiteralExpressions) {
 
 	// Test char literal
 	{
-		auto expr = parseExpression("'a'");
-		auto literal = std::dynamic_pointer_cast<ast::LiteralNode>(expr);
+		auto ast = parseExpression("'a'");
+		const auto* expr = getExpressionNode(ast);
+		const auto* literal = as<ast::LiteralNode>(expr);
 		ASSERT_NE(literal, nullptr);
 		EXPECT_EQ(literal->getKind(), ast::LiteralNode::Kind::CHAR);
 		EXPECT_EQ(literal->getValue(), "a");
@@ -77,8 +107,9 @@ TEST(ParserExpressionTest, LiteralExpressions) {
 
 	// Test string literal
 	{
-		auto expr = parseExpression("\"hello\"");
-		auto literal = std::dynamic_pointer_cast<ast::LiteralNode>(expr);
+		auto ast = parseExpression("\"hello\"");
+		const auto* expr = getExpressionNode(ast);
+		const auto* literal = as<ast::LiteralNode>(expr);
 		ASSERT_NE(literal, nullptr);
 		EXPECT_EQ(literal->getKind(), ast::LiteralNode::Kind::STRING);
 		EXPECT_EQ(literal->getValue(), "\"hello\"");
@@ -93,8 +124,9 @@ TEST(ParserExpressionTest, LiteralExpressions) {
  * - F -> identifier
  */
 TEST(ParserExpressionTest, IdentifierExpressions) {
-	auto expr = parseExpression("variable");
-	auto identifier = std::dynamic_pointer_cast<ast::IdentifierNode>(expr);
+	auto ast = parseExpression("variable");
+	const auto* expr = getExpressionNode(ast);
+	const auto* identifier = as<ast::IdentifierNode>(expr);
 	ASSERT_NE(identifier, nullptr);
 	EXPECT_EQ(identifier->getIdentifier(), "variable");
 }
@@ -112,83 +144,93 @@ TEST(ParserExpressionTest, IdentifierExpressions) {
 TEST(ParserExpressionTest, UnaryExpressions) {
 	// Test unary plus
 	{
-		auto expr = parseExpression("+x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("+x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::POSITIVE);
-		auto operand = std::dynamic_pointer_cast<ast::IdentifierNode>(unary->getOperand());
+		const auto* operand = as<ast::IdentifierNode>(unary->getOperand().get());
 		ASSERT_NE(operand, nullptr);
 		EXPECT_EQ(operand->getIdentifier(), "x");
 	}
 
 	// Test unary minus
 	{
-		auto expr = parseExpression("-x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("-x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::NEGATIVE);
 	}
 
 	// Test logical not
 	{
-		auto expr = parseExpression("!x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("!x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::LOGICAL_NOT);
 	}
 
 	// Test bitwise not
 	{
-		auto expr = parseExpression("~x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("~x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::BITWISE_NOT);
 	}
 
 	// Test pre-increment
 	{
-		auto expr = parseExpression("++x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("++x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::PRE_INCREMENT);
 	}
 
 	// Test pre-decrement
 	{
-		auto expr = parseExpression("--x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("--x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::PRE_DECREMENT);
 	}
 
 	// Test dereference
 	{
-		auto expr = parseExpression("*ptr");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("*ptr");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::DEREFERENCE);
 	}
 
 	// Test address-of
 	{
-		auto expr = parseExpression("&x");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("&x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::ADDRESS_OF);
 	}
 
 	// Test post-increment
 	{
-		auto expr = parseExpression("x++");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("x++");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::POST_INCREMENT);
 	}
 
 	// Test post-decrement
 	{
-		auto expr = parseExpression("x--");
-		auto unary = std::dynamic_pointer_cast<ast::UnaryExpressionNode>(expr);
+		auto ast = parseExpression("x--");
+		const auto* expr = getExpressionNode(ast);
+		const auto* unary = as<ast::UnaryExpressionNode>(expr);
 		ASSERT_NE(unary, nullptr);
 		EXPECT_EQ(unary->getOperator(), ast::UnaryExpressionNode::Operator::POST_DECREMENT);
 	}
@@ -213,152 +255,170 @@ TEST(ParserExpressionTest, UnaryExpressions) {
 TEST(ParserExpressionTest, BinaryExpressions) {
 	// Test multiplication
 	{
-		auto expr = parseExpression("a * b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a * b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 
-		auto left = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getLeft());
+		const auto* left = as<ast::IdentifierNode>(binary->getLeft().get());
 		ASSERT_NE(left, nullptr);
 		EXPECT_EQ(left->getIdentifier(), "a");
 
-		auto right = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getRight());
+		const auto* right = as<ast::IdentifierNode>(binary->getRight().get());
 		ASSERT_NE(right, nullptr);
 		EXPECT_EQ(right->getIdentifier(), "b");
 	}
 
 	// Test division
 	{
-		auto expr = parseExpression("a / b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a / b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::DIVIDE);
 	}
 
 	// Test modulo
 	{
-		auto expr = parseExpression("a % b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a % b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::MODULO);
 	}
 
 	// Test addition
 	{
-		auto expr = parseExpression("a + b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a + b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 	}
 
 	// Test subtraction
 	{
-		auto expr = parseExpression("a - b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a - b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::SUBTRACT);
 	}
 
 	// Test left shift
 	{
-		auto expr = parseExpression("a << b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a << b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::LEFT_SHIFT);
 	}
 
 	// Test right shift
 	{
-		auto expr = parseExpression("a >> b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a >> b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::RIGHT_SHIFT);
 	}
 
 	// Test less than
 	{
-		auto expr = parseExpression("a < b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a < b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::LESS);
 	}
 
 	// Test less than or equal
 	{
-		auto expr = parseExpression("a <= b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a <= b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::LESS_EQUAL);
 	}
 
 	// Test greater than
 	{
-		auto expr = parseExpression("a > b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a > b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::GREATER);
 	}
 
 	// Test greater than or equal
 	{
-		auto expr = parseExpression("a >= b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a >= b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::GREATER_EQUAL);
 	}
 
 	// Test equality
 	{
-		auto expr = parseExpression("a == b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a == b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::EQUAL);
 	}
 
 	// Test inequality
 	{
-		auto expr = parseExpression("a != b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a != b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::NOT_EQUAL);
 	}
 
 	// Test bitwise AND
 	{
-		auto expr = parseExpression("a & b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a & b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::BITWISE_AND);
 	}
 
 	// Test bitwise OR
 	{
-		auto expr = parseExpression("a | b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a | b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::BITWISE_OR);
 	}
 
 	// Test logical AND
 	{
-		auto expr = parseExpression("a && b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a && b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::LOGICAL_AND);
 	}
 
 	// Test logical OR
 	{
-		auto expr = parseExpression("a || b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a || b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::LOGICAL_OR);
 	}
 
 	// Test assignment
 	{
-		auto expr = parseExpression("a = b");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a = b");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::ASSIGN);
 	}
@@ -371,48 +431,51 @@ TEST(ParserExpressionTest, BinaryExpressions) {
 TEST(ParserExpressionTest, OperatorPrecedence) {
 	// Test multiplication before addition
 	{
-		auto expr = parseExpression("a + b * c");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a + b * c");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 
-		auto left = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getLeft());
+		const auto* left = as<ast::IdentifierNode>(binary->getLeft().get());
 		ASSERT_NE(left, nullptr);
 		EXPECT_EQ(left->getIdentifier(), "a");
 
-		auto right = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(binary->getRight());
+		const auto* right = as<ast::BinaryExpressionNode>(binary->getRight().get());
 		ASSERT_NE(right, nullptr);
 		EXPECT_EQ(right->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 	}
 
 	// Test parenthesized expression
 	{
-		auto expr = parseExpression("(a + b) * c");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("(a + b) * c");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 
-		auto left = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(binary->getLeft());
+		const auto* left = as<ast::BinaryExpressionNode>(binary->getLeft().get());
 		ASSERT_NE(left, nullptr);
 		EXPECT_EQ(left->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 
-		auto right = std::dynamic_pointer_cast<ast::IdentifierNode>(binary->getRight());
+		const auto* right = as<ast::IdentifierNode>(binary->getRight().get());
 		ASSERT_NE(right, nullptr);
 		EXPECT_EQ(right->getIdentifier(), "c");
 	}
 
 	// Test complex expression with mixed operators
 	{
-		auto expr = parseExpression("a * b + c * d");
-		auto binary = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		auto ast = parseExpression("a * b + c * d");
+		const auto* expr = getExpressionNode(ast);
+		const auto* binary = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(binary, nullptr);
 		EXPECT_EQ(binary->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 
-		auto left = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(binary->getLeft());
+		const auto* left = as<ast::BinaryExpressionNode>(binary->getLeft().get());
 		ASSERT_NE(left, nullptr);
 		EXPECT_EQ(left->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 
-		auto right = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(binary->getRight());
+		const auto* right = as<ast::BinaryExpressionNode>(binary->getRight().get());
 		ASSERT_NE(right, nullptr);
 		EXPECT_EQ(right->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 	}
@@ -429,44 +492,43 @@ TEST(ParserExpressionTest, OperatorPrecedence) {
 TEST(ParserExpressionTest, MemberExpressions) {
 	// Test dot operator
 	{
-		auto expr = parseExpression("point.x");
-		auto member = std::dynamic_pointer_cast<ast::MemberExpressionNode>(expr);
+		auto ast = parseExpression("point.x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* member = as<ast::MemberExpressionNode>(expr);
 		ASSERT_NE(member, nullptr);
 		EXPECT_EQ(member->getKind(), ast::MemberExpressionNode::Kind::DOT);
 		EXPECT_EQ(member->getMember(), "x");
 
-		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member->getObject());
+		const auto* object = as<ast::IdentifierNode>(member->getObject().get());
 		ASSERT_NE(object, nullptr);
 		EXPECT_EQ(object->getIdentifier(), "point");
 	}
 
 	// Test arrow operator
 	{
-		auto expr = parseExpression("ptr->x");
-		auto member = std::dynamic_pointer_cast<ast::MemberExpressionNode>(expr);
+		auto ast = parseExpression("ptr->x");
+		const auto* expr = getExpressionNode(ast);
+		const auto* member = as<ast::MemberExpressionNode>(expr);
 		ASSERT_NE(member, nullptr);
 		EXPECT_EQ(member->getKind(), ast::MemberExpressionNode::Kind::ARROW);
 		EXPECT_EQ(member->getMember(), "x");
-
-		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member->getObject());
-		ASSERT_NE(object, nullptr);
-		EXPECT_EQ(object->getIdentifier(), "ptr");
 	}
 
 	// Test chained member access
 	{
-		auto expr = parseExpression("obj.inner.value");
-		auto member1 = std::dynamic_pointer_cast<ast::MemberExpressionNode>(expr);
+		auto ast = parseExpression("obj.inner.value");
+		const auto* expr = getExpressionNode(ast);
+		const auto* member1 = as<ast::MemberExpressionNode>(expr);
 		ASSERT_NE(member1, nullptr);
 		EXPECT_EQ(member1->getKind(), ast::MemberExpressionNode::Kind::DOT);
 		EXPECT_EQ(member1->getMember(), "value");
 
-		auto member2 = std::dynamic_pointer_cast<ast::MemberExpressionNode>(member1->getObject());
+		const auto* member2 = as<ast::MemberExpressionNode>(member1->getObject().get());
 		ASSERT_NE(member2, nullptr);
 		EXPECT_EQ(member2->getKind(), ast::MemberExpressionNode::Kind::DOT);
 		EXPECT_EQ(member2->getMember(), "inner");
 
-		auto object = std::dynamic_pointer_cast<ast::IdentifierNode>(member2->getObject());
+		const auto* object = as<ast::IdentifierNode>(member2->getObject().get());
 		ASSERT_NE(object, nullptr);
 		EXPECT_EQ(object->getIdentifier(), "obj");
 	}
@@ -483,15 +545,16 @@ TEST(ParserExpressionTest, MemberExpressions) {
 TEST(ParserExpressionTest, IndexExpressions) {
 	// Test simple indexing
 	{
-		auto expr = parseExpression("arr[0]");
-		auto index = std::dynamic_pointer_cast<ast::IndexExpressionNode>(expr);
+		auto ast = parseExpression("arr[0]");
+		const auto* expr = getExpressionNode(ast);
+		const auto* index = as<ast::IndexExpressionNode>(expr);
 		ASSERT_NE(index, nullptr);
 
-		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index->getArray());
+		const auto* array = as<ast::IdentifierNode>(index->getArray().get());
 		ASSERT_NE(array, nullptr);
 		EXPECT_EQ(array->getIdentifier(), "arr");
 
-		auto indexExpr = std::dynamic_pointer_cast<ast::LiteralNode>(index->getIndex());
+		const auto* indexExpr = as<ast::LiteralNode>(index->getIndex().get());
 		ASSERT_NE(indexExpr, nullptr);
 		EXPECT_EQ(indexExpr->getKind(), ast::LiteralNode::Kind::INTEGER);
 		EXPECT_EQ(indexExpr->getValue(), "0");
@@ -499,29 +562,31 @@ TEST(ParserExpressionTest, IndexExpressions) {
 
 	// Test indexing with expression
 	{
-		auto expr = parseExpression("arr[i + 1]");
-		auto index = std::dynamic_pointer_cast<ast::IndexExpressionNode>(expr);
+		auto ast = parseExpression("arr[i + 1]");
+		const auto* expr = getExpressionNode(ast);
+		const auto* index = as<ast::IndexExpressionNode>(expr);
 		ASSERT_NE(index, nullptr);
 
-		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index->getArray());
+		const auto* array = as<ast::IdentifierNode>(index->getArray().get());
 		ASSERT_NE(array, nullptr);
 		EXPECT_EQ(array->getIdentifier(), "arr");
 
-		auto indexExpr = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(index->getIndex());
+		const auto* indexExpr = as<ast::BinaryExpressionNode>(index->getIndex().get());
 		ASSERT_NE(indexExpr, nullptr);
 		EXPECT_EQ(indexExpr->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 	}
 
 	// Test multi-dimensional indexing
 	{
-		auto expr = parseExpression("matrix[i][j]");
-		auto index1 = std::dynamic_pointer_cast<ast::IndexExpressionNode>(expr);
+		auto ast = parseExpression("matrix[i][j]");
+		const auto* expr = getExpressionNode(ast);
+		const auto* index1 = as<ast::IndexExpressionNode>(expr);
 		ASSERT_NE(index1, nullptr);
 
-		auto index2 = std::dynamic_pointer_cast<ast::IndexExpressionNode>(index1->getArray());
+		const auto* index2 = as<ast::IndexExpressionNode>(index1->getArray().get());
 		ASSERT_NE(index2, nullptr);
 
-		auto array = std::dynamic_pointer_cast<ast::IdentifierNode>(index2->getArray());
+		const auto* array = as<ast::IdentifierNode>(index2->getArray().get());
 		ASSERT_NE(array, nullptr);
 		EXPECT_EQ(array->getIdentifier(), "matrix");
 	}
@@ -538,11 +603,12 @@ TEST(ParserExpressionTest, IndexExpressions) {
 TEST(ParserExpressionTest, CallExpressions) {
 	// Test function call with no arguments
 	{
-		auto expr = parseExpression("foo()");
-		auto call = std::dynamic_pointer_cast<ast::CallExpressionNode>(expr);
+		auto ast = parseExpression("foo()");
+		const auto* expr = getExpressionNode(ast);
+		const auto* call = as<ast::CallExpressionNode>(expr);
 		ASSERT_NE(call, nullptr);
 
-		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
+		const auto* callee = as<ast::IdentifierNode>(call->getCallee().get());
 		ASSERT_NE(callee, nullptr);
 		EXPECT_EQ(callee->getIdentifier(), "foo");
 
@@ -551,22 +617,23 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 	// Test function call with arguments
 	{
-		auto expr = parseExpression("bar(1, 2)");
-		auto call = std::dynamic_pointer_cast<ast::CallExpressionNode>(expr);
+		auto ast = parseExpression("bar(1, 2)");
+		const auto* expr = getExpressionNode(ast);
+		const auto* call = as<ast::CallExpressionNode>(expr);
 		ASSERT_NE(call, nullptr);
 
-		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
+		const auto* callee = as<ast::IdentifierNode>(call->getCallee().get());
 		ASSERT_NE(callee, nullptr);
 		EXPECT_EQ(callee->getIdentifier(), "bar");
 
 		ASSERT_EQ(call->getArguments().size(), 2);
 
-		auto arg1 = std::dynamic_pointer_cast<ast::LiteralNode>(call->getArguments()[0]);
+		auto arg1 = as<ast::LiteralNode>(call->getArguments()[0].get());
 		ASSERT_NE(arg1, nullptr);
 		EXPECT_EQ(arg1->getKind(), ast::LiteralNode::Kind::INTEGER);
 		EXPECT_EQ(arg1->getValue(), "1");
 
-		auto arg2 = std::dynamic_pointer_cast<ast::LiteralNode>(call->getArguments()[1]);
+		auto arg2 = as<ast::LiteralNode>(call->getArguments()[1].get());
 		ASSERT_NE(arg2, nullptr);
 		EXPECT_EQ(arg2->getKind(), ast::LiteralNode::Kind::INTEGER);
 		EXPECT_EQ(arg2->getValue(), "2");
@@ -574,41 +641,43 @@ TEST(ParserExpressionTest, CallExpressions) {
 
 	// Test function call with expressions as arguments
 	{
-		auto expr = parseExpression("compute(a + b, c * d)");
-		auto call = std::dynamic_pointer_cast<ast::CallExpressionNode>(expr);
+		auto ast = parseExpression("compute(a + b, c * d)");
+		const auto* expr = getExpressionNode(ast);
+		const auto* call = as<ast::CallExpressionNode>(expr);
 		ASSERT_NE(call, nullptr);
 
-		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
+		const auto* callee = as<ast::IdentifierNode>(call->getCallee().get());
 		ASSERT_NE(callee, nullptr);
 		EXPECT_EQ(callee->getIdentifier(), "compute");
 
 		ASSERT_EQ(call->getArguments().size(), 2);
 
-		auto arg1 = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(call->getArguments()[0]);
+		const auto* arg1 = as<ast::BinaryExpressionNode>(call->getArguments()[0].get());
 		ASSERT_NE(arg1, nullptr);
 		EXPECT_EQ(arg1->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 
-		auto arg2 = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(call->getArguments()[1]);
+		const auto* arg2 = as<ast::BinaryExpressionNode>(call->getArguments()[1].get());
 		ASSERT_NE(arg2, nullptr);
 		EXPECT_EQ(arg2->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 	}
 
 	// Test nested function calls
 	{
-		auto expr = parseExpression("outer(inner(x))");
-		auto outerCall = std::dynamic_pointer_cast<ast::CallExpressionNode>(expr);
+		auto ast = parseExpression("outer(inner(x))");
+		const auto* expr = getExpressionNode(ast);
+		const auto* outerCall = as<ast::CallExpressionNode>(expr);
 		ASSERT_NE(outerCall, nullptr);
 
-		auto outerCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(outerCall->getCallee());
+		const auto* outerCallee = as<ast::IdentifierNode>(outerCall->getCallee().get());
 		ASSERT_NE(outerCallee, nullptr);
 		EXPECT_EQ(outerCallee->getIdentifier(), "outer");
 
 		ASSERT_EQ(outerCall->getArguments().size(), 1);
 
-		auto innerCall = std::dynamic_pointer_cast<ast::CallExpressionNode>(outerCall->getArguments()[0]);
+		const auto* innerCall = as<ast::CallExpressionNode>(outerCall->getArguments()[0].get());
 		ASSERT_NE(innerCall, nullptr);
 
-		auto innerCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(innerCall->getCallee());
+		const auto* innerCallee = as<ast::IdentifierNode>(innerCall->getCallee().get());
 		ASSERT_NE(innerCallee, nullptr);
 		EXPECT_EQ(innerCallee->getIdentifier(), "inner");
 	}
@@ -625,48 +694,51 @@ TEST(ParserExpressionTest, CallExpressions) {
 TEST(ParserExpressionTest, CastExpressions) {
 	// Test cast to int
 	{
-		auto expr = parseExpression("cast<int>(3.14)");
-		auto cast = std::dynamic_pointer_cast<ast::CastExpressionNode>(expr);
+		auto ast = parseExpression("cast<int>(3.14)");
+		const auto* expr = getExpressionNode(ast);
+		const auto* cast = as<ast::CastExpressionNode>(expr);
 		ASSERT_NE(cast, nullptr);
 
-		auto targetType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(cast->getTargetType());
+		const auto* targetType = as<ast::PrimitiveTypeNode>(cast->getTargetType().get());
 		ASSERT_NE(targetType, nullptr);
 		EXPECT_EQ(targetType->getKind(), ast::PrimitiveTypeNode::Kind::INT);
 
-		auto expression = std::dynamic_pointer_cast<ast::LiteralNode>(cast->getExpression());
+		const auto* expression = as<ast::LiteralNode>(cast->getExpression().get());
 		ASSERT_NE(expression, nullptr);
 		EXPECT_EQ(expression->getKind(), ast::LiteralNode::Kind::DOUBLE);
 	}
 
 	// Test cast to pointer
 	{
-		auto expr = parseExpression("cast<void*>(ptr)");
-		auto cast = std::dynamic_pointer_cast<ast::CastExpressionNode>(expr);
+		auto ast = parseExpression("cast<void*>(ptr)");
+		const auto* expr = getExpressionNode(ast);
+		const auto* cast = as<ast::CastExpressionNode>(expr);
 		ASSERT_NE(cast, nullptr);
 
-		auto targetType = std::dynamic_pointer_cast<ast::PointerTypeNode>(cast->getTargetType());
+		const auto* targetType = as<ast::PointerTypeNode>(cast->getTargetType().get());
 		ASSERT_NE(targetType, nullptr);
 
-		auto baseType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(targetType->getBaseType());
+		const auto* baseType = as<ast::PrimitiveTypeNode>(targetType->getBaseType().get());
 		ASSERT_NE(baseType, nullptr);
 		EXPECT_EQ(baseType->getKind(), ast::PrimitiveTypeNode::Kind::VOID);
 
-		auto expression = std::dynamic_pointer_cast<ast::IdentifierNode>(cast->getExpression());
+		const auto* expression = as<ast::IdentifierNode>(cast->getExpression().get());
 		ASSERT_NE(expression, nullptr);
 		EXPECT_EQ(expression->getIdentifier(), "ptr");
 	}
 
 	// Test cast with complex expression
 	{
-		auto expr = parseExpression("cast<int>(a + b)");
-		auto cast = std::dynamic_pointer_cast<ast::CastExpressionNode>(expr);
+		auto ast = parseExpression("cast<int>(a + b)");
+		const auto* expr = getExpressionNode(ast);
+		const auto* cast = as<ast::CastExpressionNode>(expr);
 		ASSERT_NE(cast, nullptr);
 
-		auto targetType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(cast->getTargetType());
+		const auto* targetType = as<ast::PrimitiveTypeNode>(cast->getTargetType().get());
 		ASSERT_NE(targetType, nullptr);
 		EXPECT_EQ(targetType->getKind(), ast::PrimitiveTypeNode::Kind::INT);
 
-		auto expression = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(cast->getExpression());
+		const auto* expression = as<ast::BinaryExpressionNode>(cast->getExpression().get());
 		ASSERT_NE(expression, nullptr);
 		EXPECT_EQ(expression->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 	}
@@ -681,13 +753,14 @@ TEST(ParserExpressionTest, CastExpressions) {
  * - EXPRS_TAIL -> , EXPR EXPRS_TAIL | ε
  */
 TEST(ParserExpressionTest, CommaExpressions) {
-	auto expr = parseExpression("a = 1, b = 2, c = 3");
-	auto comma = std::dynamic_pointer_cast<ast::CommaExpressionNode>(expr);
+	auto ast = parseExpression("a = 1, b = 2, c = 3");
+	const auto* expr = getExpressionNode(ast);
+	const auto* comma = as<ast::CommaExpressionNode>(expr);
 	ASSERT_NE(comma, nullptr);
 	EXPECT_EQ(comma->getExpressions().size(), 3);
 
 	for (size_t i = 0; i < 3; ++i) {
-		auto assignExpr = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(comma->getExpressions()[i]);
+		const auto* assignExpr = as<ast::BinaryExpressionNode>(comma->getExpressions()[i].get());
 		ASSERT_NE(assignExpr, nullptr);
 		EXPECT_EQ(assignExpr->getOperator(), ast::BinaryExpressionNode::Operator::ASSIGN);
 	}
@@ -700,72 +773,74 @@ TEST(ParserExpressionTest, CommaExpressions) {
 TEST(ParserExpressionTest, ComplexExpressions) {
 	// Test complex expression with function call, member access, and indexing
 	{
-		auto expr = parseExpression("getData()->items[getIndex()].value");
+		auto ast = parseExpression("getData()->items[getIndex()].value");
+		const auto* expr = getExpressionNode(ast);
 
 		// Should be a member access with DOT operator
-		auto member = std::dynamic_pointer_cast<ast::MemberExpressionNode>(expr);
+		const auto* member = as<ast::MemberExpressionNode>(expr);
 		ASSERT_NE(member, nullptr);
 		EXPECT_EQ(member->getKind(), ast::MemberExpressionNode::Kind::DOT);
 		EXPECT_EQ(member->getMember(), "value");
 
 		// Object should be an array indexing
-		auto index = std::dynamic_pointer_cast<ast::IndexExpressionNode>(member->getObject());
+		const auto* index = as<ast::IndexExpressionNode>(member->getObject().get());
 		ASSERT_NE(index, nullptr);
 
 		// Index expression should be a function call
-		auto indexExpr = std::dynamic_pointer_cast<ast::CallExpressionNode>(index->getIndex());
+		const auto* indexExpr = as<ast::CallExpressionNode>(index->getIndex().get());
 		ASSERT_NE(indexExpr, nullptr);
 
-		auto indexCallee = std::dynamic_pointer_cast<ast::IdentifierNode>(indexExpr->getCallee());
+		const auto* indexCallee = as<ast::IdentifierNode>(indexExpr->getCallee().get());
 		ASSERT_NE(indexCallee, nullptr);
 		EXPECT_EQ(indexCallee->getIdentifier(), "getIndex");
 
 		// Array should be a member access with ARROW operator
-		auto innerMember = std::dynamic_pointer_cast<ast::MemberExpressionNode>(index->getArray());
+		const auto* innerMember = as<ast::MemberExpressionNode>(index->getArray().get());
 		ASSERT_NE(innerMember, nullptr);
 		EXPECT_EQ(innerMember->getKind(), ast::MemberExpressionNode::Kind::ARROW);
 		EXPECT_EQ(innerMember->getMember(), "items");
 
 		// Object of arrow operator should be a function call
-		auto call = std::dynamic_pointer_cast<ast::CallExpressionNode>(innerMember->getObject());
+		const auto* call = as<ast::CallExpressionNode>(innerMember->getObject().get());
 		ASSERT_NE(call, nullptr);
 
-		auto callee = std::dynamic_pointer_cast<ast::IdentifierNode>(call->getCallee());
+		const auto* callee = as<ast::IdentifierNode>(call->getCallee().get());
 		ASSERT_NE(callee, nullptr);
 		EXPECT_EQ(callee->getIdentifier(), "getData");
 	}
 
 	// Test complex expression with arithmetic, logical, and comparison operators
 	{
-		auto expr = parseExpression("(a + b) * c > d && e || f == g");
+		auto ast = parseExpression("(a + b) * c > d && e || f == g");
+		const auto* expr = getExpressionNode(ast);
 
 		// Should be a logical OR expression
-		auto logicalOr = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(expr);
+		const auto* logicalOr = as<ast::BinaryExpressionNode>(expr);
 		ASSERT_NE(logicalOr, nullptr);
 		EXPECT_EQ(logicalOr->getOperator(), ast::BinaryExpressionNode::Operator::LOGICAL_OR);
 
 		// Left side should be a logical AND expression
-		auto logicalAnd = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(logicalOr->getLeft());
+		const auto* logicalAnd = as<ast::BinaryExpressionNode>(logicalOr->getLeft().get());
 		ASSERT_NE(logicalAnd, nullptr);
 		EXPECT_EQ(logicalAnd->getOperator(), ast::BinaryExpressionNode::Operator::LOGICAL_AND);
 
 		// Right side should be an equality comparison
-		auto equality = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(logicalOr->getRight());
+		const auto* equality = as<ast::BinaryExpressionNode>(logicalOr->getRight().get());
 		ASSERT_NE(equality, nullptr);
 		EXPECT_EQ(equality->getOperator(), ast::BinaryExpressionNode::Operator::EQUAL);
 
 		// Left side of logical AND should be a greater-than comparison
-		auto greaterThan = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(logicalAnd->getLeft());
+		const auto* greaterThan = as<ast::BinaryExpressionNode>(logicalAnd->getLeft().get());
 		ASSERT_NE(greaterThan, nullptr);
 		EXPECT_EQ(greaterThan->getOperator(), ast::BinaryExpressionNode::Operator::GREATER);
 
 		// Left side of greater-than should be a multiplication
-		auto multiply = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(greaterThan->getLeft());
+		const auto* multiply = as<ast::BinaryExpressionNode>(greaterThan->getLeft().get());
 		ASSERT_NE(multiply, nullptr);
 		EXPECT_EQ(multiply->getOperator(), ast::BinaryExpressionNode::Operator::MULTIPLY);
 
 		// Left side of multiplication should be an addition in parentheses
-		auto addition = std::dynamic_pointer_cast<ast::BinaryExpressionNode>(multiply->getLeft());
+		const auto* addition = as<ast::BinaryExpressionNode>(multiply->getLeft().get());
 		ASSERT_NE(addition, nullptr);
 		EXPECT_EQ(addition->getOperator(), ast::BinaryExpressionNode::Operator::ADD);
 	}
