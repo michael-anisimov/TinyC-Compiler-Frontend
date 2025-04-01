@@ -297,8 +297,6 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
-			endArray();
 		}
 		endArray();
 
@@ -433,7 +431,6 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
 		}
 		endArray();
 
@@ -486,7 +483,6 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
 		}
 		endArray();
 
@@ -517,7 +513,6 @@ namespace tinyc::ast {
 					json << "\n";
 				}
 			}
-
 		}
 		endArray();
 

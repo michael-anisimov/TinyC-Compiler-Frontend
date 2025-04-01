@@ -722,10 +722,10 @@ namespace tinyc::parser {
 			}
 
 			case lexer::TokenType::LPAREN: {
-				// Rule 168: F -> ( EXPR )
+				// Rule 168: F -> ( EXPRS )
 				consume();
 
-				ast::ASTNodePtr expr = parseExpr();
+				ast::ASTNodePtr expr = parseExprs();
 
 				expect(lexer::TokenType::RPAREN, "Expected ')' after expression");
 

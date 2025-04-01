@@ -1,5 +1,6 @@
 #include "tinyc/parser/Parser.h"
-
+#include <iostream>
+#include "tinyc/ast/visitors/JSONVisitor.h"
 
 namespace tinyc::parser {
 
@@ -437,7 +438,14 @@ namespace tinyc::parser {
 			case lexer::TokenType::KW_CHAR:
 			case lexer::TokenType::KW_VOID:
 				return parseVarDecls();
+			case lexer::TokenType::IDENTIFIER: {
+				// Check if the next token is also an identifier, like "Point p"
+				if (lexer.peekNextToken()->getType() == lexer::TokenType::IDENTIFIER){
+					return parseVarDecls();
+				}
+				else return parseExprs();
 
+			}
 			case lexer::TokenType::OP_PLUS:
 			case lexer::TokenType::OP_MINUS:
 			case lexer::TokenType::OP_NOT:
@@ -450,7 +458,7 @@ namespace tinyc::parser {
 			case lexer::TokenType::DOUBLE_LITERAL:
 			case lexer::TokenType::CHAR_LITERAL:
 			case lexer::TokenType::STRING_LITERAL:
-			case lexer::TokenType::IDENTIFIER:
+//			case lexer::TokenType::IDENTIFIER:
 			case lexer::TokenType::LPAREN:
 			case lexer::TokenType::KW_CAST:
 				return parseExprs();
@@ -463,7 +471,6 @@ namespace tinyc::parser {
 	ast::ASTNodePtr Parser::parseVarDecls() {
 		// Rule 62: VAR_DECLS -> VAR_DECL VAR_DECLS_TAIL
 		ast::ASTNodePtr decl = parseVarDecl();
-
 		std::vector<ast::ASTNodePtr> declarations = {decl};
 		declarations = parseVarDeclsTail(declarations);
 
@@ -522,7 +529,8 @@ namespace tinyc::parser {
 		// Rule 65: VAR_DECL -> TYPE identifier OPT_ARRAY_SIZE OPT_INIT
 		ast::ASTNodePtr type = parseType();
 
-		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable identifier");
+		auto identifierToken = expect(lexer::TokenType::IDENTIFIER,
+									  "Expected variable identifier");
 		std::string identifier = identifierToken->getLexeme();
 
 		// Parse optional array size

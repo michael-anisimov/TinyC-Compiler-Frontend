@@ -19,13 +19,13 @@ int main() {
     int b = 10;
 
     // Use generic swap for ints
-    swap_bytes(&a, &b, sizeof(int));
+    swap_bytes(&a, &b, 4);
 
     double x = 3.14;
     double y = 2.71;
 
     // Use same function for doubles
-    swap_bytes(&x, &y, sizeof(double));
+    swap_bytes(&x, &y, 8);
 
     return 0;
 }

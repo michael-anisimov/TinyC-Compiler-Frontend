@@ -19,10 +19,10 @@ void hello() {
 int main() {
     // Declare and assign function pointers
     BinaryOperation operation = add;
-    int result = operation(5, 3);  // Calls add(5, 3)
+    int result = operation(5, 3);
 
     operation = subtract;
-    result = operation(10, 4);  // Calls subtract(10, 4)
+    result = operation(10, 4);
 
     VoidFunction greet = hello;
     greet();

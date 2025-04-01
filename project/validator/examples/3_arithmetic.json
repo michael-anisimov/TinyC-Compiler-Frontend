@@ -461,7 +461,7 @@
               "initializer": {
                 "nodeType": "UnaryExpression",
                 "operator": "++",
-                "prefix": "true",
+                "prefix": true,
                 "operand": {
                   "nodeType": "Identifier",
                   "identifier": "a",
@@ -506,7 +506,7 @@
               "initializer": {
                 "nodeType": "UnaryExpression",
                 "operator": "--",
-                "prefix": "false",
+                "prefix": false,
                 "operand": {
                   "nodeType": "Identifier",
                   "identifier": "b",

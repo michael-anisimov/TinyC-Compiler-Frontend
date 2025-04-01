@@ -1,5 +1,5 @@
 #include "tinyc/parser/Parser.h"
-
+#include <iostream>
 
 namespace tinyc::parser {
 
@@ -18,13 +18,7 @@ namespace tinyc::parser {
 
 			case lexer::TokenType::IDENTIFIER: {
 				// Rule 74: TYPE -> TYPENAME STAR_SEQ
-				auto identifierToken = consume();
-				std::string name = identifierToken->getLexeme();
-
-				ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
-						name,
-						identifierToken->getLocation());
-
+				ast::ASTNodePtr namedType = parseNamedType();
 				parseStarSeq(namedType);
 				return namedType;
 			}
@@ -95,6 +89,22 @@ namespace tinyc::parser {
 		}
 	}
 
+
+	ast::ASTNodePtr Parser::parseNamedType() {
+		lexer::TokenPtr token = currentToken;
+
+		if (token->getType() != lexer::TokenType::IDENTIFIER) {
+			error("Expected identifier for named type");
+		}
+		auto identifierToken = consume();
+		std::string identifier = identifierToken->getLexeme();
+
+		ast::ASTNodePtr namedType = std::make_shared<ast::NamedTypeNode>(
+				identifier,
+				identifierToken->getLocation());
+
+		return namedType;
+	}
 
 	ast::ASTNodePtr Parser::parseBaseType() {
 		lexer::TokenPtr token = currentToken;

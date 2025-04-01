@@ -289,7 +289,7 @@
               "initializer": {
                 "nodeType": "UnaryExpression",
                 "operator": "!",
-                "prefix": "true",
+                "prefix": true,
                 "operand": {
                   "nodeType": "BinaryExpression",
                   "operator": "==",
@@ -723,7 +723,7 @@
               "initializer": {
                 "nodeType": "UnaryExpression",
                 "operator": "~",
-                "prefix": "true",
+                "prefix": true,
                 "operand": {
                   "nodeType": "Identifier",
                   "identifier": "a",

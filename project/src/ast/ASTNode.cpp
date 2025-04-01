@@ -266,7 +266,7 @@ namespace tinyc::ast {
 		return index;
 	}
 
-// MemberExpressionNode implementation
+	// MemberExpressionNode implementation
 	MemberExpressionNode::MemberExpressionNode(
 			Kind kind,
 			ASTNodePtr object,
@@ -287,7 +287,7 @@ namespace tinyc::ast {
 		return member;
 	}
 
-// CommaExpressionNode implementation
+	// CommaExpressionNode implementation
 	CommaExpressionNode::CommaExpressionNode(
 			std::vector<ASTNodePtr> expressions,
 			lexer::SourceLocation location
@@ -298,9 +298,9 @@ namespace tinyc::ast {
 		return expressions;
 	}
 
-/* ===== Statement Nodes ===== */
+	/* ===== Statement Nodes ===== */
 
-// BlockStatementNode implementation
+	// BlockStatementNode implementation
 	BlockStatementNode::BlockStatementNode(
 			std::vector<ASTNodePtr> statements,
 			lexer::SourceLocation location
@@ -311,7 +311,7 @@ namespace tinyc::ast {
 		return statements;
 	}
 
-// ExpressionStatementNode implementation
+	// ExpressionStatementNode implementation
 	ExpressionStatementNode::ExpressionStatementNode(
 			ASTNodePtr expression,
 			lexer::SourceLocation location
@@ -322,7 +322,7 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-// IfStatementNode implementation
+	// IfStatementNode implementation
 	IfStatementNode::IfStatementNode(
 			ASTNodePtr condition,
 			ASTNodePtr thenBranch,
@@ -562,7 +562,7 @@ namespace tinyc::ast {
 	}
 
 	// ProgramNode implementation
-	ProgramNode::ProgramNode() : ASTNode(lexer::SourceLocation("<unknown>", 1, 1)) {
+	ProgramNode::ProgramNode(std::string sourceName) : ASTNode(lexer::SourceLocation(sourceName, 0, 0)) {
 	}
 
 	void ProgramNode::addDeclaration(const ASTNodePtr &declaration) {
@@ -572,14 +572,5 @@ namespace tinyc::ast {
 	const std::vector<ASTNodePtr> &ProgramNode::getDeclarations() const {
 		return declarations;
 	}
-
-//	lexer::SourceLocation ProgramNode::getLocation() const {
-//		// Override to handle the special case for ProgramNode
-//		if (!declarations.empty()) {
-//			// Use the location of the first declaration
-//			return declarations[0]->getLocation();
-//		}
-//		return ASTNode::getLocation();
-//	}
 
 } // namespace tinyc::ast

@@ -323,7 +323,7 @@
               "initializer": {
                 "nodeType": "UnaryExpression",
                 "operator": "&",
-                "prefix": "true",
+                "prefix": true,
                 "operand": {
                   "nodeType": "Identifier",
                   "identifier": "b",
@@ -359,7 +359,7 @@
               "left": {
                 "nodeType": "UnaryExpression",
                 "operator": "*",
-                "prefix": "true",
+                "prefix": true,
                 "operand": {
                   "nodeType": "Identifier",
                   "identifier": "ptr",

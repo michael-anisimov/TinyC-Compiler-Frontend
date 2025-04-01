@@ -26,14 +26,14 @@ namespace tinyc::parser {
 		}
 	}
 
-	ast::ASTNodePtr Parser::parseVoidDeclTail() {
+	ast::ASTNodePtr Parser::parseVoidDeclTail(const lexer::SourceLocation &voidLocation) {
 		// Rule 9: VOID_DECL_TAIL -> identifier FUNCTION_DECLARATION_TAIL
 		// Rule 10: VOID_DECL_TAIL -> STAR_PLUS identifier FUNC_OR_VAR_TAIL
 
 		// Create void type
 		ast::ASTNodePtr voidType = std::make_shared<ast::PrimitiveTypeNode>(
 				ast::PrimitiveTypeNode::Kind::VOID,
-				currentToken->getLocation());
+				voidLocation);
 
 		if (check(lexer::TokenType::IDENTIFIER)) {
 			// Rule 9: identifier FUNCTION_DECLARATION_TAIL
