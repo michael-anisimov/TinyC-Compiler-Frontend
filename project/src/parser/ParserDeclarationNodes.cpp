@@ -80,7 +80,7 @@ namespace tinyc::parser {
 			const ast::ASTNodePtr &type,
 			const std::string &identifier,
 			const lexer::SourceLocation &location) {
-		// Rule 13: VARIABLE_TAIL -> OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS ;
+		// Rule 13: VARIABLE_TAIL -> OPT_ARRAY_SIZE OPT_INIT VAR_DECLS_TAIL ;
 
 		// Parse optional array size
 		ast::ASTNodePtr arraySize = parseOptArraySize();
@@ -98,8 +98,7 @@ namespace tinyc::parser {
 
 		// If there are more variables, collect them all
 		std::vector<ast::ASTNodePtr> declarations = {varDecl};
-		parseMoreGlobalVars(declarations, type);
-
+		parseVarDeclsTail(declarations);
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after variable declaration");
 
 		// If only one variable, return it directly
@@ -107,10 +106,9 @@ namespace tinyc::parser {
 			return declarations[0];
 		}
 
-		// Otherwise, return a list of declarations
-		// We could create a special node for this, but for simplicity
-		// we'll just return the first one for now
-		return declarations[0];
+		return std::make_shared<ast::MultipleDeclarationNode>(
+				declarations,
+				location);
 	}
 
 	ast::ASTNodePtr Parser::parseFunctionDeclarationTail(
@@ -149,38 +147,6 @@ namespace tinyc::parser {
 		} else {
 			error("Expected '{' or ';' after function declaration");
 		}
-	}
-
-	void Parser::parseMoreGlobalVars(
-			std::vector<ast::ASTNodePtr> &declarations,
-			const ast::ASTNodePtr &type) {
-		// Rule 17: MORE_GLOBAL_VARS -> , identifier OPT_ARRAY_SIZE OPT_INIT MORE_GLOBAL_VARS
-		// Rule 18: MORE_GLOBAL_VARS -> ε
-		if (match(lexer::TokenType::COMMA)) {
-			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected variable identifier");
-			std::string identifier = identifierToken->getLexeme();
-
-			// Parse optional array size
-			ast::ASTNodePtr arraySize = parseOptArraySize();
-
-			// Parse optional initializer
-			ast::ASTNodePtr initializer = parseOptInit();
-
-			// Create variable declaration node
-			auto varDecl = std::make_shared<ast::VariableNode>(
-					identifier,
-					type,
-					identifierToken->getLocation(),
-					arraySize,
-					initializer);
-
-			declarations.push_back(varDecl);
-
-			// Parse more global variables if any
-			parseMoreGlobalVars(declarations, type);
-		}
-
-		// If no comma, we're done (Rule 18)
 	}
 
 	std::vector<ast::ASTNodePtr> Parser::parseOptFunArgs() {

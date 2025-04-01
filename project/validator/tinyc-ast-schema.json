@@ -586,6 +586,9 @@
                   "$ref": "#/definitions/Declaration"
                 },
                 {
+                  "$ref": "#/definitions/MultipleDeclaration"
+                },
+                {
                   "type": "null"
                 }
               ],
@@ -802,6 +805,32 @@
         }
       ]
     },
+    "MultipleDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "MultipleDeclaration"
+              ]
+            },
+            "declarations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VariableDeclaration"
+              },
+              "description": "List of variable declarations that share the same statement"
+            }
+          },
+          "required": [
+            "declarations"
+          ]
+        }
+      ]
+    },
     "Parameter": {
       "allOf": [
         {
@@ -972,6 +1001,9 @@
           },
           {
             "$ref": "#/definitions/FunctionPointerDeclaration"
+          },
+          {
+            "$ref": "#/definitions/MultipleDeclaration"
           }
         ]
       },

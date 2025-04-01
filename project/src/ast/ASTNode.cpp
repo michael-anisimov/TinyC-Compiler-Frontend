@@ -234,7 +234,7 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-// CallExpressionNode implementation
+	// CallExpressionNode implementation
 	CallExpressionNode::CallExpressionNode(
 			ASTNodePtr callee,
 			std::vector<ASTNodePtr> arguments,
@@ -350,7 +350,7 @@ namespace tinyc::ast {
 		return elseBranch;
 	}
 
-// WhileStatementNode implementation
+	// WhileStatementNode implementation
 	WhileStatementNode::WhileStatementNode(
 			ASTNodePtr condition,
 			ASTNodePtr body,
@@ -366,7 +366,7 @@ namespace tinyc::ast {
 		return body;
 	}
 
-// DoWhileStatementNode implementation
+	// DoWhileStatementNode implementation
 	DoWhileStatementNode::DoWhileStatementNode(
 			ASTNodePtr body,
 			ASTNodePtr condition,
@@ -382,7 +382,7 @@ namespace tinyc::ast {
 		return condition;
 	}
 
-// ForStatementNode implementation
+	// ForStatementNode implementation
 	ForStatementNode::ForStatementNode(
 			ASTNodePtr initialization,
 			ASTNodePtr condition,
@@ -424,7 +424,7 @@ namespace tinyc::ast {
 		return body;
 	}
 
-// SwitchStatementNode implementation
+	// SwitchStatementNode implementation
 	SwitchStatementNode::SwitchStatementNode(
 			ASTNodePtr expression,
 			std::vector<Case> cases,
@@ -440,7 +440,7 @@ namespace tinyc::ast {
 		return cases;
 	}
 
-// ReturnStatementNode implementation
+	// ReturnStatementNode implementation
 	ReturnStatementNode::ReturnStatementNode(
 			ASTNodePtr expression,
 			lexer::SourceLocation location
@@ -455,9 +455,9 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-/* ===== Declaration Nodes ===== */
+	/* ===== Declaration Nodes ===== */
 
-// VariableNode implementation
+	// VariableNode implementation
 	const ASTNodePtr &VariableNode::getType() const {
 		return type;
 	}
@@ -478,12 +478,17 @@ namespace tinyc::ast {
 		return initializer;
 	}
 
-// ParameterNode implementation
+	// MultipleDeclarationNode implementation
+	const std::vector<ASTNodePtr> &MultipleDeclarationNode::getDeclarations() const {
+		return declarations;
+	}
+
+	// ParameterNode implementation
 	const ASTNodePtr &ParameterNode::getType() const {
 		return type;
 	}
 
-// FunctionDeclarationNode implementation
+	// FunctionDeclarationNode implementation
 	FunctionDeclarationNode::FunctionDeclarationNode(
 			ASTNodePtr returnType,
 			std::string identifier,
@@ -517,7 +522,7 @@ namespace tinyc::ast {
 		return body;
 	}
 
-// StructDeclarationNode implementation
+	// StructDeclarationNode implementation
 	StructDeclarationNode::StructDeclarationNode(
 			std::string identifier,
 			std::vector<ASTNodePtr> fields,
@@ -537,7 +542,7 @@ namespace tinyc::ast {
 		return fields;
 	}
 
-// FunctionPointerDeclarationNode implementation
+	// FunctionPointerDeclarationNode implementation
 	FunctionPointerDeclarationNode::FunctionPointerDeclarationNode(
 			ASTNodePtr returnType,
 			std::string identifier,
@@ -572,5 +577,4 @@ namespace tinyc::ast {
 	const std::vector<ASTNodePtr> &ProgramNode::getDeclarations() const {
 		return declarations;
 	}
-
 } // namespace tinyc::ast

@@ -194,6 +194,35 @@ namespace tinyc::ast {
 		endObject();
 	}
 
+	void JSONVisitor::visit(const MultipleDeclarationNode& node) {
+		startObject();
+
+		addField("nodeType", "MultipleDeclaration");
+
+		// Process declarations
+		startArray("declarations");
+		if (!node.getDeclarations().empty()) {
+			for (size_t i = 0; i < node.getDeclarations().size(); ++i) {
+				if (prettyPrint) {
+					json << getIndent();
+				}
+				node.getDeclarations()[i]->accept(*this);
+				if (i < node.getDeclarations().size() - 1) {
+					json << ",";
+				}
+				if (prettyPrint) {
+					json << "\n";
+				}
+			}
+		}
+		endArray();
+
+		addLocationField(node.getLocation());
+
+		endObject();
+	}
+
+
 	void JSONVisitor::visit(const ParameterNode &node) {
 		startObject();
 

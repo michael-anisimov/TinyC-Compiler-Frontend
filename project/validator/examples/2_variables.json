@@ -398,6 +398,108 @@
             }
           },
           {
+            "nodeType": "ExpressionStatement",
+            "expression": {
+              "nodeType": "MultipleDeclaration",
+              "declarations": [
+                {
+                  "nodeType": "VariableDeclaration",
+                  "identifier": "x",
+                  "type": {
+                    "nodeType": "PrimitiveType",
+                    "kind": "int",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 5
+                    }
+                  },
+                  "initializer": {
+                    "nodeType": "Literal",
+                    "kind": "integer",
+                    "value": "1",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 13
+                    }
+                  },
+                  "location": {
+                    "filename": "../examples/2_variables.tc",
+                    "line": 18,
+                    "column": 9
+                  }
+                },
+                {
+                  "nodeType": "VariableDeclaration",
+                  "identifier": "y",
+                  "type": {
+                    "nodeType": "PrimitiveType",
+                    "kind": "int",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 16
+                    }
+                  },
+                  "initializer": {
+                    "nodeType": "Literal",
+                    "kind": "integer",
+                    "value": "2",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 24
+                    }
+                  },
+                  "location": {
+                    "filename": "../examples/2_variables.tc",
+                    "line": 18,
+                    "column": 20
+                  }
+                },
+                {
+                  "nodeType": "VariableDeclaration",
+                  "identifier": "z",
+                  "type": {
+                    "nodeType": "PrimitiveType",
+                    "kind": "int",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 27
+                    }
+                  },
+                  "initializer": {
+                    "nodeType": "Literal",
+                    "kind": "integer",
+                    "value": "3",
+                    "location": {
+                      "filename": "../examples/2_variables.tc",
+                      "line": 18,
+                      "column": 35
+                    }
+                  },
+                  "location": {
+                    "filename": "../examples/2_variables.tc",
+                    "line": 18,
+                    "column": 31
+                  }
+                }
+              ],
+              "location": {
+                "filename": "../examples/2_variables.tc",
+                "line": 18,
+                "column": 9
+              }
+            },
+            "location": {
+              "filename": "../examples/2_variables.tc",
+              "line": 18,
+              "column": 9
+            }
+          },
+          {
             "nodeType": "ReturnStatement",
             "expression": {
               "nodeType": "Literal",
@@ -405,13 +507,13 @@
               "value": "0",
               "location": {
                 "filename": "../examples/2_variables.tc",
-                "line": 18,
+                "line": 20,
                 "column": 12
               }
             },
             "location": {
               "filename": "../examples/2_variables.tc",
-              "line": 18,
+              "line": 20,
               "column": 5
             }
           }

@@ -25,7 +25,7 @@ namespace tinyc::ast {
 		decreaseIndent();
 	}
 
-// Program node
+	// Program node
 	void DumpVisitor::visit(const ProgramNode &node) {
 		os << getIndent() << "Program" << std::endl;
 
@@ -34,7 +34,7 @@ namespace tinyc::ast {
 		}
 	}
 
-// Declaration nodes
+	// Declaration nodes
 	void DumpVisitor::visit(const VariableNode &node) {
 		os << getIndent() << "VariableDeclaration: " << node.getIdentifier() << std::endl;
 
@@ -49,6 +49,14 @@ namespace tinyc::ast {
 		if (node.hasInitializer()) {
 			os << getIndent() << "  Initializer:" << std::endl;
 			dumpChild(*node.getInitializer());
+		}
+	}
+
+	void DumpVisitor::visit(const MultipleDeclarationNode& node) {
+		os << getIndent() << "MultipleDeclaration:" << std::endl;
+
+		for (const auto& decl : node.getDeclarations()) {
+			dumpChild(*decl);
 		}
 	}
 
@@ -105,7 +113,7 @@ namespace tinyc::ast {
 		}
 	}
 
-// Type nodes
+	// Type nodes
 	void DumpVisitor::visit(const PrimitiveTypeNode &node) {
 		os << getIndent() << "PrimitiveType: " << node.getKindString() << std::endl;
 	}
@@ -119,7 +127,7 @@ namespace tinyc::ast {
 		dumpChild(*node.getBaseType());
 	}
 
-// Expression nodes
+	// Expression nodes
 	void DumpVisitor::visit(const LiteralNode &node) {
 		os << getIndent() << "Literal (" << node.getKindString() << "): "
 		   << node.getValue() << std::endl;

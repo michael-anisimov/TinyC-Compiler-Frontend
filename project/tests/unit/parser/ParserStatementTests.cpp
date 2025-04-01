@@ -91,7 +91,10 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test simple variable declaration
 	{
 		auto stmt = parseStatement("int x;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
+		auto exprStmt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(stmt);
+		ASSERT_NE(exprStmt, nullptr);
+
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(exprStmt->getExpression());
 		ASSERT_NE(varDecl, nullptr);
 		EXPECT_EQ(varDecl->getIdentifier(), "x");
 
@@ -105,7 +108,10 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test variable declaration with initializer
 	{
 		auto stmt = parseStatement("double pi = 3.14159;");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
+		auto exprStmt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(stmt);
+		ASSERT_NE(exprStmt, nullptr);
+
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(exprStmt->getExpression());
 		ASSERT_NE(varDecl, nullptr);
 		EXPECT_EQ(varDecl->getIdentifier(), "pi");
 
@@ -122,7 +128,10 @@ TEST(ParserStatementTest, VariableDeclaration) {
 	// Test array declaration
 	{
 		auto stmt = parseStatement("int numbers[10];");
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
+		auto exprStmt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(stmt);
+		ASSERT_NE(exprStmt, nullptr);
+
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(exprStmt->getExpression());
 		ASSERT_NE(varDecl, nullptr);
 		EXPECT_EQ(varDecl->getIdentifier(), "numbers");
 
@@ -139,22 +148,44 @@ TEST(ParserStatementTest, VariableDeclaration) {
 
 	// Test multiple variable declarations
 	{
-		auto stmt = parseStatement("int a = 1, b = 2, c = 3;");
+		auto stmt = parseStatement("int a = 1, int b = 2, int c = 3;");
 
-		// In the current implementation, the first variable is returned
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(stmt);
-		ASSERT_NE(varDecl, nullptr);
-		EXPECT_EQ(varDecl->getIdentifier(), "a");
+		auto exprStmt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(stmt);
+		ASSERT_NE(exprStmt, nullptr);
 
-		auto type = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(varDecl->getType());
-		ASSERT_NE(type, nullptr);
-		EXPECT_EQ(type->getKind(), ast::PrimitiveTypeNode::Kind::INT);
+		auto multiDecl = std::dynamic_pointer_cast<ast::MultipleDeclarationNode>(exprStmt->getExpression());
+		ASSERT_NE(multiDecl, nullptr);
 
-		EXPECT_TRUE(varDecl->hasInitializer());
-		auto initializer = std::dynamic_pointer_cast<ast::LiteralNode>(varDecl->getInitializer());
-		ASSERT_NE(initializer, nullptr);
-		EXPECT_EQ(initializer->getKind(), ast::LiteralNode::Kind::INTEGER);
-		EXPECT_EQ(initializer->getValue(), "1");
+		// Get the declarations from the multiple declaration node
+		const auto& declarations = multiDecl->getDeclarations();
+		ASSERT_EQ(declarations.size(), 3);
+
+		// Check the first variable
+		auto firstVar = std::dynamic_pointer_cast<ast::VariableNode>(declarations[0]);
+		ASSERT_NE(firstVar, nullptr);
+		EXPECT_EQ(firstVar->getIdentifier(), "a");
+
+		auto firstType = std::dynamic_pointer_cast<ast::PrimitiveTypeNode>(firstVar->getType());
+		ASSERT_NE(firstType, nullptr);
+		EXPECT_EQ(firstType->getKind(), ast::PrimitiveTypeNode::Kind::INT);
+
+		EXPECT_TRUE(firstVar->hasInitializer());
+		auto firstInit = std::dynamic_pointer_cast<ast::LiteralNode>(firstVar->getInitializer());
+		ASSERT_NE(firstInit, nullptr);
+		EXPECT_EQ(firstInit->getKind(), ast::LiteralNode::Kind::INTEGER);
+		EXPECT_EQ(firstInit->getValue(), "1");
+
+		// Check the second variable
+		auto secondVar = std::dynamic_pointer_cast<ast::VariableNode>(declarations[1]);
+		ASSERT_NE(secondVar, nullptr);
+		EXPECT_EQ(secondVar->getIdentifier(), "b");
+		EXPECT_TRUE(secondVar->hasInitializer());
+
+		// Check the third variable
+		auto thirdVar = std::dynamic_pointer_cast<ast::VariableNode>(declarations[2]);
+		ASSERT_NE(thirdVar, nullptr);
+		EXPECT_EQ(thirdVar->getIdentifier(), "c");
+		EXPECT_TRUE(thirdVar->hasInitializer());
 	}
 }
 
@@ -182,13 +213,18 @@ TEST(ParserStatementTest, BlockStatement) {
 		ASSERT_NE(block, nullptr);
 		ASSERT_EQ(block->getStatements().size(), 3);
 
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(block->getStatements()[0]);
+		auto exprStmt0 = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(block->getStatements()[0]);
+		ASSERT_NE(exprStmt0, nullptr);
+
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(exprStmt0->getExpression());
 		ASSERT_NE(varDecl, nullptr);
 		EXPECT_EQ(varDecl->getIdentifier(), "x");
 
+		// Second statement is an assignment expression
 		auto exprStmt1 = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(block->getStatements()[1]);
 		ASSERT_NE(exprStmt1, nullptr);
 
+		// Third statement is a function call
 		auto exprStmt2 = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(block->getStatements()[2]);
 		ASSERT_NE(exprStmt2, nullptr);
 	}
@@ -204,7 +240,10 @@ TEST(ParserStatementTest, BlockStatement) {
 		ASSERT_NE(innerBlock, nullptr);
 		ASSERT_EQ(innerBlock->getStatements().size(), 1);
 
-		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(innerBlock->getStatements()[0]);
+		auto exprStmnt = std::dynamic_pointer_cast<ast::ExpressionStatementNode>(innerBlock->getStatements()[0]);
+		ASSERT_NE(exprStmnt, nullptr);
+
+		auto varDecl = std::dynamic_pointer_cast<ast::VariableNode>(exprStmnt->getExpression());
 		ASSERT_NE(varDecl, nullptr);
 		EXPECT_EQ(varDecl->getIdentifier(), "y");
 	}
