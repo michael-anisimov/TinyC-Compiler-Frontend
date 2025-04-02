@@ -158,7 +158,9 @@ namespace tinyc::parser {
 			case lexer::TokenType::KW_VOID:
 			case lexer::TokenType::KW_INT:
 			case lexer::TokenType::KW_DOUBLE:
-			case lexer::TokenType::KW_CHAR: {
+			case lexer::TokenType::KW_CHAR:
+			case lexer::TokenType::IDENTIFIER:
+			{
 				ast::ASTNodePtr arg = parseFunArg();
 				std::vector<ast::ASTNodePtr> args;
 				args.push_back(std::move(arg));

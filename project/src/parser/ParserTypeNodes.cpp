@@ -23,22 +23,23 @@ namespace tinyc::parser {
 				return namedType;
 			}
 
-			case lexer::TokenType::KW_STRUCT: {
-				// Handle "struct Name" as a type
-				auto structToken = consume(); // Consume "struct"
-				auto nameToken = expect(lexer::TokenType::IDENTIFIER, "Expected struct name after 'struct'");
-				std::string identifier = nameToken->getLexeme();
-
-				// Create a named type node that represents a struct type
-				// We can use a special format like "struct:Name" or just use the name directly
-				// For simplicity, we'll use "struct:Name" to distinguish from regular named types
-				ast::ASTNodePtr structType = std::make_unique<ast::NamedTypeNode>(
-						"struct:" + identifier,
-						structToken->getLocation());
-
-				parseStarSeq(structType);
-				return structType;
-			}
+			// For now I will not suppport types as "struct Name"
+//			case lexer::TokenType::KW_STRUCT: {
+//				// Handle "struct Name" as a type
+//				auto structToken = consume(); // Consume "struct"
+//				auto nameToken = expect(lexer::TokenType::IDENTIFIER, "Expected struct name after 'struct'");
+//				std::string identifier = nameToken->getLexeme();
+//
+//				// Create a named type node that represents a struct type
+//				// We can use a special format like "struct:Name" or just use the name directly
+//				// For simplicity, we'll use "struct:Name" to distinguish from regular named types
+//				ast::ASTNodePtr structType = std::make_unique<ast::NamedTypeNode>(
+//						"struct:" + identifier,
+//						structToken->getLocation());
+//
+//				parseStarSeq(structType);
+//				return structType;
+//			}
 
 			case lexer::TokenType::KW_VOID: {
 				// Rule 75: TYPE -> void STAR_PLUS

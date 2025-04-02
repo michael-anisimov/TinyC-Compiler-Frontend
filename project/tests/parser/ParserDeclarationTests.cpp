@@ -367,7 +367,7 @@ TEST(ParserDeclarationTest, StructDeclarations) {
 
 	// Test struct with complex fields
 	{
-		auto ast = parseDeclaration("struct LinkedList { int value; struct LinkedList* next; };");
+		auto ast = parseDeclaration("struct LinkedList { int value; LinkedList* next; };");
 		const auto* decl = getFirstDeclaration(ast);
 		const auto* structDecl = as<ast::StructDeclarationNode>(decl);
 		ASSERT_NE(structDecl, nullptr);

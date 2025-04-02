@@ -417,6 +417,7 @@ namespace tinyc::parser {
 		auto expr = parseExprOrVarDecl();
 		expect(lexer::TokenType::SEMICOLON, "Expected ';' after expression");
 
+		// Not possible for now, as the hierarchy is flat
 		// If the expression is already a statement or a declaration, return it directly
 //		if (dynamic_cast<ast::StatementNode *>(expr.get()) ||
 //			dynamic_cast<ast::DeclarationNode *>(expr.get())) {

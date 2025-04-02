@@ -11,8 +11,8 @@ struct Rectangle;
 
 // Struct definition with a previously forward-declared type
 struct Rectangle {
-    struct Point top_left;
-    struct Point bottom_right;
+    Point top_left;
+    Point bottom_right;
 };
 
 int main() {

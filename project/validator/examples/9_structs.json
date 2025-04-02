@@ -68,7 +68,7 @@
           "identifier": "top_left",
           "type": {
             "nodeType": "NamedType",
-            "identifier": "struct:Point",
+            "identifier": "Point",
             "location": {
               "filename": "../examples/9_structs.tc",
               "line": 14,
@@ -78,7 +78,7 @@
           "location": {
             "filename": "../examples/9_structs.tc",
             "line": 14,
-            "column": 18
+            "column": 11
           }
         },
         {
@@ -86,7 +86,7 @@
           "identifier": "bottom_right",
           "type": {
             "nodeType": "NamedType",
-            "identifier": "struct:Point",
+            "identifier": "Point",
             "location": {
               "filename": "../examples/9_structs.tc",
               "line": 15,
@@ -96,7 +96,7 @@
           "location": {
             "filename": "../examples/9_structs.tc",
             "line": 15,
-            "column": 18
+            "column": 11
           }
         }
       ],
