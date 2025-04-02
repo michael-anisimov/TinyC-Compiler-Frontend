@@ -1,0 +1,12 @@
+{
+  "nodeType": "ErrorProgram",
+  "errorType": "lexer",
+  "message": "../examples/17_lexer_error.tc:6:20: Unterminated character literal",
+  "declarations": [
+  ],
+  "location": {
+    "filename": "../examples/17_lexer_error.tc",
+    "line": 6,
+    "column": 20
+  }
+}
