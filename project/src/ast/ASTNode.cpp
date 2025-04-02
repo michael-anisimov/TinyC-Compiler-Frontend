@@ -4,16 +4,16 @@
 
 namespace tinyc::ast {
 
-	// ASTNode implementation
+// ASTNode implementation
 	ASTNode::ASTNode(lexer::SourceLocation location) : location(std::move(location)) {}
 
 	[[nodiscard]] lexer::SourceLocation ASTNode::getLocation() const {
 		return location;
 	}
 
-	/* ===== Type Nodes ===== */
+/* ===== Type Nodes ===== */
 
-	// PrimitiveTypeNode implementation
+// PrimitiveTypeNode implementation
 	PrimitiveTypeNode::PrimitiveTypeNode(Kind kind, lexer::SourceLocation location)
 			: ASTNode(std::move(location)), kind(kind) {
 	}
@@ -37,7 +37,7 @@ namespace tinyc::ast {
 		}
 	}
 
-	// NamedTypeNode implementation
+// NamedTypeNode implementation
 	NamedTypeNode::NamedTypeNode(std::string identifier, lexer::SourceLocation location)
 			: ASTNode(std::move(location)), identifier(std::move(identifier)) {
 	}
@@ -46,7 +46,7 @@ namespace tinyc::ast {
 		return identifier;
 	}
 
-	// PointerTypeNode implementation
+// PointerTypeNode implementation
 	PointerTypeNode::PointerTypeNode(ASTNodePtr baseType, lexer::SourceLocation location)
 			: ASTNode(std::move(location)), baseType(std::move(baseType)) {
 	}
@@ -55,9 +55,9 @@ namespace tinyc::ast {
 		return baseType;
 	}
 
-	/* ===== Expression Nodes ===== */
+/* ===== Expression Nodes ===== */
 
-	// LiteralNode implementation
+// LiteralNode implementation
 	LiteralNode::LiteralNode(std::string value, Kind kind, lexer::SourceLocation location)
 			: ASTNode(std::move(location)), kind(kind), value(std::move(value)) {
 	}
@@ -85,7 +85,7 @@ namespace tinyc::ast {
 		}
 	}
 
-	// IdentifierNode implementation
+// IdentifierNode implementation
 	IdentifierNode::IdentifierNode(std::string identifier, lexer::SourceLocation location)
 			: ASTNode(std::move(location)), identifier(std::move(identifier)) {
 	}
@@ -94,7 +94,7 @@ namespace tinyc::ast {
 		return identifier;
 	}
 
-	// BinaryExpressionNode implementation
+// BinaryExpressionNode implementation
 	BinaryExpressionNode::BinaryExpressionNode(
 			Operator op,
 			ASTNodePtr left,
@@ -158,7 +158,7 @@ namespace tinyc::ast {
 		return right;
 	}
 
-	// UnaryExpressionNode implementation
+// UnaryExpressionNode implementation
 	UnaryExpressionNode::UnaryExpressionNode(
 			Operator op,
 			ASTNodePtr operand,
@@ -220,7 +220,7 @@ namespace tinyc::ast {
 		return operand;
 	}
 
-	// CastExpressionNode implementation
+// CastExpressionNode implementation
 	CastExpressionNode::CastExpressionNode(
 			ASTNodePtr targetType,
 			ASTNodePtr expression,
@@ -236,7 +236,7 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-	// CallExpressionNode implementation
+// CallExpressionNode implementation
 	CallExpressionNode::CallExpressionNode(
 			ASTNodePtr callee,
 			std::vector<ASTNodePtr> arguments,
@@ -252,7 +252,7 @@ namespace tinyc::ast {
 		return arguments;
 	}
 
-	// IndexExpressionNode implementation
+// IndexExpressionNode implementation
 	IndexExpressionNode::IndexExpressionNode(
 			ASTNodePtr array,
 			ASTNodePtr index,
@@ -268,7 +268,7 @@ namespace tinyc::ast {
 		return index;
 	}
 
-	// MemberExpressionNode implementation
+// MemberExpressionNode implementation
 	MemberExpressionNode::MemberExpressionNode(
 			Kind kind,
 			ASTNodePtr object,
@@ -289,7 +289,7 @@ namespace tinyc::ast {
 		return member;
 	}
 
-	// CommaExpressionNode implementation
+// CommaExpressionNode implementation
 	CommaExpressionNode::CommaExpressionNode(
 			std::vector<ASTNodePtr> expressions,
 			lexer::SourceLocation location
@@ -300,9 +300,9 @@ namespace tinyc::ast {
 		return expressions;
 	}
 
-	/* ===== Statement Nodes ===== */
+/* ===== Statement Nodes ===== */
 
-	// BlockStatementNode implementation
+// BlockStatementNode implementation
 	BlockStatementNode::BlockStatementNode(
 			std::vector<ASTNodePtr> statements,
 			lexer::SourceLocation location
@@ -313,7 +313,7 @@ namespace tinyc::ast {
 		return statements;
 	}
 
-	// ExpressionStatementNode implementation
+// ExpressionStatementNode implementation
 	ExpressionStatementNode::ExpressionStatementNode(
 			ASTNodePtr expression,
 			lexer::SourceLocation location
@@ -324,7 +324,7 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-	// IfStatementNode implementation
+// IfStatementNode implementation
 	IfStatementNode::IfStatementNode(
 			ASTNodePtr condition,
 			ASTNodePtr thenBranch,
@@ -352,7 +352,7 @@ namespace tinyc::ast {
 		return elseBranch;
 	}
 
-	// WhileStatementNode implementation
+// WhileStatementNode implementation
 	WhileStatementNode::WhileStatementNode(
 			ASTNodePtr condition,
 			ASTNodePtr body,
@@ -368,7 +368,7 @@ namespace tinyc::ast {
 		return body;
 	}
 
-	// DoWhileStatementNode implementation
+// DoWhileStatementNode implementation
 	DoWhileStatementNode::DoWhileStatementNode(
 			ASTNodePtr body,
 			ASTNodePtr condition,
@@ -384,7 +384,7 @@ namespace tinyc::ast {
 		return condition;
 	}
 
-	// ForStatementNode implementation
+// ForStatementNode implementation
 	ForStatementNode::ForStatementNode(
 			ASTNodePtr initialization,
 			ASTNodePtr condition,
@@ -426,7 +426,7 @@ namespace tinyc::ast {
 		return body;
 	}
 
-	// SwitchStatementNode implementation
+// SwitchStatementNode implementation
 	SwitchStatementNode::SwitchStatementNode(
 			ASTNodePtr expression,
 			std::vector<Case> cases,
@@ -442,7 +442,17 @@ namespace tinyc::ast {
 		return cases;
 	}
 
-	// ReturnStatementNode implementation
+// BreakStatementNode implementation
+	BreakStatementNode::BreakStatementNode(lexer::SourceLocation location)
+			: ASTNode(std::move(location)) {
+	}
+
+// ContinueStatementNode implementation
+	ContinueStatementNode::ContinueStatementNode(lexer::SourceLocation location)
+			: ASTNode(std::move(location)) {
+	}
+
+// ReturnStatementNode implementation
 	ReturnStatementNode::ReturnStatementNode(
 			ASTNodePtr expression,
 			lexer::SourceLocation location
@@ -457,9 +467,26 @@ namespace tinyc::ast {
 		return expression;
 	}
 
-	/* ===== Declaration Nodes ===== */
+/* ===== Declaration Nodes ===== */
 
-	// VariableNode implementation
+// VariableNode implementation
+	VariableNode::VariableNode(
+			std::string identifier,
+			ASTNodePtr type,
+			lexer::SourceLocation location,
+			ASTNodePtr arraySize,
+			ASTNodePtr initializer)
+			: ASTNode(std::move(location)),
+			  identifier(std::move(identifier)),
+			  type(std::move(type)),
+			  arraySize(std::move(arraySize)),
+			  initializer(std::move(initializer)) {
+	}
+
+	const std::string &VariableNode::getIdentifier() const {
+		return identifier;
+	}
+
 	const ASTNodePtr &VariableNode::getType() const {
 		return type;
 	}
@@ -480,28 +507,47 @@ namespace tinyc::ast {
 		return initializer;
 	}
 
-	// MultipleDeclarationNode implementation
+// MultipleDeclarationNode implementation
+	MultipleDeclarationNode::MultipleDeclarationNode(
+			std::vector<ASTNodePtr> declarations,
+			lexer::SourceLocation location)
+			: ASTNode(std::move(location)), declarations(std::move(declarations)) {
+	}
+
 	const std::vector<ASTNodePtr> &MultipleDeclarationNode::getDeclarations() const {
 		return declarations;
 	}
 
-	// ParameterNode implementation
+// ParameterNode implementation
+	ParameterNode::ParameterNode(
+			std::string identifier,
+			ASTNodePtr type,
+			lexer::SourceLocation location)
+			: ASTNode(std::move(location)),
+			  identifier(std::move(identifier)),
+			  type(std::move(type)) {
+	}
+
 	const ASTNodePtr &ParameterNode::getType() const {
 		return type;
 	}
 
-	// FunctionDeclarationNode implementation
+	const std::string &ParameterNode::getIdentifier() const {
+		return identifier;
+	}
+
+// FunctionDeclarationNode implementation
 	FunctionDeclarationNode::FunctionDeclarationNode(
-			ASTNodePtr returnType,
 			std::string identifier,
+			ASTNodePtr returnType,
 			std::vector<ASTNodePtr> parameters,
 			ASTNodePtr body,
-			lexer::SourceLocation location
-	) : ASTNode(std::move(location)),
-		returnType(std::move(returnType)),
-		identifier(std::move(identifier)),
-		parameters(std::move(parameters)),
-		body(std::move(body)) {
+			lexer::SourceLocation location)
+			: ASTNode(std::move(location)),
+			  identifier(std::move(identifier)),
+			  returnType(std::move(returnType)),
+			  parameters(std::move(parameters)),
+			  body(std::move(body)) {
 	}
 
 	const ASTNodePtr &FunctionDeclarationNode::getReturnType() const {
@@ -524,12 +570,12 @@ namespace tinyc::ast {
 		return body;
 	}
 
-	// StructDeclarationNode implementation
+// StructDeclarationNode implementation
 	StructDeclarationNode::StructDeclarationNode(
 			std::string identifier,
 			std::vector<ASTNodePtr> fields,
-			lexer::SourceLocation location
-	) : ASTNode(std::move(location)), identifier(std::move(identifier)), fields(std::move(fields)) {
+			lexer::SourceLocation location)
+			: ASTNode(std::move(location)), identifier(std::move(identifier)), fields(std::move(fields)) {
 	}
 
 	const std::string &StructDeclarationNode::getIdentifier() const {
@@ -540,20 +586,24 @@ namespace tinyc::ast {
 		return !fields.empty();
 	}
 
+	void StructDeclarationNode::setFields(std::vector<ASTNodePtr> newFields) {
+		fields = std::move(newFields);
+	}
+
 	const std::vector<ASTNodePtr> &StructDeclarationNode::getFields() const {
 		return fields;
 	}
 
-	// FunctionPointerDeclarationNode implementation
+// FunctionPointerDeclarationNode implementation
 	FunctionPointerDeclarationNode::FunctionPointerDeclarationNode(
-			ASTNodePtr returnType,
 			std::string identifier,
+			ASTNodePtr returnType,
 			std::vector<ASTNodePtr> parameterTypes,
-			lexer::SourceLocation location
-	) : ASTNode(std::move(location)),
-		returnType(std::move(returnType)),
-		identifier(std::move(identifier)),
-		parameterTypes(std::move(parameterTypes)) {
+			lexer::SourceLocation location)
+			: ASTNode(std::move(location)),
+			  identifier(std::move(identifier)),
+			  returnType(std::move(returnType)),
+			  parameterTypes(std::move(parameterTypes)) {
 	}
 
 	const ASTNodePtr &FunctionPointerDeclarationNode::getReturnType() const {
@@ -568,8 +618,9 @@ namespace tinyc::ast {
 		return parameterTypes;
 	}
 
-	// ProgramNode implementation
-	ProgramNode::ProgramNode(std::string sourceName) : ASTNode(lexer::SourceLocation(std::move(sourceName), 0, 0)) {
+// ProgramNode implementation
+	ProgramNode::ProgramNode(std::string sourceName)
+			: ASTNode(lexer::SourceLocation(std::move(sourceName), 0, 0)) {
 	}
 
 	void ProgramNode::addDeclaration(ASTNodePtr declaration) {
@@ -579,4 +630,5 @@ namespace tinyc::ast {
 	const std::vector<ASTNodePtr> &ProgramNode::getDeclarations() const {
 		return declarations;
 	}
+
 } // namespace tinyc::ast

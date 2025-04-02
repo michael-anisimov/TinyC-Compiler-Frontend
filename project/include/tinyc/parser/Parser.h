@@ -129,14 +129,14 @@ namespace tinyc::parser {
 		// Function and variable declarations
 		ast::ASTNodePtr parseNotVoidFunctionOrVariable(
 				ast::ASTNodePtr type,
-				const std::string &name,
+				const std::string &identifier,
 				const lexer::SourceLocation &location);
 
 		ast::ASTNodePtr parseVoidDeclTail(const lexer::SourceLocation &voidLocation);
 
 		ast::ASTNodePtr parseFuncOrVarTail(
 				ast::ASTNodePtr type,
-				const std::string &name,
+				const std::string &identifier,
 				const lexer::SourceLocation &location);
 
 		ast::ASTNodePtr parseVariableTail(
@@ -146,7 +146,7 @@ namespace tinyc::parser {
 
 		ast::ASTNodePtr parseFunctionDeclarationTail(
 				ast::ASTNodePtr returnType,
-				const std::string &name,
+				const std::string &identifier,
 				const lexer::SourceLocation &location);
 
 		ast::ASTNodePtr parseFuncTail();

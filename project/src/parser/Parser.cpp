@@ -60,9 +60,9 @@ namespace tinyc::parser {
 
 				auto identifierToken = expect(lexer::TokenType::IDENTIFIER,
 											  "Expected identifier after type");
-				std::string name = identifierToken->getLexeme();
+				std::string identifier = identifierToken->getLexeme();
 
-				return parseNotVoidFunctionOrVariable(std::move(type), name, identifierToken->getLocation());
+				return parseNotVoidFunctionOrVariable(std::move(type), identifier, identifierToken->getLocation());
 			}
 
 			case lexer::TokenType::KW_VOID: {

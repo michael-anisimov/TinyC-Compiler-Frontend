@@ -7,7 +7,7 @@ namespace tinyc::parser {
 
 	ast::ASTNodePtr Parser::parseNotVoidFunctionOrVariable(
 			ast::ASTNodePtr type,
-			const std::string &name,
+			const std::string &identifier,
 			const lexer::SourceLocation &location) {
 		// Rule 7: NOT_VOID_FUNCTION_OR_VARIABLE -> VARIABLE_TAIL
 		// Rule 8: NOT_VOID_FUNCTION_OR_VARIABLE -> FUNCTION_DECLARATION_TAIL
@@ -16,10 +16,10 @@ namespace tinyc::parser {
 			case lexer::TokenType::OP_ASSIGN:
 			case lexer::TokenType::COMMA:
 			case lexer::TokenType::SEMICOLON:
-				return parseVariableTail(std::move(type), name, location);
+				return parseVariableTail(std::move(type), identifier, location);
 
 			case lexer::TokenType::LPAREN:
-				return parseFunctionDeclarationTail(std::move(type), name, location);
+				return parseFunctionDeclarationTail(std::move(type), identifier, location);
 
 			default:
 				error("Expected variable or function declaration");
@@ -38,18 +38,18 @@ namespace tinyc::parser {
 		if (check(lexer::TokenType::IDENTIFIER)) {
 			// Rule 9: identifier FUNCTION_DECLARATION_TAIL
 			auto identifierToken = consume();
-			std::string name = identifierToken->getLexeme();
+			std::string identifier = identifierToken->getLexeme();
 
 			// Only functions can have a void return type directly
-			return parseFunctionDeclarationTail(std::move(voidType), name, identifierToken->getLocation());
+			return parseFunctionDeclarationTail(std::move(voidType), identifier, identifierToken->getLocation());
 		} else if (check(lexer::TokenType::OP_MULTIPLY)) {
 			// Rule 10: STAR_PLUS identifier FUNC_OR_VAR_TAIL
 			parseStarPlus(voidType);
 
 			auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected identifier after void*");
-			std::string name = identifierToken->getLexeme();
+			std::string identifier = identifierToken->getLexeme();
 
-			return parseFuncOrVarTail(std::move(voidType), name, identifierToken->getLocation());
+			return parseFuncOrVarTail(std::move(voidType), identifier, identifierToken->getLocation());
 		} else {
 			error("Expected identifier or '*' after 'void'");
 		}
@@ -57,7 +57,7 @@ namespace tinyc::parser {
 
 	ast::ASTNodePtr Parser::parseFuncOrVarTail(
 			ast::ASTNodePtr type,
-			const std::string &name,
+			const std::string &identifier,
 			const lexer::SourceLocation &location) {
 		// Rule 11: FUNC_OR_VAR_TAIL -> VARIABLE_TAIL
 		// Rule 12: FUNC_OR_VAR_TAIL -> FUNCTION_DECLARATION_TAIL
@@ -66,10 +66,10 @@ namespace tinyc::parser {
 			case lexer::TokenType::OP_ASSIGN:
 			case lexer::TokenType::COMMA:
 			case lexer::TokenType::SEMICOLON:
-				return parseVariableTail(std::move(type), name, location);
+				return parseVariableTail(std::move(type), identifier, location);
 
 			case lexer::TokenType::LPAREN:
-				return parseFunctionDeclarationTail(std::move(type), name, location);
+				return parseFunctionDeclarationTail(std::move(type), identifier, location);
 
 			default:
 				error("Expected variable or function declaration");
@@ -115,7 +115,7 @@ namespace tinyc::parser {
 
 	ast::ASTNodePtr Parser::parseFunctionDeclarationTail(
 			ast::ASTNodePtr returnType,
-			const std::string &name,
+			const std::string &identifier,
 			const lexer::SourceLocation &location) {
 		// Rule 14: FUNCTION_DECLARATION_TAIL -> ( OPT_FUN_ARGS ) FUNC_TAIL
 		expect(lexer::TokenType::LPAREN, "Expected '(' after function name");
@@ -130,8 +130,8 @@ namespace tinyc::parser {
 
 		// Create function declaration node
 		return std::make_unique<ast::FunctionDeclarationNode>(
+				identifier,
 				std::move(returnType),
-				name,
 				std::move(parameters),
 				std::move(body),
 				location);

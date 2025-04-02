@@ -27,13 +27,13 @@ namespace tinyc::parser {
 				// Handle "struct Name" as a type
 				auto structToken = consume(); // Consume "struct"
 				auto nameToken = expect(lexer::TokenType::IDENTIFIER, "Expected struct name after 'struct'");
-				std::string name = nameToken->getLexeme();
+				std::string identifier = nameToken->getLexeme();
 
 				// Create a named type node that represents a struct type
 				// We can use a special format like "struct:Name" or just use the name directly
 				// For simplicity, we'll use "struct:Name" to distinguish from regular named types
 				ast::ASTNodePtr structType = std::make_unique<ast::NamedTypeNode>(
-						"struct:" + name,
+						"struct:" + identifier,
 						structToken->getLocation());
 
 				parseStarSeq(structType);
@@ -74,10 +74,10 @@ namespace tinyc::parser {
 			case lexer::TokenType::IDENTIFIER: {
 				// Rule 77: NON_VOID_TYPE -> TYPENAME STAR_SEQ
 				auto identifierToken = consume();
-				std::string name = identifierToken->getLexeme();
+				std::string identifier = identifierToken->getLexeme();
 
 				ast::ASTNodePtr namedType = std::make_unique<ast::NamedTypeNode>(
-						name,
+						identifier,
 						identifierToken->getLocation());
 
 				parseStarSeq(namedType);
@@ -205,7 +205,7 @@ namespace tinyc::parser {
 		// Rule 88: STRUCT_DECL -> struct identifier [ '{' { TYPE identifier ';' } '}' ] ';'
 		auto structToken = expect(lexer::TokenType::KW_STRUCT, "Expected 'struct'");
 		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected struct name");
-		std::string name = identifierToken->getLexeme();
+		std::string identifier = identifierToken->getLexeme();
 
 		// Parse optional struct body
 		std::vector <ast::ASTNodePtr> fields;
@@ -240,7 +240,7 @@ namespace tinyc::parser {
 
 		// Create struct declaration node
 		return std::make_unique<ast::StructDeclarationNode>(
-				name,
+				identifier,
 				std::move(fields),
 				structToken->getLocation());
 	}
@@ -254,7 +254,7 @@ namespace tinyc::parser {
 		expect(lexer::TokenType::OP_MULTIPLY, "Expected '*' for function pointer");
 
 		auto identifierToken = expect(lexer::TokenType::IDENTIFIER, "Expected function pointer name");
-		std::string name = identifierToken->getLexeme();
+		std::string identifier = identifierToken->getLexeme();
 
 		expect(lexer::TokenType::RPAREN, "Expected ')' after function pointer name");
 		expect(lexer::TokenType::LPAREN, "Expected '(' for parameter list");
@@ -267,8 +267,8 @@ namespace tinyc::parser {
 
 		// Create function pointer declaration node
 		return std::make_unique<ast::FunctionPointerDeclarationNode>(
+				identifier,
 				std::move(returnType),
-				name,
 				std::move(parameterTypes),
 				typedefToken->getLocation());
 	}
