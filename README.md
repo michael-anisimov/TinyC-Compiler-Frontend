@@ -4,17 +4,6 @@
 
 **Supervisor:** Ing. Petr Máj, Ph.D
 
-### Second fortnight tasks
-
-1. Lexer, Tokens
-2. Unit tests for Lexer
-3. Location info about each node
-4. Interactive Lexer in console for development
-5. AST nodes, includes with comments for future library
-6. Recursive descent parser, dump function for development, which outputs AST in console
-7. Some tests for LL(1) parser
-8. Paper structure
-
 ## Description
 
 Assignment can be found [here](paper/Assignment.pdf).
