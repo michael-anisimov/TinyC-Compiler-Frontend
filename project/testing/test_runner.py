@@ -210,12 +210,15 @@ def compare_json_ast(expected: str, actual: str, verbose: bool = False) -> Tuple
         return False, [f"JSON parse error: {e}"]
 
 
-def get_test_files(test_dir: str) -> List[str]:
+def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Optional[Tuple[int, int]] = None) -> List[str]:
     """
     Get a list of all test files in the given directory, sorted by numeric prefix.
+    Can filter to specific test number or range.
 
     Args:
         test_dir: Directory to search for test files
+        test_num: If provided, only include the test with this number
+        test_range: If provided, only include tests in this range (start, end) inclusive
 
     Returns:
         List of paths to test files
@@ -225,7 +228,7 @@ def get_test_files(test_dir: str) -> List[str]:
         return []
 
     # Get all .tc files
-    test_files = []
+    all_test_files = []
     for file in os.listdir(test_dir):
         if file.endswith('.tc'):
             file_path = os.path.join(test_dir, file)
@@ -235,36 +238,73 @@ def get_test_files(test_dir: str) -> List[str]:
                 with open(file_path, 'r') as f:
                     first_line = f.readline().strip()
                     if first_line.startswith('// TINYC TEST'):
-                        test_files.append(file_path)
+                        all_test_files.append(file_path)
             except Exception as e:
                 print(f"Error reading {file_path}: {e}")
 
+    # Filter based on test number or range
+    filtered_files = []
+    for file_path in all_test_files:
+        file_num = extract_number_prefix(file_path)
+
+        # Skip files without numeric prefix if we're filtering
+        if file_num == float('inf') and (test_num is not None or test_range is not None):
+            continue
+
+        if test_num is not None:
+            # Single test number
+            if file_num == test_num:
+                filtered_files.append(file_path)
+        elif test_range is not None:
+            # Test range
+            start, end = test_range
+            if start <= file_num <= end:
+                filtered_files.append(file_path)
+        else:
+            # No filter, include all test files
+            filtered_files.append(file_path)
+
     # Sort test files by their numeric prefix
-    return sorted(test_files, key=extract_number_prefix)
+    return sorted(filtered_files, key=extract_number_prefix)
 
 
-def run_tests(parser_command: str, test_dir: str, verbose: bool = False) -> Tuple[int, int]:
+def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None,
+              test_range: Optional[Tuple[int, int]] = None, verbose: bool = False) -> Tuple[int, int]:
     """
-    Run all tests against the parser.
+    Run tests against the parser.
 
     Args:
         parser_command: Command to run the parser
         test_dir: Directory containing test files
+        test_num: If provided, only run the test with this number
+        test_range: If provided, only run tests in this range (start, end) inclusive
         verbose: Whether to print detailed comparison information
 
     Returns:
         Tuple of (passed_count, failed_count)
     """
-    test_files = get_test_files(test_dir)
+    test_files = get_test_files(test_dir, test_num, test_range)
 
     if not test_files:
-        print(f"No test files found in {test_dir}")
+        if test_num is not None:
+            print(f"No test file found with number {test_num}")
+        elif test_range is not None:
+            print(f"No test files found in range {test_range[0]}-{test_range[1]}")
+        else:
+            print(f"No test files found in {test_dir}")
         return 0, 0
 
     passed = 0
     failed = 0
 
-    print(f"Running {len(test_files)} tests...")
+    # Create a message about which tests we're running
+    test_msg = f"{len(test_files)} tests"
+    if test_num is not None:
+        test_msg = f"test {test_num}"
+    elif test_range is not None:
+        test_msg = f"tests {test_range[0]}-{test_range[1]}"
+
+    print(f"Running {test_msg}...")
 
     for i, test_file in enumerate(test_files, 1):
         test = parse_test_file(test_file)
@@ -309,15 +349,52 @@ def run_tests(parser_command: str, test_dir: str, verbose: bool = False) -> Tupl
     return passed, failed
 
 
+def parse_range(range_str: str) -> Optional[Tuple[int, int]]:
+    """
+    Parse a range string in the format 'start-end' to a tuple.
+
+    Args:
+        range_str: String in the format 'start-end'
+
+    Returns:
+        Tuple (start, end) if valid, None otherwise
+    """
+    try:
+        if '-' in range_str:
+            start, end = map(int, range_str.split('-'))
+            if start <= end:
+                return start, end
+
+        # If we get here, the range is invalid
+        print(f"Invalid range: {range_str}. Should be in format 'start-end' where start <= end.")
+        return None
+    except ValueError:
+        print(f"Invalid range: {range_str}. Should contain numeric values.")
+        return None
+
+
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='TinyC Parser Test Runner')
     parser.add_argument('parser_command', help='Command to run the parser (e.g., "./student-parser -p")')
     parser.add_argument('--test-dir', '-d', default='tests', help='Directory containing test files (default: tests)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output with detailed differences')
+
+    # Add mutually exclusive group for test selection
+    test_group = parser.add_mutually_exclusive_group()
+    test_group.add_argument('--test', '-t', type=int, help='Run a specific test by number (e.g., 5 for 5_*.tc)')
+    test_group.add_argument('--range', '-r', help='Run tests in a specific range (e.g., 3-7 for tests 3 to 7)')
+
     args = parser.parse_args()
 
-    passed, failed = run_tests(args.parser_command, args.test_dir, args.verbose)
+    # Parse range if provided
+    test_range = None
+    if args.range:
+        test_range = parse_range(args.range)
+        if test_range is None:
+            return 1
+
+    passed, failed = run_tests(args.parser_command, args.test_dir, args.test, test_range, args.verbose)
 
     print("\n" + "="*50)
     print(f"Test Results: {passed} passed, {failed} failed")
