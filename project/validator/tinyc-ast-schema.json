@@ -981,13 +981,73 @@
           ]
         }
       ]
+    },
+    "ErrorProgramNode": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Node"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "ErrorProgram"
+              ]
+            },
+            "errorType": {
+              "type": "string",
+              "enum": ["lexer", "parser", "semantic", "unknown"],
+              "description": "Type of error"
+            },
+            "message": {
+              "type": "string",
+              "description": "Detailed error message"
+            },
+            "errorLocation": {
+              "$ref": "#/definitions/SourceLocation",
+              "description": "Location where the error occurred"
+            },
+            "declarations": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/VariableDeclaration"
+                  },
+                  {
+                    "$ref": "#/definitions/FunctionDeclaration"
+                  },
+                  {
+                    "$ref": "#/definitions/StructDeclaration"
+                  },
+                  {
+                    "$ref": "#/definitions/FunctionPointerDeclaration"
+                  },
+                  {
+                    "$ref": "#/definitions/MultipleDeclaration"
+                  }
+                ]
+              },
+              "description": "Declarations that were successfully parsed before the error"
+            }
+          },
+          "required": [
+            "nodeType",
+            "errorType",
+            "message",
+            "declarations",
+            "location"
+          ]
+        }
+      ]
     }
   },
   "type": "object",
   "properties": {
     "nodeType": {
       "enum": [
-        "Program"
+        "Program",
+        "ErrorProgram"
       ]
     },
     "location": {

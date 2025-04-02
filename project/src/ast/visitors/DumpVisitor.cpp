@@ -315,4 +315,19 @@ namespace tinyc::ast {
 		}
 	}
 
+	void DumpVisitor::visit(const ErrorProgramNode& node) {
+		os << getIndent() << "ErrorProgram: " << node.getErrorTypeString() << ": " << node.getMessage() << std::endl;
+		os << getIndent() << "  at " << node.getLocation().filename << ":"
+		   << node.getLocation().line << ":" << node.getLocation().column << std::endl;
+
+		if (!node.getDeclarations().empty()) {
+			os << getIndent() << "Declarations (partial):" << std::endl;
+			increaseIndent();
+			for (const auto& decl : node.getDeclarations()) {
+				decl->accept(*this);
+			}
+			decreaseIndent();
+		}
+	}
+
 } // namespace tinyc::ast

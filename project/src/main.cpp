@@ -48,10 +48,6 @@ void runParserMode(const std::string &source, const std::string &filename) {
 	Parser parser(lexer);
 	auto ast = parser.parseProgram();
 
-	// Print AST
-//	std::cout << "AST from " << filename << ":" << std::endl;
-//	DumpVisitor printer(std::cout);
-//	ast->accept(printer);
 
 	JSONVisitor jsonVisitor(true);
 	ast->accept(jsonVisitor);

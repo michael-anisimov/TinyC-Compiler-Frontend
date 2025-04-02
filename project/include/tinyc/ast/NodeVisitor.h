@@ -33,6 +33,7 @@ class SwitchStatementNode;
 class BreakStatementNode;
 class ContinueStatementNode;
 class ReturnStatementNode;
+class ErrorProgramNode;
 
 /**
  * @brief The Visitor interface for AST nodes
@@ -83,6 +84,9 @@ public:
     virtual void visit(const BreakStatementNode& node) = 0;
     virtual void visit(const ContinueStatementNode& node) = 0;
     virtual void visit(const ReturnStatementNode& node) = 0;
+
+	// Error node
+	virtual void visit(const ErrorProgramNode& node) = 0;
 };
 
 } // namespace tinyc::ast

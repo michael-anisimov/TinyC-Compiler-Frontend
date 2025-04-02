@@ -1482,6 +1482,81 @@ namespace tinyc::ast {
 	};
 
 /**
+ * @brief Error program node
+ *
+ * Represents a program that could not be fully parsed due to errors.
+ * Contains error information and any declarations successfully parsed
+ * before the error occurred.
+ */
+	class ErrorProgramNode : public ASTNode {
+	public:
+		/**
+		 * @brief Enumeration of error types
+		 */
+		enum class ErrorType {
+			LEXER,      // Lexical error (invalid token)
+			PARSER,     // Syntax error (invalid grammar)
+			SEMANTIC,   // Semantic error (type checking, etc.)
+			UNKNOWN     // Other errors
+		};
+
+		/**
+		 * @brief Construct a new Error Program Node
+		 *
+		 * @param sourceName Name of the source file
+		 * @param errorType Type of the error
+		 * @param message Detailed error message
+		 * @param declarations List of successfully parsed declarations
+		 * @param location Location of the error in source
+		 */
+		ErrorProgramNode(
+				ErrorType errorType,
+				std::string message,
+				std::vector<ASTNodePtr> declarations,
+				lexer::SourceLocation location);
+
+		/**
+		 * @brief Get the error type
+		 *
+		 * @return The type of error
+		 */
+		[[nodiscard]] ErrorType getErrorType() const;
+
+		/**
+		 * @brief Get string representation of error type
+		 *
+		 * @return String representation of the error type
+		 */
+		[[nodiscard]] std::string getErrorTypeString() const;
+
+		/**
+		 * @brief Get the error message
+		 *
+		 * @return The error message
+		 */
+		[[nodiscard]] const std::string& getMessage() const;
+
+		/**
+		 * @brief Get the declarations parsed before error
+		 *
+		 * @return List of successfully parsed declarations
+		 */
+		[[nodiscard]] const std::vector<ASTNodePtr>& getDeclarations() const;
+
+		/**
+		 * @brief Accept a visitor
+		 *
+		 * @param visitor The visitor to accept
+		 */
+		void accept(NodeVisitor& visitor) const override;
+
+	private:
+		ErrorType errorType;
+		std::string message;
+		std::vector<ASTNodePtr> declarations;
+	};
+
+/**
  * @brief Program node (root of the AST)
  *
  * Represents an entire TinyC program, which is a collection of

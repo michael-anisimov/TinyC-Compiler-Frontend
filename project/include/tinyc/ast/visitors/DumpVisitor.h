@@ -85,6 +85,8 @@ namespace tinyc::ast {
 
 		void visit(const ReturnStatementNode &node) override;
 
+		void visit(const ErrorProgramNode &node) override;
+
 	private:
 		std::ostream &os;
 		int indentLevel = 0;

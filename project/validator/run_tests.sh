@@ -18,7 +18,7 @@ fi
 mkdir -p examples
 
 # Loop through example files from 0 to 15
-for i in {0..15}; do
+for i in {0..17}; do
     example_file="../examples/${i}_*.tc"
 
     # Use find to get the exact filename (if it exists)
