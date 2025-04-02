@@ -1,8 +1,0 @@
-/* Program with a lexer error: invalid character */
-
-int main() {
-    int x = 10;
-    char y = '@'; // Valid
-    char invalid = '#$'; // Invalid character literal (should be single character)
-    return x;
-}

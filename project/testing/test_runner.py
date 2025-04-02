@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""
+TinyC Parser Test Runner
+
+This script validates student parser implementations against a set of TinyC test files.
+Each test file contains TinyC code along with metadata about the expected AST output.
+"""
+
+import os
+import sys
+import re
+import json
+import subprocess
+import argparse
+from typing import Dict, List, Optional, Tuple, NamedTuple, Any, Union
+
+
+class TinyCTest(NamedTuple):
+    """Represents a TinyC test case"""
+    name: str
+    description: str
+    code: str
+    expected_output: str
+
+
+def extract_number_prefix(filename: str) -> int:
+    """
+    Extract the numeric prefix from a filename (e.g., '10_pointers.tc' -> 10)
+    If no numeric prefix is found, return a large number to sort it at the end
+    """
+    match = re.match(r'^(\d+)_', os.path.basename(filename))
+    if match:
+        return int(match.group(1))
+    return float('inf')  # Sort files without numeric prefix at the end
+
+
+def parse_test_file(file_path: str) -> Optional[TinyCTest]:
+    """
+    Parse a TinyC test file to extract metadata and code.
+
+    Args:
+        file_path: Path to the test file
+
+    Returns:
+        A TinyCTest object if parsing succeeds, None otherwise
+    """
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+
+        # Check if this is a test file (should start with a special comment)
+        if not content.lstrip().startswith('// TINYC TEST'):
+            print(f"Warning: {file_path} does not appear to be a test file (missing header)")
+            return None
+
+        # Extract test information using regex
+        name = os.path.basename(file_path).replace('.tc', '')
+        description_match = re.search(r'// INFO: (.*?)$', content, re.MULTILINE)
+        result_match = re.search(r'// RESULT: (.*?)$', content, re.MULTILINE)
+
+        if not description_match or not result_match:
+            print(f"Warning: {file_path} is missing required metadata")
+            return None
+
+        description = description_match.group(1).strip()
+        expected_output = result_match.group(1).strip()
+
+        # Extract code (everything after the metadata)
+        test_header_pattern = re.compile(r'^// (TINYC TEST|INFO:|RESULT:).*?$', re.MULTILINE)
+        code_only = re.sub(test_header_pattern, '', content).lstrip()
+
+        return TinyCTest(name, description, code_only, expected_output)
+    except Exception as e:
+        print(f"Error parsing test file {file_path}: {e}")
+        return None
+
+
+def run_parser(parser_command: str, code: str) -> str:
+    """
+    Run the parser on the provided code and return its output.
+
+    Args:
+        parser_command: Command to run the parser
+        code: TinyC code to parse
+
+    Returns:
+        Output from the parser (expected to be JSON AST)
+    """
+    # Create temporary file with the code
+    temp_file = "temp_code.tc"
+    try:
+        with open(temp_file, 'w') as f:
+            f.write(code)
+
+        # Run the parser command
+        cmd = f"{parser_command} {temp_file}"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        # Check for execution errors
+        if result.returncode != 0:
+            print(f"Parser execution failed with return code {result.returncode}")
+            print(f"Error output: {result.stderr}")
+
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"Error running parser: {e}")
+        return ""
+    finally:
+        # Clean up temporary file
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+
+def compare_json_objects(expected: Dict[str, Any], actual: Dict[str, Any], path: str = "") -> Tuple[bool, List[str]]:
+    """
+    Recursively compare two JSON objects, ignoring specific values in location fields.
+
+    Args:
+        expected: Expected JSON object
+        actual: Actual JSON object
+        path: Current path in the JSON tree (for error reporting)
+
+    Returns:
+        Tuple of (is_equal, differences_list)
+    """
+    differences = []
+
+    # Check for same keys
+    expected_keys = set(expected.keys())
+    actual_keys = set(actual.keys())
+
+    # Check for missing keys
+    missing_keys = expected_keys - actual_keys
+    if missing_keys:
+        differences.append(f"{path}: Missing keys: {', '.join(missing_keys)}")
+
+    # Check for extra keys (less important but still useful feedback)
+    extra_keys = actual_keys - expected_keys
+    if extra_keys:
+        differences.append(f"{path}: Extra keys: {', '.join(extra_keys)}")
+
+    # Check key values
+    for key in expected_keys.intersection(actual_keys):
+        current_path = f"{path}.{key}" if path else key
+
+        # Special handling for location fields - only check existence
+        if key == "location":
+            # For location, we only check that both objects have the required location fields
+            if isinstance(expected[key], dict) and isinstance(actual[key], dict):
+                expected_loc_keys = set(expected[key].keys())
+                actual_loc_keys = set(actual[key].keys())
+
+                # Check that all expected location fields exist
+                missing_loc_keys = expected_loc_keys - actual_loc_keys
+                if missing_loc_keys:
+                    differences.append(f"{current_path}: Missing location fields: {', '.join(missing_loc_keys)}")
+            else:
+                differences.append(f"{current_path}: Expected location object but got {type(actual[key])}")
+        # Recursive comparison for nested objects
+        elif isinstance(expected[key], dict) and isinstance(actual[key], dict):
+            equal, child_diffs = compare_json_objects(expected[key], actual[key], current_path)
+            differences.extend(child_diffs)
+        # Recursive comparison for arrays
+        elif isinstance(expected[key], list) and isinstance(actual[key], list):
+            if len(expected[key]) != len(actual[key]):
+                differences.append(f"{current_path}: Array length mismatch - expected {len(expected[key])}, got {len(actual[key])}")
+            else:
+                for i, (expected_item, actual_item) in enumerate(zip(expected[key], actual[key])):
+                    if isinstance(expected_item, dict) and isinstance(actual_item, dict):
+                        equal, child_diffs = compare_json_objects(expected_item, actual_item, f"{current_path}[{i}]")
+                        differences.extend(child_diffs)
+                    elif expected_item != actual_item:
+                        differences.append(f"{current_path}[{i}]: Value mismatch - expected {expected_item}, got {actual_item}")
+        # Simple value comparison for non-objects
+        elif expected[key] != actual[key]:
+            differences.append(f"{current_path}: Value mismatch - expected {expected[key]}, got {actual[key]}")
+
+    return len(differences) == 0, differences
+
+
+def compare_json_ast(expected: str, actual: str, verbose: bool = False) -> Tuple[bool, List[str]]:
+    """
+    Compare two JSON ASTs for semantic equivalence, ignoring specific location values.
+
+    Args:
+        expected: Expected JSON output
+        actual: Actual JSON output from the parser
+        verbose: Whether to print detailed comparison information
+
+    Returns:
+        Tuple of (is_equal, differences_list)
+    """
+    try:
+        expected_json = json.loads(expected)
+        actual_json = json.loads(actual)
+
+        # Special handling for error nodes
+        if expected_json.get('nodeType') == 'ErrorProgram':
+            if actual_json.get('nodeType') == 'ErrorProgram':
+                # For error programs, we just check that the error type matches
+                if expected_json.get('errorType') == actual_json.get('errorType'):
+                    return True, []
+                else:
+                    return False, [f"Error type mismatch - expected {expected_json.get('errorType')}, got {actual_json.get('errorType')}"]
+            return False, [f"Expected ErrorProgram node but got {actual_json.get('nodeType')}"]
+
+        # For regular programs, do a recursive comparison
+        return compare_json_objects(expected_json, actual_json)
+    except json.JSONDecodeError as e:
+        return False, [f"JSON parse error: {e}"]
+
+
+def get_test_files(test_dir: str) -> List[str]:
+    """
+    Get a list of all test files in the given directory, sorted by numeric prefix.
+
+    Args:
+        test_dir: Directory to search for test files
+
+    Returns:
+        List of paths to test files
+    """
+    if not os.path.isdir(test_dir):
+        print(f"Error: Test directory {test_dir} not found")
+        return []
+
+    # Get all .tc files
+    test_files = []
+    for file in os.listdir(test_dir):
+        if file.endswith('.tc'):
+            file_path = os.path.join(test_dir, file)
+
+            # Verify it's a test file by checking the first line
+            try:
+                with open(file_path, 'r') as f:
+                    first_line = f.readline().strip()
+                    if first_line.startswith('// TINYC TEST'):
+                        test_files.append(file_path)
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
+
+    # Sort test files by their numeric prefix
+    return sorted(test_files, key=extract_number_prefix)
+
+
+def run_tests(parser_command: str, test_dir: str, verbose: bool = False) -> Tuple[int, int]:
+    """
+    Run all tests against the parser.
+
+    Args:
+        parser_command: Command to run the parser
+        test_dir: Directory containing test files
+        verbose: Whether to print detailed comparison information
+
+    Returns:
+        Tuple of (passed_count, failed_count)
+    """
+    test_files = get_test_files(test_dir)
+
+    if not test_files:
+        print(f"No test files found in {test_dir}")
+        return 0, 0
+
+    passed = 0
+    failed = 0
+
+    print(f"Running {len(test_files)} tests...")
+
+    for i, test_file in enumerate(test_files, 1):
+        test = parse_test_file(test_file)
+        if not test:
+            print(f"Skipping invalid test file: {test_file}")
+            continue
+
+        print(f"\nTest {i}/{len(test_files)}: {test.name}")
+        print(f"  Description: {test.description}")
+
+        # Run parser on test code
+        actual_output = run_parser(parser_command, test.code)
+
+        if not actual_output:
+            print(f"  ❌ FAILED (No output from parser)")
+            failed += 1
+            continue
+
+        # Compare outputs
+        passed_test, differences = compare_json_ast(test.expected_output, actual_output, verbose)
+
+        if passed_test:
+            print(f"  ✅ PASSED")
+            passed += 1
+        else:
+            print(f"  ❌ FAILED")
+            # Show first 80 chars of expected/actual (or less if they're shorter)
+            expected_preview = test.expected_output[:80] + "..." if len(test.expected_output) > 80 else test.expected_output
+            actual_preview = actual_output[:80] + "..." if len(actual_output) > 80 else actual_output
+            print(f"  Expected: {expected_preview}")
+            print(f"  Actual  : {actual_preview}")
+
+            if verbose and differences:
+                print("\n  Differences:")
+                for diff in differences[:10]:  # Show at most 10 differences
+                    print(f"    - {diff}")
+                if len(differences) > 10:
+                    print(f"    ... and {len(differences) - 10} more differences")
+
+            failed += 1
+
+    return passed, failed
+
+
+def main():
+    """Main function"""
+    parser = argparse.ArgumentParser(description='TinyC Parser Test Runner')
+    parser.add_argument('parser_command', help='Command to run the parser (e.g., "./student-parser -p")')
+    parser.add_argument('--test-dir', '-d', default='tests', help='Directory containing test files (default: tests)')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output with detailed differences')
+    args = parser.parse_args()
+
+    passed, failed = run_tests(args.parser_command, args.test_dir, args.verbose)
+
+    print("\n" + "="*50)
+    print(f"Test Results: {passed} passed, {failed} failed")
+    print(f"Overall: {'✅ PASSED' if failed == 0 else '❌ FAILED'}")
+    print("="*50)
+
+    # Return non-zero exit code if any tests failed
+    return 1 if failed > 0 else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

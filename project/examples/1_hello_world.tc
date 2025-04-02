@@ -1,8 +1,0 @@
-/* Basic Hello World program */
-
-void print_string(char* s);  // Declaration only (external function)
-
-int main() {
-    print_string("Hello, World!");
-    return 0;
-}

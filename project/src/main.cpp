@@ -49,7 +49,7 @@ void runParserMode(const std::string &source, const std::string &filename) {
 	auto ast = parser.parseProgram();
 
 
-	JSONVisitor jsonVisitor(true);
+	JSONVisitor jsonVisitor(false);
 	ast->accept(jsonVisitor);
 	std::string json = jsonVisitor.getJSON();
 	std::cout << json << std::endl;

@@ -1,0 +1,10 @@
+// TINYC TEST
+// INFO: Program with a lexical error (should produce an error node)
+// RESULT: {"nodeType":"ErrorProgram","errorType":"lexer","message":"../examples/17_lexer_error.tc:6:20: Unterminated character literal","declarations":[],"location":{"filename":"../examples/17_lexer_error.tc","line":6,"column":20}}
+
+int main() {
+    int x = 10;
+    char y = '@'; // Valid
+    char invalid = '#$'; // Invalid character literal (should be single character)
+    return x;
+}
