@@ -36,3 +36,7 @@ pdfa.xmpi
 
 # for now
 .gitlab-ci.yml 
+
+# doxygen
+project/docs/html
+project/docs/latex
