@@ -40,44 +40,15 @@ namespace tinyc::parser {
 
 	ast::ASTNodePtr Parser::parseProgram() {
 		auto sourceName = lexer.getSourceName();
-		std::vector<ast::ASTNodePtr> declarations;
+		auto program = std::make_unique<ast::ProgramNode>(sourceName);
 
-		try {
-			// Parse declarations until EOF
-			while (!check(lexer::TokenType::END_OF_FILE)) {
-				auto item = parseProgramItem();
-				declarations.push_back(std::move(item));
-			}
-
-			auto program = std::make_unique<ast::ProgramNode>(sourceName);
-			for (auto& decl : declarations) {
-				program->addDeclaration(std::move(decl));
-			}
-
-			return program;
-		} catch (const lexer::LexerError& e) {
-			return std::make_unique<ast::ErrorProgramNode>(
-					ast::ErrorProgramNode::ErrorType::LEXER,
-					e.what(),
-					std::move(declarations),
-					e.getLocation()
-			);
-		} catch (const ParserError& e) {
-			return std::make_unique<ast::ErrorProgramNode>(
-					ast::ErrorProgramNode::ErrorType::PARSER,
-					e.what(),
-					std::move(declarations),
-					e.getLocation()
-			);
-		} catch (const std::exception& e) {
-			lexer::SourceLocation location(sourceName, 0, 0);
-			return std::make_unique<ast::ErrorProgramNode>(
-					ast::ErrorProgramNode::ErrorType::UNKNOWN,
-					e.what(),
-					std::move(declarations),
-					location
-			);
+		// Parse declarations until EOF
+		while (!check(lexer::TokenType::END_OF_FILE)) {
+			auto item = parseProgramItem();
+			program->addDeclaration(std::move(item));
 		}
+
+		return program;
 	}
 
 	ast::ASTNodePtr Parser::parseProgramItem() {

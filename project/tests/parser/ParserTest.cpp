@@ -207,32 +207,28 @@ TEST(ParserTest, FunctionPointerDeclaration) {
 // Test errors
 TEST(ParserTest, Errors) {
 	// Missing semicolon
-	{
-		auto ast = parseString("int abc () { int x } ");
-		auto errorProgram = dynamic_cast<ast::ErrorProgramNode*>(ast.get());
-		ASSERT_NE(errorProgram, nullptr);
-		EXPECT_EQ(errorProgram->getErrorType(), ast::ErrorProgramNode::ErrorType::PARSER);
-		EXPECT_NE(errorProgram->getMessage().find("Expected ';'"), std::string::npos);
-	}
+	EXPECT_THROW({
+					 std::string source = "int x";
+					 lexer::Lexer lexer(source);
+					 parser::Parser parser(lexer);
+					 parser.parseProgram();
+				 }, parser::ParserError);
 
 	// Unmatched parenthesis
-	{
-		auto ast = parseString("int f() { return (1 + 2; }");
-		auto errorProgram = dynamic_cast<ast::ErrorProgramNode*>(ast.get());
-		ASSERT_NE(errorProgram, nullptr);
-		EXPECT_EQ(errorProgram->getErrorType(), ast::ErrorProgramNode::ErrorType::PARSER);
-		EXPECT_NE(errorProgram->getMessage().find("Expected ')'"), std::string::npos);
-	}
+	EXPECT_THROW({
+					 std::string source = "int f() { return (1 + 2; }";
+					 lexer::Lexer lexer(source);
+					 parser::Parser parser(lexer);
+					 parser.parseProgram();
+				 }, parser::ParserError);
 
 	// Invalid declaration
-	{
-		auto ast = parseString("x = 10;");
-		auto errorProgram = dynamic_cast<ast::ErrorProgramNode*>(ast.get());
-		ASSERT_NE(errorProgram, nullptr);
-		EXPECT_EQ(errorProgram->getErrorType(), ast::ErrorProgramNode::ErrorType::PARSER);
-		// Check for partial parsing - we shouldn't have any declarations since this is invalid from the start
-		EXPECT_EQ(errorProgram->getDeclarations().size(), 0);
-	}
+	EXPECT_THROW({
+					 std::string source = "x = 10;";
+					 lexer::Lexer lexer(source);
+					 parser::Parser parser(lexer);
+					 parser.parseProgram();
+				 }, parser::ParserError);
 }
 
 int main(int argc, char **argv) {

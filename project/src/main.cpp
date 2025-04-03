@@ -222,10 +222,10 @@ int main(int argc, char *argv[]) {
 	}
 	catch (const ParserError &e) {
 		std::cerr << "Parser error: " << e.what() << std::endl;
-		return 1;
+		return 2;
 	}
 	catch (const std::exception &e) {
 		std::cerr << "Error: " << e.what() << std::endl;
-		return 1;
+		return 3;
 	}
 }

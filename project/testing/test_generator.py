@@ -32,8 +32,14 @@ TEST_DESCRIPTIONS = {
     "13_void_pointers": "Using void pointers for generic functions",
     "14_complex_expression": "Complex nested expressions and operator precedence",
     "15_nested_blocks": "Nested code blocks and scoping",
-    "16_parser_error": "Program with a parsing error (should produce an error node)",
-    "17_lexer_error": "Program with a lexical error (should produce an error node)"
+    "16_parser_error": "Program with a parsing error (should produce a parser error)",
+    "17_lexer_error": "Program with a lexical error (should produce a lexer error)"
+}
+
+# Define which test files should produce errors
+ERROR_FILES = {
+    "16_parser_error": "PARSER_ERROR",
+    "17_lexer_error": "LEXER_ERROR"
 }
 
 
@@ -62,9 +68,7 @@ def create_test_file(tc_file: str, json_file: str, output_file: str, use_prefix:
     """
     # Read input files
     tc_code = read_file(tc_file)
-    json_output = read_file(json_file)
-
-    if tc_code is None or json_output is None:
+    if tc_code is None:
         return False
 
     # Extract base name for description lookup
@@ -74,16 +78,32 @@ def create_test_file(tc_file: str, json_file: str, output_file: str, use_prefix:
     # Get description for this test
     description = TEST_DESCRIPTIONS.get(name_without_ext, f"Test for {name_without_ext}")
 
-    # Try to compact the JSON for better readability
-    try:
-        json_obj = json.loads(json_output)
-        compact_json = json.dumps(json_obj, separators=(',', ':'))
-    except json.JSONDecodeError:
-        print(f"Warning: Could not parse JSON from {json_file}, using as-is")
-        compact_json = json_output.strip()
+    # Determine if this should produce an error
+    expect_type = ERROR_FILES.get(name_without_ext, "SUCCESS")
+
+    # For success cases, we need the expected JSON output
+    compact_json = ""
+    if expect_type == "SUCCESS":
+        json_output = read_file(json_file)
+        if json_output is None:
+            return False
+
+        # Try to compact the JSON for better readability
+        try:
+            json_obj = json.loads(json_output)
+            compact_json = json.dumps(json_obj, separators=(',', ':'))
+        except json.JSONDecodeError:
+            print(f"Warning: Could not parse JSON from {json_file}, using as-is")
+            compact_json = json_output.strip()
 
     # Create test file content
-    test_content = f"// TINYC TEST\n// INFO: {description}\n// RESULT: {compact_json}\n\n{tc_code}"
+    test_content = f"// TINYC TEST\n// INFO: {description}\n// EXPECT: {expect_type}\n"
+
+    # Only include RESULT for SUCCESS cases
+    if expect_type == "SUCCESS":
+        test_content += f"// RESULT: {compact_json}\n"
+
+    test_content += f"\n{tc_code}"
 
     # Apply prefix to filename if requested
     if use_prefix and not os.path.basename(output_file).startswith('test_'):
@@ -134,8 +154,11 @@ def main():
         name_without_ext = os.path.splitext(basename)[0]
         json_file = os.path.join(args.json_dir, f"{name_without_ext}.json")
 
-        # Check if JSON file exists
-        if not os.path.exists(json_file):
+        # For error cases, we don't need the JSON file
+        expect_type = ERROR_FILES.get(name_without_ext, "SUCCESS")
+
+        # Check if JSON file exists (only for SUCCESS cases)
+        if expect_type == "SUCCESS" and not os.path.exists(json_file):
             print(f"Warning: No JSON file found for {tc_file}")
             continue
 

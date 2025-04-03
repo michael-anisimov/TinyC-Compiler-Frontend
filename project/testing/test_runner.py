@@ -3,12 +3,13 @@
 TinyC Parser Test Runner
 
 This script validates student parser implementations against a set of TinyC test files.
-Each test file contains TinyC code along with metadata about the expected AST output.
+Each test file contains TinyC code along with metadata about the expected output or error.
 """
 
 import os
 import sys
 import re
+
 import json
 import subprocess
 import argparse
@@ -19,8 +20,9 @@ class TinyCTest(NamedTuple):
     """Represents a TinyC test case"""
     name: str
     description: str
+    expect_type: str  # Can be 'SUCCESS', 'PARSER_ERROR', or 'LEXER_ERROR'
     code: str
-    expected_output: str
+    expected_output: Optional[str]  # None for error test cases
 
 
 def extract_number_prefix(filename: str) -> int:
@@ -56,35 +58,50 @@ def parse_test_file(file_path: str) -> Optional[TinyCTest]:
         # Extract test information using regex
         name = os.path.basename(file_path).replace('.tc', '')
         description_match = re.search(r'// INFO: (.*?)$', content, re.MULTILINE)
-        result_match = re.search(r'// RESULT: (.*?)$', content, re.MULTILINE)
+        expect_match = re.search(r'// EXPECT: (.*?)$', content, re.MULTILINE)
 
-        if not description_match or not result_match:
-            print(f"Warning: {file_path} is missing required metadata")
+        if not description_match or not expect_match:
+            print(f"Warning: {file_path} is missing required metadata (INFO or EXPECT)")
             return None
 
         description = description_match.group(1).strip()
-        expected_output = result_match.group(1).strip()
+        expect_type = expect_match.group(1).strip()
+
+        # Validate expect_type
+        if expect_type not in ['SUCCESS', 'PARSER_ERROR', 'LEXER_ERROR']:
+            print(f"Warning: {file_path} has invalid EXPECT value: {expect_type}")
+            print("EXPECT should be one of: SUCCESS, PARSER_ERROR, LEXER_ERROR")
+            return None
+
+        # For success cases, we need the expected JSON output
+        expected_output = None
+        if expect_type == 'SUCCESS':
+            result_match = re.search(r'// RESULT: (.*?)$', content, re.MULTILINE)
+            if not result_match:
+                print(f"Warning: {file_path} is a SUCCESS test but missing RESULT metadata")
+                return None
+            expected_output = result_match.group(1).strip()
 
         # Extract code (everything after the metadata)
-        test_header_pattern = re.compile(r'^// (TINYC TEST|INFO:|RESULT:).*?$', re.MULTILINE)
+        test_header_pattern = re.compile(r'^// (TINYC TEST|INFO:|EXPECT:|RESULT:).*?$', re.MULTILINE)
         code_only = re.sub(test_header_pattern, '', content).lstrip()
 
-        return TinyCTest(name, description, code_only, expected_output)
+        return TinyCTest(name, description, expect_type, code_only, expected_output)
     except Exception as e:
         print(f"Error parsing test file {file_path}: {e}")
         return None
 
 
-def run_parser(parser_command: str, code: str) -> str:
+def run_parser(parser_command: str, code: str) -> Tuple[str, int]:
     """
-    Run the parser on the provided code and return its output.
+    Run the parser on the provided code and return its output and exit code.
 
     Args:
         parser_command: Command to run the parser
         code: TinyC code to parse
 
     Returns:
-        Output from the parser (expected to be JSON AST)
+        Tuple of (output, exit_code)
     """
     # Create temporary file with the code
     temp_file = "temp_code.tc"
@@ -96,15 +113,17 @@ def run_parser(parser_command: str, code: str) -> str:
         cmd = f"{parser_command} {temp_file}"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
-        # Check for execution errors
-        if result.returncode != 0:
-            print(f"Parser execution failed with return code {result.returncode}")
-            print(f"Error output: {result.stderr}")
+        # Combine stdout and stderr for output checking
+        output = result.stdout.strip()
+        if result.stderr.strip():
+            if output:
+                output += "\n"
+            output += result.stderr.strip()
 
-        return result.stdout.strip()
+        return output, result.returncode
     except Exception as e:
         print(f"Error running parser: {e}")
-        return ""
+        return "", -1
     finally:
         # Clean up temporary file
         if os.path.exists(temp_file):
@@ -178,7 +197,7 @@ def compare_json_objects(expected: Dict[str, Any], actual: Dict[str, Any], path:
     return len(differences) == 0, differences
 
 
-def compare_json_ast(expected: str, actual: str, verbose: bool = False) -> Tuple[bool, List[str]]:
+def validate_json_output(expected: str, actual: str, verbose: bool = False) -> Tuple[bool, List[str]]:
     """
     Compare two JSON ASTs for semantic equivalence, ignoring specific location values.
 
@@ -194,20 +213,40 @@ def compare_json_ast(expected: str, actual: str, verbose: bool = False) -> Tuple
         expected_json = json.loads(expected)
         actual_json = json.loads(actual)
 
-        # Special handling for error nodes
-        if expected_json.get('nodeType') == 'ErrorProgram':
-            if actual_json.get('nodeType') == 'ErrorProgram':
-                # For error programs, we just check that the error type matches
-                if expected_json.get('errorType') == actual_json.get('errorType'):
-                    return True, []
-                else:
-                    return False, [f"Error type mismatch - expected {expected_json.get('errorType')}, got {actual_json.get('errorType')}"]
-            return False, [f"Expected ErrorProgram node but got {actual_json.get('nodeType')}"]
-
-        # For regular programs, do a recursive comparison
+        # Do a recursive comparison of the JSON objects
         return compare_json_objects(expected_json, actual_json)
     except json.JSONDecodeError as e:
         return False, [f"JSON parse error: {e}"]
+
+
+def validate_error_output(expected_type: str, actual_output: str) -> Tuple[bool, str]:
+    """
+    Validate that the output contains the expected error type.
+
+    Args:
+        expected_type: Expected error type ('PARSER_ERROR' or 'LEXER_ERROR')
+        actual_output: Actual output from the parser
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    # Normalize errors to lowercase for case-insensitive comparison
+    lowercase_output = actual_output.lower()
+
+    if expected_type == 'PARSER_ERROR':
+        # Accept various forms of parser error messages
+        if any(pattern in lowercase_output for pattern in ['parser error', 'parse error', 'parsing error', 'syntax error']):
+            return True, ""
+        return False, "Expected parser error but none found in output"
+
+    elif expected_type == 'LEXER_ERROR':
+        # Accept various forms of lexer error messages
+        if any(pattern in lowercase_output for pattern in ['lexer error', 'lex error', 'lexical error', 'token error']):
+            return True, ""
+        return False, "Expected lexer error but none found in output"
+
+    # This should never happen if we validate expect_type properly
+    return False, f"Unknown expected error type: {expected_type}"
 
 
 def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Optional[Tuple[int, int]] = None) -> List[str]:
@@ -314,35 +353,55 @@ def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None
 
         print(f"\nTest {i}/{len(test_files)}: {test.name}")
         print(f"  Description: {test.description}")
+        print(f"  Expecting: {test.expect_type}")
 
         # Run parser on test code
-        actual_output = run_parser(parser_command, test.code)
+        actual_output, exit_code = run_parser(parser_command, test.code)
 
-        if not actual_output:
-            print(f"  ❌ FAILED (No output from parser)")
+        # For error tests, non-zero exit code is expected
+        # For success tests, a non-zero exit code with no output is a problem
+        if not actual_output and exit_code != 0 and test.expect_type == 'SUCCESS':
+            print(f"  ❌ FAILED (Parser failed with exit code {exit_code})")
             failed += 1
             continue
 
-        # Compare outputs
-        passed_test, differences = compare_json_ast(test.expected_output, actual_output, verbose)
+        # Handle different expected result types
+        passed_test = False
+        error_msg = ""
+
+        if test.expect_type == 'SUCCESS':
+            # For success tests, validate the JSON output
+            if test.expected_output:
+                passed_test, differences = validate_json_output(test.expected_output, actual_output, verbose)
+                if not passed_test and verbose:
+                    error_msg = "\n  Differences:"
+                    for diff in differences[:10]:  # Show at most 10 differences
+                        error_msg += f"\n    - {diff}"
+                    if len(differences) > 10:
+                        error_msg += f"\n    ... and {len(differences) - 10} more differences"
+            else:
+                passed_test = False
+                error_msg = "Missing expected output for SUCCESS test"
+        else:
+            # For error tests, check for the appropriate error message
+            passed_test, error_msg = validate_error_output(test.expect_type, actual_output)
 
         if passed_test:
             print(f"  ✅ PASSED")
             passed += 1
         else:
             print(f"  ❌ FAILED")
-            # Show first 80 chars of expected/actual (or less if they're shorter)
-            expected_preview = test.expected_output[:80] + "..." if len(test.expected_output) > 80 else test.expected_output
-            actual_preview = actual_output[:80] + "..." if len(actual_output) > 80 else actual_output
-            print(f"  Expected: {expected_preview}")
-            print(f"  Actual  : {actual_preview}")
+            if error_msg:
+                print(f"  {error_msg}")
 
-            if verbose and differences:
-                print("\n  Differences:")
-                for diff in differences[:10]:  # Show at most 10 differences
-                    print(f"    - {diff}")
-                if len(differences) > 10:
-                    print(f"    ... and {len(differences) - 10} more differences")
+            # Show first 80 chars of expected/actual (or less if they're shorter)
+            if test.expect_type == 'SUCCESS' and test.expected_output:
+                expected_preview = test.expected_output[:80] + "..." if len(test.expected_output) > 80 else test.expected_output
+                actual_preview = actual_output[:80] + "..." if len(actual_output) > 80 else actual_output
+                print(f"  Expected: {expected_preview}")
+                print(f"  Actual  : {actual_preview}")
+            else:
+                print(f"  Actual output: {actual_output[:80]}" + ("..." if len(actual_output) > 80 else ""))
 
             failed += 1
 

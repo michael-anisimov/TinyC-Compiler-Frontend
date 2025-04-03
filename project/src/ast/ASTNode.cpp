@@ -618,47 +618,6 @@ namespace tinyc::ast {
 		return parameterTypes;
 	}
 
-// ErrorProgramNode implementation
-	ErrorProgramNode::ErrorProgramNode(
-			ErrorType errorType,
-			std::string message,
-			std::vector<ASTNodePtr> declarations,
-			lexer::SourceLocation location)
-			: ASTNode({location}),
-			  errorType(errorType),
-			  message(std::move(message)),
-			  declarations(std::move(declarations)) {}
-
-	ErrorProgramNode::ErrorType ErrorProgramNode::getErrorType() const {
-		return errorType;
-	}
-
-	std::string ErrorProgramNode::getErrorTypeString() const {
-		switch (errorType) {
-			case ErrorType::LEXER:
-				return "lexer";
-			case ErrorType::PARSER:
-				return "parser";
-			case ErrorType::SEMANTIC:
-				return "semantic";
-			case ErrorType::UNKNOWN:
-			default:
-				return "unknown";
-		}
-	}
-
-	const std::string& ErrorProgramNode::getMessage() const {
-		return message;
-	}
-
-	const std::vector<ASTNodePtr>& ErrorProgramNode::getDeclarations() const {
-		return declarations;
-	}
-
-	void ErrorProgramNode::accept(NodeVisitor& visitor) const {
-		visitor.visit(*this);
-	}
-
 // ProgramNode implementation
 	ProgramNode::ProgramNode(std::string sourceName)
 			: ASTNode(lexer::SourceLocation(std::move(sourceName), 0, 0)) {
