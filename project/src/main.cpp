@@ -40,7 +40,7 @@ void runLexerMode(const std::string &source, const std::string &filename) {
 	printTokens(tokens);
 }
 
-void runParserMode(const std::string &source, const std::string &filename) {
+void runParserMode(const std::string &source, const std::string &filename, bool prettyPrint) {
 	// Create lexer
 	Lexer lexer(source, filename);
 
@@ -48,8 +48,8 @@ void runParserMode(const std::string &source, const std::string &filename) {
 	Parser parser(lexer);
 	auto ast = parser.parseProgram();
 
-
-	JSONVisitor jsonVisitor(false);
+	// Create JSON visitor with pretty print option
+	JSONVisitor jsonVisitor(prettyPrint);
 	ast->accept(jsonVisitor);
 	std::string json = jsonVisitor.getJSON();
 	std::cout << json << std::endl;
@@ -64,11 +64,22 @@ void runInteractiveMode() {
 
 	bool parserMode = (mode == "parser" || mode == "p");
 
+	if (parserMode) {
+		std::cout << "Pretty print JSON? (y/n, default is 'n'): ";
+		std::string prettyPrintInput;
+		std::getline(std::cin, prettyPrintInput);
+		bool prettyPrint = (prettyPrintInput == "y" || prettyPrintInput == "yes" ||
+							prettyPrintInput == "Y" || prettyPrintInput == "Yes");
+
+		std::cout << "Pretty printing " << (prettyPrint ? "enabled" : "disabled") << std::endl;
+	}
+
 	std::cout << "Enter TinyC code (type 'exit' to quit):" << std::endl;
 
 	std::string line;
 	std::string source;
 	int lineNumber = 1;
+	bool prettyPrint = false;
 
 	while (true) {
 		std::cout << lineNumber << "> ";
@@ -108,7 +119,7 @@ void runInteractiveMode() {
 	// In parser mode, we process the entire input at once
 	if (parserMode && !source.empty()) {
 		try {
-			runParserMode(source, "<interactive>");
+			runParserMode(source, "<interactive>", prettyPrint);
 		}
 		catch (const LexerError &e) {
 			std::cerr << "Lexer error: " << e.what() << std::endl;
@@ -121,34 +132,88 @@ void runInteractiveMode() {
 	std::cout << "Exiting interactive mode." << std::endl;
 }
 
+void printUsage(const char* programName) {
+	std::cerr << "Usage: " << programName << " [--lex|-l|--parse|-p] [--pretty|-pp] <source_file>" << std::endl;
+	std::cerr << "       Run without arguments for interactive mode." << std::endl;
+	std::cerr << "Options:" << std::endl;
+	std::cerr << "  --lex, -l       Run in lexer mode (output tokens)" << std::endl;
+	std::cerr << "  --parse, -p     Run in parser mode (output AST as JSON)" << std::endl;
+	std::cerr << "  --pretty, -pp   Pretty print JSON output (only with parser mode)" << std::endl;
+}
+
 int main(int argc, char *argv[]) {
 	try {
 		if (argc == 1) {
 			// No arguments, run in interactive mode
 			runInteractiveMode();
 			return 0;
-		} else if (argc == 3) {
-			// Two arguments: mode and file
-			std::string mode = argv[1];
-			std::string filename = argv[2];
-			std::string source = readFile(filename);
+		} else {
+			// Parse command line arguments
+			std::string mode;
+			std::string filename;
+			bool prettyPrint = false;
 
-			if (mode == "--lex" || mode == "-l") {
-				runLexerMode(source, filename);
-			} else if (mode == "--parse" || mode == "-p") {
-				runParserMode(source, filename);
-			} else {
-				std::cerr << "Unknown mode: " << mode << std::endl;
-				std::cerr << "Usage: " << argv[0] << " [--lex|-l|--parse|-p] <source_file>" << std::endl;
-				std::cerr << "       Run without arguments for interactive mode." << std::endl;
+			// Process all arguments
+			for (int i = 1; i < argc; i++) {
+				std::string arg = argv[i];
+
+				if (arg == "--lex" || arg == "-l") {
+					if (!mode.empty()) {
+						std::cerr << "Error: Multiple mode options specified" << std::endl;
+						printUsage(argv[0]);
+						return 1;
+					}
+					mode = "--lex";
+				} else if (arg == "--parse" || arg == "-p") {
+					if (!mode.empty()) {
+						std::cerr << "Error: Multiple mode options specified" << std::endl;
+						printUsage(argv[0]);
+						return 1;
+					}
+					mode = "--parse";
+				} else if (arg == "--pretty" || arg == "-pp") {
+					prettyPrint = true;
+				} else if (arg[0] == '-') {
+					std::cerr << "Unknown option: " << arg << std::endl;
+					printUsage(argv[0]);
+					return 1;
+				} else {
+					// Must be the filename
+					if (!filename.empty()) {
+						std::cerr << "Error: Multiple filenames specified" << std::endl;
+						printUsage(argv[0]);
+						return 1;
+					}
+					filename = arg;
+				}
+			}
+
+			// Check if we have a filename
+			if (filename.empty()) {
+				std::cerr << "Error: No source file specified" << std::endl;
+				printUsage(argv[0]);
 				return 1;
 			}
 
+			// Default to parser mode if not specified
+			if (mode.empty()) {
+				mode = "--parse";
+			}
+
+			// Read the source file
+			std::string source = readFile(filename);
+
+			// Run in the selected mode
+			if (mode == "--lex") {
+				if (prettyPrint) {
+					std::cerr << "Warning: Pretty print option is ignored in lexer mode" << std::endl;
+				}
+				runLexerMode(source, filename);
+			} else if (mode == "--parse") {
+				runParserMode(source, filename, prettyPrint);
+			}
+
 			return 0;
-		} else {
-			std::cerr << "Usage: " << argv[0] << " [--lex|-l|--parse|-p] <source_file>" << std::endl;
-			std::cerr << "       Run without arguments for interactive mode." << std::endl;
-			return 1;
 		}
 	}
 	catch (const LexerError &e) {
