@@ -83,9 +83,6 @@ namespace tinyc::ast {
 
 		void visit(const ReturnStatementNode &node) override;
 
-		// Error node
-		void visit(const ErrorProgramNode &node) override;
-
 	private:
 		std::ostringstream json;
 		int indentLevel = 0;

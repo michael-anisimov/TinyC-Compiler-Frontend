@@ -1,4 +1,5 @@
 // TINYC TEST
 // INFO: Empty program test
+// EXPECT: SUCCESS
 // RESULT: {"nodeType":"Program","declarations":[],"location":{"filename":"../examples/0_empty.tc","line":0,"column":0}}
 
