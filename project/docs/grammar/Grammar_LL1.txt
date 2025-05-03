@@ -249,7 +249,7 @@ F -> char_literal
 F -> string_literal
 F -> identifier
 # Change from EXPR to EXPRS
-F -> ( EXPRS )
+F -> ( EXPR )
 F -> E_CAST
 
 E_CAST -> cast < TYPE > ( EXPR )

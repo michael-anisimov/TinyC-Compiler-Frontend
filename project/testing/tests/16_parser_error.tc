@@ -1,6 +1,8 @@
 // TINYC TEST
 // INFO: Program with a parsing error (should produce a parser error)
-// EXPECT: PARSER_ERROR
+// RUN: parser
+// EXPECT: ERROR
+// ERROR_TYPE: PARSER_ERROR
 
 struct Point;
 

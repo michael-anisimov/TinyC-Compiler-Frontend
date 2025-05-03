@@ -3,7 +3,7 @@
 TinyC Test File Generator
 
 This script generates test files from existing TinyC examples and their
-corresponding JSON outputs.
+corresponding JSON outputs, supporting multiple test configurations per file.
 """
 
 import os
@@ -11,7 +11,7 @@ import sys
 import json
 import argparse
 import glob
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Tuple
 
 
 # Descriptions for the test files
@@ -36,10 +36,28 @@ TEST_DESCRIPTIONS = {
     "17_lexer_error": "Program with a lexical error (should produce a lexer error)"
 }
 
-# Define which test files should produce errors
+# Define which test files should produce errors and what type of error
 ERROR_FILES = {
     "16_parser_error": "PARSER_ERROR",
     "17_lexer_error": "LEXER_ERROR"
+}
+
+# Define the run configurations for each test file
+# Format: filename -> list of (run_type, expect, result) tuples
+TEST_CONFIGS = {
+    # Default configuration for most files is just parser validation
+    # For examples that should be executable, we can add exec configs
+    "1_hello_world": [
+        ("parser", "SUCCESS", None),  # Normal parser test
+        ("exec", "0", None)           # Should exit with code 0
+    ],
+    # For error cases
+    "16_parser_error": [
+        ("parser", "ERROR", "PARSER_ERROR")
+    ],
+    "17_lexer_error": [
+        ("parser", "ERROR", "LEXER_ERROR")
+    ]
 }
 
 
@@ -78,30 +96,47 @@ def create_test_file(tc_file: str, json_file: str, output_file: str, use_prefix:
     # Get description for this test
     description = TEST_DESCRIPTIONS.get(name_without_ext, f"Test for {name_without_ext}")
 
-    # Determine if this should produce an error
-    expect_type = ERROR_FILES.get(name_without_ext, "SUCCESS")
+    # Get test configurations
+    configs = TEST_CONFIGS.get(name_without_ext, [])
 
-    # For success cases, we need the expected JSON output
-    compact_json = ""
-    if expect_type == "SUCCESS":
+    # If no specific configs defined, create default parser test
+    if not configs:
+        if name_without_ext in ERROR_FILES:
+            # Default error test
+            error_type = ERROR_FILES[name_without_ext]
+            configs = [("parser", "ERROR", error_type)]
+        else:
+            # Default success test
+            configs = [("parser", "SUCCESS", None)]
+
+    # Load JSON output for parser success tests
+    json_output = None
+    if any(cfg[0] == "parser" and cfg[1] == "SUCCESS" for cfg in configs):
         json_output = read_file(json_file)
-        if json_output is None:
+        if json_output is None and not name_without_ext in ERROR_FILES:
+            print(f"Warning: No JSON file found for {tc_file}")
             return False
 
         # Try to compact the JSON for better readability
         try:
             json_obj = json.loads(json_output)
-            compact_json = json.dumps(json_obj, separators=(',', ':'))
+            json_output = json.dumps(json_obj, separators=(',', ':'))
         except json.JSONDecodeError:
             print(f"Warning: Could not parse JSON from {json_file}, using as-is")
-            compact_json = json_output.strip()
+            json_output = json_output.strip() if json_output else None
 
     # Create test file content
-    test_content = f"// TINYC TEST\n// INFO: {description}\n// EXPECT: {expect_type}\n"
+    test_content = f"// TINYC TEST\n// INFO: {description}\n"
 
-    # Only include RESULT for SUCCESS cases
-    if expect_type == "SUCCESS":
-        test_content += f"// RESULT: {compact_json}\n"
+    # Add test configurations
+    for run_type, expect, error_type in configs:
+        test_content += f"// RUN: {run_type}\n"
+        test_content += f"// EXPECT: {expect}\n"
+
+        if expect == "ERROR" and error_type:
+            test_content += f"// ERROR_TYPE: {error_type}\n"
+        elif expect == "SUCCESS" and run_type == "parser" and json_output:
+            test_content += f"// RESULT: {json_output}\n"
 
     test_content += f"\n{tc_code}"
 
@@ -155,10 +190,17 @@ def main():
         json_file = os.path.join(args.json_dir, f"{name_without_ext}.json")
 
         # For error cases, we don't need the JSON file
-        expect_type = ERROR_FILES.get(name_without_ext, "SUCCESS")
+        if name_without_ext in ERROR_FILES:
+            # Create output path
+            output_file = os.path.join(args.output_dir, basename)
 
-        # Check if JSON file exists (only for SUCCESS cases)
-        if expect_type == "SUCCESS" and not os.path.exists(json_file):
+            # Create the test file
+            if create_test_file(tc_file, None, output_file, args.prefix):
+                success_count += 1
+            continue
+
+        # For regular files, check if JSON exists
+        if not os.path.exists(json_file):
             print(f"Warning: No JSON file found for {tc_file}")
             continue
 

@@ -1,28 +1,40 @@
 #!/usr/bin/env python3
 """
-TinyC Parser Test Runner
+TinyC Test Runner
 
-This script validates student parser implementations against a set of TinyC test files.
-Each test file contains TinyC code along with metadata about the expected output or error.
+This script validates TinyC compiler implementations against a set of test files.
+Each test file can contain multiple test configurations with different run types,
+expected outputs, and other parameters.
+
+Run types supported:
+- parser: Test the parser by comparing AST output
+- exec: Test the compiler by executing the program and comparing output or return value
+- typechecker: Test the type checker output or errors
 """
 
 import os
 import sys
 import re
-
 import json
 import subprocess
 import argparse
 from typing import Dict, List, Optional, Tuple, NamedTuple, Any, Union
 
 
+class TestConfig(NamedTuple):
+    """Represents a single test configuration within a test file"""
+    run_type: str  # 'parser', 'exec', 'typechecker', etc.
+    expect: str  # Can be 'SUCCESS', 'ERROR', or a specific expected value
+    result: Optional[str]  # Expected output or None
+    error_type: Optional[str]  # For error tests, specifies the type of error
+
+
 class TinyCTest(NamedTuple):
-    """Represents a TinyC test case"""
+    """Represents a TinyC test case with multiple test configurations"""
     name: str
     description: str
-    expect_type: str  # Can be 'SUCCESS', 'PARSER_ERROR', or 'LEXER_ERROR'
     code: str
-    expected_output: Optional[str]  # None for error test cases
+    configs: List[TestConfig]  # List of test configurations
 
 
 def extract_number_prefix(filename: str) -> int:
@@ -38,7 +50,7 @@ def extract_number_prefix(filename: str) -> int:
 
 def parse_test_file(file_path: str) -> Optional[TinyCTest]:
     """
-    Parse a TinyC test file to extract metadata and code.
+    Parse a TinyC test file to extract metadata, code, and test configurations.
 
     Args:
         file_path: Path to the test file
@@ -55,63 +67,119 @@ def parse_test_file(file_path: str) -> Optional[TinyCTest]:
             print(f"Warning: {file_path} does not appear to be a test file (missing header)")
             return None
 
-        # Extract test information using regex
+        # Extract basic test information
         name = os.path.basename(file_path).replace('.tc', '')
         description_match = re.search(r'// INFO: (.*?)$', content, re.MULTILINE)
-        expect_match = re.search(r'// EXPECT: (.*?)$', content, re.MULTILINE)
 
-        if not description_match or not expect_match:
-            print(f"Warning: {file_path} is missing required metadata (INFO or EXPECT)")
+        if not description_match:
+            print(f"Warning: {file_path} is missing required INFO metadata")
             return None
 
         description = description_match.group(1).strip()
-        expect_type = expect_match.group(1).strip()
 
-        # Validate expect_type
-        if expect_type not in ['SUCCESS', 'PARSER_ERROR', 'LEXER_ERROR']:
-            print(f"Warning: {file_path} has invalid EXPECT value: {expect_type}")
-            print("EXPECT should be one of: SUCCESS, PARSER_ERROR, LEXER_ERROR")
-            return None
+        # Extract all RUN blocks
+        run_matches = re.finditer(r'// RUN: (.*?)$', content, re.MULTILINE)
+        if not run_matches:
+            print(f"Warning: {file_path} has no RUN directives")
 
-        # For success cases, we need the expected JSON output
-        expected_output = None
-        if expect_type == 'SUCCESS':
-            result_match = re.search(r'// RESULT: (.*?)$', content, re.MULTILINE)
-            if not result_match:
-                print(f"Warning: {file_path} is a SUCCESS test but missing RESULT metadata")
+            # For backward compatibility, try to extract the old format
+            expect_match = re.search(r'// EXPECT: (.*?)$', content, re.MULTILINE)
+            if expect_match:
+                expect = expect_match.group(1).strip()
+                if expect in ['PARSER_ERROR', 'LEXER_ERROR']:
+                    # Old error test
+                    configs = [TestConfig('parser', 'ERROR', None, expect)]
+                else:
+                    # Old success test
+                    result_match = re.search(r'// RESULT: (.*?)$', content, re.MULTILINE)
+                    result = result_match.group(1).strip() if result_match else None
+                    configs = [TestConfig('parser', 'SUCCESS', result, None)]
+            else:
                 return None
-            expected_output = result_match.group(1).strip()
+        else:
+            # Process each RUN block to create test configurations
+            configs = []
+            positions = []
+
+            # Find all RUN directive positions
+            for match in run_matches:
+                positions.append((match.start(), match.group(1).strip()))
+
+            # Add a sentinel position at the end
+            positions.append((len(content), None))
+
+            # Process each block between RUN directives
+            for i in range(len(positions) - 1):
+                start_pos, run_type = positions[i]
+                end_pos = positions[i + 1][0]
+
+                # Extract the block between this RUN and the next one
+                block = content[start_pos:end_pos]
+
+                # Extract EXPECT from this block
+                expect_match = re.search(r'// EXPECT: (.*?)$', block, re.MULTILINE)
+                if not expect_match:
+                    print(f"Warning: Missing EXPECT for RUN: {run_type} in {file_path}")
+                    continue
+
+                expect = expect_match.group(1).strip()
+
+                # Check if this is an error test
+                error_type = None
+                if expect == 'ERROR':
+                    error_type_match = re.search(r'// ERROR_TYPE: (.*?)$', block, re.MULTILINE)
+                    if error_type_match:
+                        error_type = error_type_match.group(1).strip()
+
+                # Extract RESULT if present
+                result = None
+                result_match = re.search(r'// RESULT: (.*?)$', block, re.MULTILINE)
+                if result_match:
+                    result = result_match.group(1).strip()
+
+                # Add the configuration
+                configs.append(TestConfig(run_type, expect, result, error_type))
 
         # Extract code (everything after the metadata)
-        test_header_pattern = re.compile(r'^// (TINYC TEST|INFO:|EXPECT:|RESULT:).*?$', re.MULTILINE)
-        code_only = re.sub(test_header_pattern, '', content).lstrip()
+        # Find the last occurrence of any test directive
+        last_directive_pattern = re.compile(r'^// (TINYC TEST|INFO:|RUN:|EXPECT:|RESULT:|ERROR_TYPE:).*?$', re.MULTILINE)
+        last_match = None
+        for match in last_directive_pattern.finditer(content):
+            last_match = match
 
-        return TinyCTest(name, description, expect_type, code_only, expected_output)
+        # Extract code after the last directive
+        if last_match:
+            code_start = last_match.end()
+            code_only = content[code_start:].lstrip()
+        else:
+            # Fallback - just remove all directive lines
+            code_only = re.sub(last_directive_pattern, '', content).lstrip()
+
+        return TinyCTest(name, description, code_only, configs)
     except Exception as e:
         print(f"Error parsing test file {file_path}: {e}")
         return None
 
 
-def run_parser(parser_command: str, code: str) -> Tuple[str, int]:
+def run_command(command: str, code: str, temp_file: str = "temp_code.tc") -> Tuple[str, int]:
     """
-    Run the parser on the provided code and return its output and exit code.
+    Run a command on the provided code and return its output and exit code.
 
     Args:
-        parser_command: Command to run the parser
-        code: TinyC code to parse
+        command: Command to run
+        code: TinyC code to process
+        temp_file: Name of the temporary file to create
 
     Returns:
         Tuple of (output, exit_code)
     """
     # Create temporary file with the code
-    temp_file = "temp_code.tc"
     try:
         with open(temp_file, 'w') as f:
             f.write(code)
 
-        # Run the parser command
-        cmd = f"{parser_command} {temp_file}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        # Run the command
+        result = subprocess.run(f"{command} {temp_file}", shell=True, capture_output=True, text=True)
 
         # Combine stdout and stderr for output checking
         output = result.stdout.strip()
@@ -122,8 +190,8 @@ def run_parser(parser_command: str, code: str) -> Tuple[str, int]:
 
         return output, result.returncode
     except Exception as e:
-        print(f"Error running parser: {e}")
-        return "", -1
+        print(f"Error running command: {e}")
+        return f"Error: {e}", -1
     finally:
         # Clean up temporary file
         if os.path.exists(temp_file):
@@ -197,59 +265,151 @@ def compare_json_objects(expected: Dict[str, Any], actual: Dict[str, Any], path:
     return len(differences) == 0, differences
 
 
-def validate_json_output(expected: str, actual: str, verbose: bool = False) -> Tuple[bool, List[str]]:
+def validate_parser_output(config: TestConfig, actual_output: str, verbose: bool = False) -> Tuple[bool, str]:
     """
-    Compare two JSON ASTs for semantic equivalence, ignoring specific location values.
+    Validate parser output against expected output.
 
     Args:
-        expected: Expected JSON output
-        actual: Actual JSON output from the parser
-        verbose: Whether to print detailed comparison information
-
-    Returns:
-        Tuple of (is_equal, differences_list)
-    """
-    try:
-        expected_json = json.loads(expected)
-        actual_json = json.loads(actual)
-
-        # Do a recursive comparison of the JSON objects
-        return compare_json_objects(expected_json, actual_json)
-    except json.JSONDecodeError as e:
-        return False, [f"JSON parse error: {e}"]
-
-
-def validate_error_output(expected_type: str, actual_output: str) -> Tuple[bool, str]:
-    """
-    Validate that the output contains the expected error type.
-
-    Args:
-        expected_type: Expected error type ('PARSER_ERROR' or 'LEXER_ERROR')
+        config: Test configuration with expected result
         actual_output: Actual output from the parser
+        verbose: Whether to print detailed comparison information
 
     Returns:
         Tuple of (is_valid, error_message)
     """
-    # Normalize errors to lowercase for case-insensitive comparison
-    lowercase_output = actual_output.lower()
+    if config.expect == 'SUCCESS':
+        # For success tests, validate the JSON output
+        try:
+            expected_json = json.loads(config.result)
+            actual_json = json.loads(actual_output)
 
-    if expected_type == 'PARSER_ERROR':
-        # Accept various forms of parser error messages
-        if any(pattern in lowercase_output for pattern in ['parser error', 'parse error', 'parsing error', 'syntax error']):
+            # Do a recursive comparison of the JSON objects
+            is_equal, differences = compare_json_objects(expected_json, actual_json)
+
+            if not is_equal and verbose:
+                error_msg = "Differences in JSON ASTs:"
+                for diff in differences[:10]:  # Show at most 10 differences
+                    error_msg += f"\n    - {diff}"
+                if len(differences) > 10:
+                    error_msg += f"\n    ... and {len(differences) - 10} more differences"
+                return False, error_msg
+
+            return is_equal, "" if is_equal else "AST structures differ"
+        except json.JSONDecodeError as e:
+            return False, f"JSON parse error: {e}"
+
+    elif config.expect == 'ERROR':
+        # For error tests, check for the appropriate error message
+        lowercase_output = actual_output.lower()
+
+        if config.error_type == 'PARSER_ERROR':
+            # Accept various forms of parser error messages
+            if any(pattern in lowercase_output for pattern in ['parser error', 'parse error', 'parsing error', 'syntax error']):
+                return True, ""
+            return False, "Expected parser error but none found in output"
+
+        elif config.error_type == 'LEXER_ERROR':
+            # Accept various forms of lexer error messages
+            if any(pattern in lowercase_output for pattern in ['lexer error', 'lex error', 'lexical error', 'token error']):
+                return True, ""
+            return False, "Expected lexer error but none found in output"
+
+        # Other error types can be added as needed
+        return False, f"Unknown error type: {config.error_type}"
+
+    else:
+        # For non-standard expect values (not SUCCESS or ERROR), try direct comparison
+        return config.expect == actual_output.strip(), f"Expected '{config.expect}' but got '{actual_output.strip()}'"
+
+
+def validate_exec_output(config: TestConfig, actual_output: str, exit_code: int, verbose: bool = False) -> Tuple[bool, str]:
+    """
+    Validate execution output against expected output.
+
+    Args:
+        config: Test configuration with expected result
+        actual_output: Actual output from executing the program
+        exit_code: Exit code from program execution
+        verbose: Whether to print detailed comparison information
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    if config.expect == 'SUCCESS':
+        # For success tests with explicit result, compare output
+        if config.result:
+            expected_output = config.result.strip()
+            actual_output = actual_output.strip()
+
+            if expected_output == actual_output:
+                return True, ""
+            else:
+                # Create a nice diff for the error message
+                if verbose:
+                    import difflib
+                    diff = difflib.unified_diff(
+                        expected_output.splitlines(keepends=True),
+                        actual_output.splitlines(keepends=True),
+                        fromfile='expected',
+                        tofile='actual'
+                    )
+                    return False, "Output differs:\n" + ''.join(diff)
+                return False, "Program output did not match expected output"
+
+        # For success tests without explicit result, check exit code is 0
+        return exit_code == 0, f"Program exited with non-zero code: {exit_code}" if exit_code != 0 else ""
+
+    elif config.expect == 'ERROR':
+        # For error tests, just check that the program produced an error
+        if "error" in actual_output.lower() or exit_code != 0:
             return True, ""
-        return False, "Expected parser error but none found in output"
+        return False, "Expected execution error but program completed successfully"
 
-    elif expected_type == 'LEXER_ERROR':
-        # Accept various forms of lexer error messages
-        if any(pattern in lowercase_output for pattern in ['lexer error', 'lex error', 'lexical error', 'token error']):
+    else:
+        # For other expect values, treat as expected exit code
+        try:
+            expected_exit = int(config.expect)
+            return exit_code == expected_exit, f"Expected exit code {expected_exit} but got {exit_code}"
+        except ValueError:
+            # If not a number, treat as expected output
+            return config.expect == actual_output.strip(), f"Expected output '{config.expect}' but got '{actual_output.strip()}'"
+
+
+def validate_typechecker_output(config: TestConfig, actual_output: str, verbose: bool = False) -> Tuple[bool, str]:
+    """
+    Validate type checker output against expected output.
+
+    Args:
+        config: Test configuration with expected result
+        actual_output: Actual output from the type checker
+        verbose: Whether to print detailed comparison information
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    if config.expect == 'SUCCESS':
+        # For success tests, expected output might be empty (no type errors)
+        if not config.result and not actual_output:
             return True, ""
-        return False, "Expected lexer error but none found in output"
 
-    # This should never happen if we validate expect_type properly
-    return False, f"Unknown expected error type: {expected_type}"
+        # If expected output is provided, compare it with actual output
+        if config.result == actual_output.strip():
+            return True, ""
+        return False, "Type checker output did not match expected output"
+
+    elif config.expect == 'ERROR':
+        # For error tests, check for type error messages
+        if "type error" in actual_output.lower() or "type mismatch" in actual_output.lower():
+            return True, ""
+        return False, "Expected type error but none found in output"
+
+    else:
+        # For other expect values, treat as expected output
+        return config.expect == actual_output.strip(), f"Expected '{config.expect}' but got '{actual_output.strip()}'"
 
 
-def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Optional[Tuple[int, int]] = None) -> List[str]:
+def get_test_files(test_dir: str, test_num: Optional[int] = None,
+                   test_range: Optional[Tuple[int, int]] = None) -> List[str]:
     """
     Get a list of all test files in the given directory, sorted by numeric prefix.
     Can filter to specific test number or range.
@@ -271,15 +431,7 @@ def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Op
     for file in os.listdir(test_dir):
         if file.endswith('.tc'):
             file_path = os.path.join(test_dir, file)
-
-            # Verify it's a test file by checking the first line
-            try:
-                with open(file_path, 'r') as f:
-                    first_line = f.readline().strip()
-                    if first_line.startswith('// TINYC TEST'):
-                        all_test_files.append(file_path)
-            except Exception as e:
-                print(f"Error reading {file_path}: {e}")
+            all_test_files.append(file_path)
 
     # Filter based on test number or range
     filtered_files = []
@@ -300,23 +452,25 @@ def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Op
             if start <= file_num <= end:
                 filtered_files.append(file_path)
         else:
-            # No filter, include all test files
+            # No filter, include all files
             filtered_files.append(file_path)
 
     # Sort test files by their numeric prefix
     return sorted(filtered_files, key=extract_number_prefix)
 
 
-def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None,
-              test_range: Optional[Tuple[int, int]] = None, verbose: bool = False) -> Tuple[int, int]:
+def run_tests(base_command: str, test_dir: str, test_num: Optional[int] = None,
+              test_range: Optional[Tuple[int, int]] = None, run_type_filter: Optional[str] = None,
+              verbose: bool = False) -> Tuple[int, int]:
     """
-    Run tests against the parser.
+    Run tests against the TinyC compiler.
 
     Args:
-        parser_command: Command to run the parser
+        base_command: Base command to run (will be modified based on run type)
         test_dir: Directory containing test files
         test_num: If provided, only run the test with this number
         test_range: If provided, only run tests in this range (start, end) inclusive
+        run_type_filter: If provided, only run test configs with this run type
         verbose: Whether to print detailed comparison information
 
     Returns:
@@ -335,15 +489,30 @@ def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None
 
     passed = 0
     failed = 0
+    total_configs = 0
 
     # Create a message about which tests we're running
-    test_msg = f"{len(test_files)} tests"
+    test_msg = f"{len(test_files)} test files"
     if test_num is not None:
-        test_msg = f"test {test_num}"
+        test_msg = f"test file {test_num}"
     elif test_range is not None:
-        test_msg = f"tests {test_range[0]}-{test_range[1]}"
+        test_msg = f"test files {test_range[0]}-{test_range[1]}"
 
     print(f"Running {test_msg}...")
+
+    # Set up validation functions for different test types
+    validation_functions = {
+        'parser': validate_parser_output,
+        'exec': validate_exec_output,
+        'typechecker': validate_typechecker_output
+    }
+
+    # Command-line argument mapping for different run types
+    command_args = {
+        'parser': '--parse',
+        'exec': '--run',
+        'typechecker': '--typecheck'
+    }
 
     for i, test_file in enumerate(test_files, 1):
         test = parse_test_file(test_file)
@@ -351,59 +520,69 @@ def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None
             print(f"Skipping invalid test file: {test_file}")
             continue
 
-        print(f"\nTest {i}/{len(test_files)}: {test.name}")
+        print(f"\nTest file {i}/{len(test_files)}: {test.name}")
         print(f"  Description: {test.description}")
-        print(f"  Expecting: {test.expect_type}")
 
-        # Run parser on test code
-        actual_output, exit_code = run_parser(parser_command, test.code)
+        # Count configs that match the filter
+        filtered_configs = [c for c in test.configs if run_type_filter is None or c.run_type == run_type_filter]
+        total_configs += len(filtered_configs)
 
-        # For error tests, non-zero exit code is expected
-        # For success tests, a non-zero exit code with no output is a problem
-        if not actual_output and exit_code != 0 and test.expect_type == 'SUCCESS':
-            print(f"  ❌ FAILED (Parser failed with exit code {exit_code})")
-            failed += 1
+        if not filtered_configs:
+            if run_type_filter:
+                print(f"  Skipping - no configurations for run type '{run_type_filter}'")
+            else:
+                print(f"  Warning: No valid test configurations found")
             continue
 
-        # Handle different expected result types
-        passed_test = False
-        error_msg = ""
+        # Run each test configuration
+        for j, config in enumerate(filtered_configs, 1):
+            print(f"  Configuration {j}/{len(filtered_configs)}: {config.run_type} (Expect: {config.expect})")
 
-        if test.expect_type == 'SUCCESS':
-            # For success tests, validate the JSON output
-            if test.expected_output:
-                passed_test, differences = validate_json_output(test.expected_output, actual_output, verbose)
-                if not passed_test and verbose:
-                    error_msg = "\n  Differences:"
-                    for diff in differences[:10]:  # Show at most 10 differences
-                        error_msg += f"\n    - {diff}"
-                    if len(differences) > 10:
-                        error_msg += f"\n    ... and {len(differences) - 10} more differences"
+            # Choose the appropriate command based on the run type
+            cmd_arg = command_args.get(config.run_type, '')
+            cmd = f"{base_command} {cmd_arg}".strip()
+
+            # Run the command on the test code
+            actual_output, exit_code = run_command(cmd, test.code)
+
+            # Check for catastrophic failure
+            if not actual_output and exit_code != 0 and config.expect == 'SUCCESS':
+                print(f"    ❌ FAILED (Command failed with exit code {exit_code})")
+                failed += 1
+                continue
+
+            # Get the appropriate validation function
+            validation_func = validation_functions.get(config.run_type)
+            if not validation_func:
+                print(f"    ❌ FAILED (No validation function for run type: {config.run_type})")
+                failed += 1
+                continue
+
+            # Validate the output
+            if config.run_type == 'exec':
+                passed_test, error_msg = validation_func(config, actual_output, exit_code, verbose)
             else:
-                passed_test = False
-                error_msg = "Missing expected output for SUCCESS test"
-        else:
-            # For error tests, check for the appropriate error message
-            passed_test, error_msg = validate_error_output(test.expect_type, actual_output)
+                passed_test, error_msg = validation_func(config, actual_output, verbose)
 
-        if passed_test:
-            print(f"  ✅ PASSED")
-            passed += 1
-        else:
-            print(f"  ❌ FAILED")
-            if error_msg:
-                print(f"  {error_msg}")
-
-            # Show first 80 chars of expected/actual (or less if they're shorter)
-            if test.expect_type == 'SUCCESS' and test.expected_output:
-                expected_preview = test.expected_output[:80] + "..." if len(test.expected_output) > 80 else test.expected_output
-                actual_preview = actual_output[:80] + "..." if len(actual_output) > 80 else actual_output
-                print(f"  Expected: {expected_preview}")
-                print(f"  Actual  : {actual_preview}")
+            if passed_test:
+                print(f"    ✅ PASSED")
+                passed += 1
             else:
-                print(f"  Actual output: {actual_output[:80]}" + ("..." if len(actual_output) > 80 else ""))
+                print(f"    ❌ FAILED")
+                if error_msg:
+                    print(f"    {error_msg}")
 
-            failed += 1
+                # Show preview of expected/actual (for non-verbose mode)
+                if not verbose:
+                    if config.expect == 'SUCCESS' and config.result:
+                        expected_preview = config.result[:80] + "..." if len(config.result) > 80 else config.result
+                        actual_preview = actual_output[:80] + "..." if len(actual_output) > 80 else actual_output
+                        print(f"    Expected: {expected_preview}")
+                        print(f"    Actual  : {actual_preview}")
+                    else:
+                        print(f"    Actual output: {actual_output[:80]}" + ("..." if len(actual_output) > 80 else ""))
+
+                failed += 1
 
     return passed, failed
 
@@ -434,10 +613,13 @@ def parse_range(range_str: str) -> Optional[Tuple[int, int]]:
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description='TinyC Parser Test Runner')
-    parser.add_argument('parser_command', help='Command to run the parser (e.g., "./student-parser -p")')
+    parser = argparse.ArgumentParser(description='TinyC Test Runner')
+    parser.add_argument('command', help='Base command to run the compiler (e.g., "./tinyc-compiler")')
     parser.add_argument('--test-dir', '-d', default='tests', help='Directory containing test files (default: tests)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output with detailed differences')
+
+    # Add optional filter for run type
+    parser.add_argument('--run-type', '-rt', help='Only run test configurations of a specific type')
 
     # Add mutually exclusive group for test selection
     test_group = parser.add_mutually_exclusive_group()
@@ -453,7 +635,7 @@ def main():
         if test_range is None:
             return 1
 
-    passed, failed = run_tests(args.parser_command, args.test_dir, args.test, test_range, args.verbose)
+    passed, failed = run_tests(args.command, args.test_dir, args.test, test_range, args.run_type, args.verbose)
 
     print("\n" + "="*50)
     print(f"Test Results: {passed} passed, {failed} failed")
