@@ -15,6 +15,8 @@ import subprocess
 import argparse
 from typing import Dict, List, Optional, Tuple, NamedTuple, Any, Union
 
+import jsonschema
+
 
 class TinyCTest(NamedTuple):
     """Represents a TinyC test case"""
@@ -91,6 +93,58 @@ def parse_test_file(file_path: str) -> Optional[TinyCTest]:
         print(f"Error parsing test file {file_path}: {e}")
         return None
 
+def load_json_schema(schema_path: str = "tinyc-ast-schema.json") -> Dict[str, Any]:
+    """
+    Load the TinyC AST JSON schema.
+
+    Args:
+        schema_path: Path to the JSON schema file
+
+    Returns:
+        The loaded JSON schema as a dictionary
+    """
+    try:
+        with open(schema_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON schema from {schema_path}: {e}")
+        print("Schema validation will be disabled.")
+        return {}
+
+
+def validate_against_schema(json_obj: Dict[str, Any], schema: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    """
+    Validate a JSON object against the TinyC AST schema.
+
+    Args:
+        json_obj: The JSON object to validate
+        schema: The JSON schema to validate against
+
+    Returns:
+        Tuple of (is_valid, validation_errors)
+    """
+    if not schema:
+        # If no schema is available, skip validation
+        return True, []
+
+    errors = []
+    try:
+        # Create a validator instance
+        validator = jsonschema.Draft7Validator(schema)
+
+        # Validate and collect errors
+        for error in validator.iter_errors(json_obj):
+            # Format the error message with path
+            path = ".".join(str(p) for p in error.absolute_path)
+            if path:
+                error_msg = f"At {path}: {error.message}"
+            else:
+                error_msg = error.message
+            errors.append(error_msg)
+
+        return len(errors) == 0, errors
+    except Exception as e:
+        return False, [f"Schema validation error: {str(e)}"]
 
 def run_parser(parser_command: str, code: str) -> Tuple[str, int]:
     """
@@ -307,7 +361,7 @@ def get_test_files(test_dir: str, test_num: Optional[int] = None, test_range: Op
     return sorted(filtered_files, key=extract_number_prefix)
 
 
-def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None,
+def run_tests(parser_command: str, test_dir: str, schema_path: str, test_num: Optional[int] = None,
               test_range: Optional[Tuple[int, int]] = None, verbose: bool = False) -> Tuple[int, int]:
     """
     Run tests against the parser.
@@ -322,6 +376,14 @@ def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None
     Returns:
         Tuple of (passed_count, failed_count)
     """
+    schema = load_json_schema(schema_path)
+    schema_loaded = bool(schema)
+
+    if schema_loaded:
+        print(f"Loaded JSON schema from {schema_path}")
+    else:
+        print(f"Warning: Could not load JSON schema. Schema validation will be skipped.")
+
     test_files = get_test_files(test_dir, test_num, test_range)
 
     if not test_files:
@@ -370,18 +432,50 @@ def run_tests(parser_command: str, test_dir: str, test_num: Optional[int] = None
         error_msg = ""
 
         if test.expect_type == 'SUCCESS':
-            # For success tests, validate the JSON output
-            if test.expected_output:
-                passed_test, differences = validate_json_output(test.expected_output, actual_output, verbose)
-                if not passed_test and verbose:
-                    error_msg = "\n  Differences:"
-                    for diff in differences[:10]:  # Show at most 10 differences
-                        error_msg += f"\n    - {diff}"
-                    if len(differences) > 10:
-                        error_msg += f"\n    ... and {len(differences) - 10} more differences"
-            else:
+            # Parse JSON output for success tests
+            try:
+                actual_json = json.loads(actual_output)
+
+                # First, validate against the schema if available
+                if schema_loaded:
+                    schema_valid, schema_errors = validate_against_schema(actual_json, schema)
+                    if not schema_valid:
+                        passed_test = False
+                        error_msg = "Schema validation failed:"
+                        for error in schema_errors[:5]:  # Show at most 5 schema errors
+                            error_msg += f"\n    - {error}"
+                        if len(schema_errors) > 5:
+                            error_msg += f"\n    ... and {len(schema_errors) - 5} more schema errors"
+                    else:
+                        # Schema validation passed, proceed with output comparison
+                        if test.expected_output:
+                            passed_test, differences = validate_json_output(test.expected_output, actual_output, verbose)
+                            if not passed_test and verbose:
+                                error_msg = "\n  Structural comparison failed:"
+                                for diff in differences[:10]:  # Show at most 10 differences
+                                    error_msg += f"\n    - {diff}"
+                                if len(differences) > 10:
+                                    error_msg += f"\n    ... and {len(differences) - 10} more differences"
+                        else:
+                            passed_test = False
+                            error_msg = "Missing expected output for SUCCESS test"
+                else:
+                    # No schema validation, just compare outputs
+                    if test.expected_output:
+                        passed_test, differences = validate_json_output(test.expected_output, actual_output, verbose)
+                        if not passed_test and verbose:
+                            error_msg = "\n  Differences:"
+                            for diff in differences[:10]:  # Show at most 10 differences
+                                error_msg += f"\n    - {diff}"
+                            if len(differences) > 10:
+                                error_msg += f"\n    ... and {len(differences) - 10} more differences"
+                    else:
+                        passed_test = False
+                        error_msg = "Missing expected output for SUCCESS test"
+
+            except json.JSONDecodeError as e:
                 passed_test = False
-                error_msg = "Missing expected output for SUCCESS test"
+                error_msg = f"Invalid JSON output: {e}"
         else:
             # For error tests, check for the appropriate error message
             passed_test, error_msg = validate_error_output(test.expect_type, actual_output)
@@ -437,6 +531,7 @@ def main():
     parser = argparse.ArgumentParser(description='TinyC Parser Test Runner')
     parser.add_argument('parser_command', help='Command to run the parser (e.g., "./student-parser -p")')
     parser.add_argument('--test-dir', '-d', default='tests', help='Directory containing test files (default: tests)')
+    parser.add_argument('--schema', '-s', default='tinyc-ast-schema.json', help='Path to JSON schema file (default: tinyc-ast-schema.json)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output with detailed differences')
 
     # Add mutually exclusive group for test selection
@@ -453,7 +548,7 @@ def main():
         if test_range is None:
             return 1
 
-    passed, failed = run_tests(args.parser_command, args.test_dir, args.test, test_range, args.verbose)
+    passed, failed = run_tests(args.parser_command, args.test_dir, args.schema, args.test, test_range, args.verbose)
 
     print("\n" + "="*50)
     print(f"Test Results: {passed} passed, {failed} failed")
