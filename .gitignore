@@ -3,12 +3,17 @@
 .idea
 
 cmake-build-debug/
+*.cmake
+CMakeCache.txt
+*.a
+
 
 # TinyC project:
 tinyc/
 
 # project:
 build/
+lima-build/
 cmake-build-debug/
 _deps
 CMakeFiles
@@ -24,6 +29,8 @@ CMakeFiles
 *.lof
 *.log
 *.lol
+*.lua
+creationdate.timestamp
 *.lot
 _minted-ctufit-thesis/
 _minted-thesis
@@ -33,6 +40,7 @@ _minted-thesis
 *.synctex.gz
 *.toc
 pdfa.xmpi
+_minted
 
 # for now
 .gitlab-ci.yml 
