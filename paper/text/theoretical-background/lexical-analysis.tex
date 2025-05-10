@@ -1,0 +1,79 @@
+
+\section{Lexical Analysis}
+
+The lexical analyser, often referred to as a scanner or tokenizer, is the first phase in the compilation process. Its primary role is to read the source code, which is essentially a stream of characters, and to group these characters into meaningful sequences known as lexemes \cite{aho2007compilers}. 
+
+\subsection{Responsibilities}
+
+The lexical analyser is responsible for the following tasks:
+\begin{itemize}
+  \item Produce a token for each identified lexeme, categorising it as a keyword (e.g.\ \texttt{if}, \texttt{while}), identifier (e.g.\ variable names), operator (e.g.\ \texttt{=}, \texttt{+}), literal (e.g.\ numbers, strings), or punctuation (e.g.\ parentheses, semicolons) \cite{aho2007compilers}.
+  \item Remove whitespace (spaces, tabs, newlines) and comments, as they serve only to separate tokens and are not needed by the parser \cite{aho2007compilers}.
+  \item Detect and report lexical errors, such as invalid characters or character sequences that do not match any token pattern \cite{aho2007compilers}.
+  \item Store preliminary information about tokens—particularly identifiers—in the symbol table for later compiler phases \cite{aho2007compilers}.
+  \item Track the location (line and column numbers) of each token for precise error reporting and downstream stages.
+  \item Simplify the parser’s input by transforming the raw source code into a structured stream of tokens, thereby abstracting away character-level details.
+\end{itemize}
+
+\subsection{Tokens, Lexemes, and Patterns}
+
+To effectively understand the process of lexical analysis, it is crucial to distinguish between the concepts of tokens, lexemes, and patterns \cite{aho2007compilers}. 
+
+Tokens are abstract categories (e.g.\ \texttt{KEYWORD}, \texttt{IDENTIFIER}, \texttt{INTEGER}); lexemes are the actual character sequences (e.g.\ \texttt{if}, \texttt{count}, \texttt{123}); and patterns are the regular expressions that define which lexemes belong to which token class \cite{aho2007compilers}.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lll}
+\hline
+Token             & Example lexemes      & Pattern (regex)                       \\
+\hline
+\texttt{KEYWORD}    & if, while, return    & \texttt{if|while|return|...}          \\
+\texttt{IDENTIFIER} & count, tmp          & \texttt{[A-Za-z][A-Za-z_0-9]*}       \\
+\texttt{INTEGER}    & 0, 123               & \texttt{[0-9]+}                       \\
+\hline
+\end{tabular}
+\caption{Common token classes in \texttt{tinyC}}
+\label{tab:lex-tokens}
+\end{table}
+
+Patterns are expressed using operators for concatenation, alternation (\texttt{|}), and repetition (\texttt{*}, \texttt{+}, \texttt{?}). For instance, \texttt{[A-Za-z_][A-Za-z_0-9]*} defines identifiers, while \texttt{[0-9]+} defines integer literals. Tools such as Lex or Flex convert these specifications into effective scanners \cite{aho2007compilers}.
+
+
+
+\subsection{Specifying Tokens with Regular Expressions}
+
+Regular expressions allow concise specification of token patterns \cite{aho2007compilers}. Key points include:
+\begin{itemize}
+  \item Identifiers: \texttt{[A-Za-z\_][A-Za-z\_0-9]*} matches names starting with a letter or underscore.
+  \item Integer literals: \texttt{[0-9]+} matches one or more digits.
+  \item Keywords: fixed strings such as \texttt{if}, \texttt{while}, \texttt{return}.
+  \item Operators and punctuation: single- or multi-character sequences (e.g.\ \texttt{=}, \texttt{++}, \texttt{;}).
+  \item Construction operators: concatenation, alternation (\texttt{|}), repetition (\texttt{*}, \texttt{+}, \texttt{?}).
+\end{itemize}
+
+\subsection{Implementing Lexical Analysers using Finite Automata}
+
+The equivalence of regex and finite automata underpins scanner implementation \cite{aho2007compilers}. Main steps:
+\begin{itemize}
+  \item Convert each regular expression into an NFA.
+  \item Apply the powerset construction to transform NFAs into DFAs.
+  \item Build a transition table indexed by state and input symbol.
+  \item Scan input by following DFA transitions; reaching an accepting state emits the corresponding token.
+  \item Use the DFA’s accepting-state information to determine token type.
+  \item Report errors when no valid transition exists for an input character.
+\end{itemize}
+
+
+
+% \subsection{Specifying Tokens with Regular Expressions}
+
+% Regular expressions provide a powerful and concise means of specifying the patterns that define the various token types in a programming language \cite{aho2007compilers}. They are essentially a formal language used to describe sets of strings based on a defined set of rules \cite{aho2007compilers}. For example, a regular expression for an identifier might be \texttt{[a-zA-Z\_][a-zA-Z\_0-9]*}, which specifies a sequence of one or more letters, underscores, or digits, with the initial character being a letter or an underscore. Similarly, the regular expression for an integer literal could be \texttt{[0-9]+}, indicating one or more digits. Keywords, being fixed sequences of characters, have very simple regular expressions, such as \texttt{if} for the keyword "if" \cite{aho2007compilers}. Regular expressions utilise a set of operators to construct these patterns, including concatenation (joining sequences), alternation (specifying alternatives using the \texttt{|} operator), and repetition (using operators like \texttt{*} for zero or more occurrences, \texttt{+} for one or more, and \texttt{?} for zero or one) \cite{aho2007compilers}. The formal nature of regular expressions allows for their direct translation into finite automata, which are the underlying mechanism used for efficient scanning. Tools like Lex (and its more modern counterpart, Flex) are widely used in compiler construction to automate the process of generating a lexical analyser (a scanner) from a specification that primarily consists of a set of regular expressions, each associated with a specific token type \cite{aho2007compilers}. These tools take the regular expression specifications as input and automatically generate the code for a lexical analyser that can then scan the source code and produce the corresponding stream of tokens. This automation significantly simplifies the development of the lexical analysis phase of a compiler.
+
+% \subsection{Implementing Lexical Analysers using Finite Automata}
+
+% The theoretical equivalence between regular expressions and finite automata is fundamental to the implementation of lexical analysers \cite{aho2007compilers}. Regular expressions, as discussed, are used to specify the patterns for tokens. These regular expressions can be systematically converted into Non-deterministic Finite Automata (NFAs) \cite{aho2007compilers}. An NFA is a finite automaton where for each state and each input symbol, there can be zero, one, or more next states. NFAs can also have transitions labelled with $\epsilon$ (epsilon), which represent transitions that can occur without consuming any input symbol \cite{aho2007compilers}. While NFAs are useful for specifying the lexical rules derived from regular expressions, they are often not the most efficient model for direct implementation. For implementation purposes, NFAs are typically converted into Deterministic Finite Automata (DFAs) using techniques such as the powerset construction \cite{aho2007compilers}. A DFA is a finite automaton that has exactly one transition for each input symbol from each state, and it does not have any $\epsilon$-transitions. This deterministic nature makes DFAs more straightforward and efficient to implement in a scanner.
+
+% A finite automaton (whether an NFA or a DFA) consists of a finite set of states, a set of input symbols (the alphabet), a transition function that defines how the automaton moves from one state to another based on the input symbol, a start state, and a set of accepting states \cite{aho2007compilers}. In the context of lexical analysis, the scanner operates by reading the input stream of characters, one at a time. Starting from the initial state of the DFA, the automaton transitions between states based on the input character. If, after reading a sequence of characters, the DFA ends up in an accepting state, it indicates that a token has been recognised. The type of the token is determined by the specific accepting state that was reached. The implementation of a DFA often involves the use of a transition table, which is a two-dimensional array where one dimension represents the current state and the other represents the input symbol. The entry in the table at the intersection of a state and an input symbol specifies the next state to which the automaton should transition \cite{aho2007compilers}. This table-driven approach provides an efficient mechanism for performing lexical analysis. The systematic conversion from regular expressions to NFAs and then to DFAs allows for a robust and automated way to build the lexical analysis phase of a compiler, where token recognition is driven by well-defined state transitions based on the characters in the source code.
+
+\pagebreak
+

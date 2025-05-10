@@ -1,0 +1,392 @@
+\chapter{Analysis of Existing Solutions}
+
+The development of a compiler frontend for educational purposes requires careful consideration of existing technologies, approaches, and best practices. This chapter examines various parser technologies, AST representations, serialization formats, and educational compiler frontends, with the aim of informing the design decisions for the \texttt{tinyC} frontend implementation.
+
+\section{Parser Technologies}
+
+Numerous approaches to parsing have been developed over the decades, each with its own advantages and trade-offs. This section analyzes the most relevant parser technologies from the perspective of educational compiler development.
+
+\subsection{Handwritten Recursive Descent Parsers}
+
+Recursive descent parsers represent one of the most straightforward approaches to parsing, implementing the grammar rules directly as a set of mutually recursive functions \cite{aho2007compilers}. Each function corresponds to a non-terminal in the grammar and is responsible for recognizing the corresponding syntactic construct.
+
+For educational purposes, handwritten recursive descent parsers offer several advantages:
+
+\begin{itemize}
+    \item \textbf{Directness}: The correspondence between the grammar and code is clear, making it easier for students to understand the relation between formal grammar specifications and their implementation \cite{parr2010language}.
+    \item \textbf{Control over error handling}: Developers have fine-grained control over error messages, allowing for more student-friendly diagnostics \cite{holub1990compiler}.
+    \item \textbf{Flexibility}: Modifications to the grammar can be directly translated to code changes without intermediary tools \cite{grune2012modern}.
+\end{itemize}
+
+However, handwritten parsers also have limitations:
+\begin{itemize}
+    \item \textbf{Labor-intensive}: They require considerable manual coding, especially for complex languages \cite{grune2012modern}.
+    \item \textbf{Left recursion}: They cannot handle left recursion directly, necessitating grammar transformations \cite{aho2007compilers}.
+    \item \textbf{Maintenance burden}: Changes to the grammar require coordinated changes across potentially many functions \cite{crenshaw1988lets}.
+\end{itemize}
+
+\subsection{Parser Generators}
+
+Parser generators automate the creation of parsers from grammar specifications. Tools like ANTLR \cite{parr2013definitive}, Bison, and Yacc have long been used in compiler construction courses.
+
+These tools offer significant advantages:
+\begin{itemize}
+    \item \textbf{Productivity}: They generate parser code from grammar specifications, reducing implementation time \cite{levine2009flex}.
+    \item \textbf{Formal basis}: They implement well-studied parsing algorithms with proven properties \cite{aho2007compilers}.
+    \item \textbf{Grammar checking}: Many parser generators validate the grammar and report potential issues \cite{parr2013definitive}.
+\end{itemize}
+
+However, they also present challenges in educational contexts:
+\begin{itemize}
+    \item \textbf{Learning curve}: Students must learn both the grammar specification language and the integration patterns with the host language \cite{sestoft2017programming}.
+    \item \textbf{Abstraction gap}: The generated code may obscure the connection between grammar and parsing logic \cite{grune2012modern}.
+    \item \textbf{Error reporting}: Default error messages are often cryptic, requiring additional work to make them student-friendly \cite{tratt2010parsing}.
+\end{itemize}
+
+\subsection{Parser Combinators}
+
+Parser combinators represent a functional approach to parsing, where basic parsers are combined using higher-order functions to create more complex parsers \cite{hutton1992higher}. Libraries like Parsec for Haskell and parser-combinators for Scala exemplify this approach.
+
+Advantages of parser combinators include:
+\begin{itemize}
+    \item \textbf{Composability}: Simple parsers can be combined in modular ways to handle complex structures \cite{leijen2001parsec}.
+    \item \textbf{Type safety}: In statically typed languages, type errors in parser construction are caught at compile time \cite{marlow2011haskell}.
+    \item \textbf{Readable code}: The parsing logic often resembles the grammar directly \cite{moors2008parser}.
+\end{itemize}
+
+Limitations include:
+\begin{itemize}
+    \item \textbf{Performance}: Naive implementations may have poor performance due to backtracking \cite{leijen2001parsec}.
+    \item \textbf{Functional programming prerequisite}: Students need familiarity with functional programming concepts \cite{sestoft2017programming}.
+    \item \textbf{Limited error recovery}: Advanced error recovery techniques can be difficult to implement \cite{tratt2010parsing}.
+\end{itemize}
+
+\subsection{PEG Parsers}
+
+Parsing Expression Grammars (PEGs) provide an alternative formalism to Context-Free Grammars, with ordered choice replacing the ambiguous choice of CFGs \cite{ford2004parsing}. PEG parsers often use packrat parsing techniques to achieve linear time complexity.
+
+PEG parsers offer several advantages:
+\begin{itemize}
+    \item \textbf{No ambiguity}: The ordered choice operator eliminates parsing ambiguities by definition \cite{ford2004parsing}.
+    \item \textbf{Integrated lexing and parsing}: Many PEG implementations combine lexical and syntactic analysis \cite{grimm2006better}.
+    \item \textbf{Expressive power}: They can recognize some non-context-free languages \cite{medeiros2014peg}.
+\end{itemize}
+
+However, they also have drawbacks:
+\begin{itemize}
+    \item \textbf{Subtle behavior}: The ordered choice can lead to unexpected parsing behavior \cite{tratt2010parsing}.
+    \item \textbf{Memory usage}: Packrat parsing, while efficient in time, can have high memory requirements \cite{ford2002packrat}.
+    \item \textbf{Less theory}: PEGs have less theoretical foundation compared to LR or LL parsing \cite{medeiros2014peg}.
+\end{itemize}
+
+\subsection{Comparative Analysis}
+
+Table \ref{tab:parser-comparison} presents a comparison of these parser technologies across dimensions particularly relevant to educational compiler development.
+
+\begin{table}[ht!]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Comparison of Parser Technologies for Educational Use}
+    \label{tab:parser-comparison}
+    \begin{tabularx}{\textwidth}{|
+        >{\raggedright\arraybackslash}X|
+        >{\centering\arraybackslash}X|
+        >{\centering\arraybackslash}X|
+        >{\centering\arraybackslash}X|
+        >{\centering\arraybackslash}X|
+      }
+      \hline
+      \textbf{Criterion} & \textbf{Recursive Descent} & \textbf{Parser Generators} & \textbf{Parser Combinators} & \textbf{PEG Parsers} \\
+      \hline
+      Implementation effort     & High                     & Low                       & Medium                        & Low                    \\
+      \hline
+      Error reporting quality   & Excellent                & Poor to Medium            & Medium                        & Medium                 \\
+      \hline
+      Educational clarity       & High                     & Medium                    & High (if functional programming is known) & Medium  \\
+      \hline
+      Grammar flexibility       & Medium                   & Medium to High            & High                          & High                   \\
+      \hline
+      Performance               & Good                     & Excellent                 & Variable                      & Good to Excellent      \\
+      \hline
+      Tool dependencies         & None                     & Required                  & Library only                  & Library or Generator   \\
+      \hline
+    \end{tabularx}
+\end{table}  
+  
+
+For the \texttt{tinyC} frontend, considering its educational purpose and the need for high-quality error reporting, a recursive descent parser with predictive parsing techniques offers an appealing balance of clarity, control, and performance.
+
+\section{AST Representations}
+
+The Abstract Syntax Tree (AST) serves as the central data structure in a compiler, bridging the parsing and semantic analysis phases. Various approaches to AST design and implementation exist, each with implications for educational compiler development.
+
+\subsection{Object-Oriented Hierarchies}
+
+Traditional object-oriented AST designs use class hierarchies, with a base node class and derived classes for specific language constructs \cite{gamma1995design}. This approach is common in compilers implemented in languages like C++, Java, and C\#.
+
+Benefits of this approach include:
+\begin{itemize}
+    \item \textbf{Intuitive modeling}: The class hierarchy naturally maps to the syntactic categories of the language \cite{appel2004modern}.
+    \item \textbf{Extensibility}: New node types can be added by extending the hierarchy \cite{gamma1995design}.
+    \item \textbf{Type safety}: Strong typing ensures operations are applied to appropriate nodes \cite{odersky2004overview}.
+\end{itemize}
+
+Challenges with this approach include:
+\begin{itemize}
+    \item \textbf{Rigidity}: Adding new operations across the entire AST typically requires modifying every node class \cite{gamma1995design}.
+    \item \textbf{Boilerplate code}: Substantial repetitive code is often required for node constructors, accessors, etc. \cite{appel2004modern}.
+    \item \textbf{Visitor implementation complexity}: Implementing the visitor pattern correctly requires careful attention to detail \cite{gamma1995design}.
+\end{itemize}
+
+\subsection{Algebraic Data Types}
+
+Languages that support algebraic data types (ADTs) offer an alternative approach to AST representation \cite{krishnamurthi2007programming}. This approach is common in functional languages like ML, Haskell, and increasingly in modern multi-paradigm languages.
+
+Advantages of ADTs for AST representation include:
+\begin{itemize}
+    \item \textbf{Conciseness}: ADTs allow for compact definitions of the entire AST structure \cite{krishnamurthi2007programming}.
+    \item \textbf{Pattern matching}: Exhaustive pattern matching facilitates comprehensive AST processing \cite{odersky2004overview}.
+    \item \textbf{Immutability}: ADTs are typically immutable, simplifying reasoning about AST transformations \cite{okasaki1999purely}.
+\end{itemize}
+
+Limitations include:
+\begin{itemize}
+    \item \textbf{Limited language support}: Many mainstream languages used in education do not support ADTs natively \cite{krishnamurthi2007programming}.
+    \item \textbf{Expression problem}: Adding new node types requires modifying all functions that process the AST \cite{wadler1998expression}.
+    \item \textbf{Memory overhead}: Naive implementations may incur higher memory overhead compared to optimized OO designs \cite{appel2004modern}.
+\end{itemize}
+
+\subsection{Visitor Pattern Applications}
+
+The Visitor pattern provides a way to separate algorithms from the objects they operate on, addressing some limitations of rigid class hierarchies \cite{gamma1995design}. It is commonly used for AST traversal and transformation.
+
+Different implementations of the Visitor pattern offer varying trade-offs:
+\begin{itemize}
+    \item \textbf{Classic Visitor}: Defines a visitor interface with visit methods for each node type, allowing for new operations without modifying the node classes \cite{gamma1995design}.
+    \item \textbf{Acyclic Visitor}: A variant that reduces coupling between the visitor and visitable classes \cite{martin2000acyclic}.
+    \item \textbf{Reflective Visitor}: Uses reflection to dynamically dispatch based on runtime types, reducing the need for explicit accept methods \cite{palsberg1998essence}.
+\end{itemize}
+
+For educational compilers, the classic Visitor pattern offers a good balance of type safety and extensibility, while teaching an important design pattern \cite{gamma1995design}.
+
+\subsection{Memory Management Strategies}
+
+Memory management for AST nodes is a critical consideration, affecting both performance and correctness. Various approaches exist, from manual memory management to garbage collection and smart pointers.
+
+For the \texttt{tinyC} frontend implementation, the decision to use \texttt{std::unique\_ptr} for AST nodes offers several advantages:
+\begin{itemize}
+    \item \textbf{Automatic resource management}: Nodes are automatically deleted when their owning pointer goes out of scope, preventing memory leaks \cite{meyers2014effective}.
+    \item \textbf{Ownership semantics}: \texttt{unique\_ptr} clearly expresses that the owner has exclusive responsibility for the node's lifetime \cite{stroustrup2013cxx}.
+    \item \textbf{No reference counting overhead}: Unlike \texttt{shared\_ptr}, \texttt{unique\_ptr} has no runtime overhead beyond raw pointers \cite{meyers2014effective}.
+    \item \textbf{Move semantics}: Efficient transfer of ownership through move operations \cite{stroustrup2013cxx}.
+\end{itemize}
+
+This approach is particularly suitable for a tree structure like an AST, where each node typically has a single parent responsible for its lifetime \cite{meyers2014effective}. It also demonstrates modern C++ practices to students while avoiding the complexities of manual memory management.
+
+\subsection{Location Tracking Approaches}
+
+Maintaining source location information is essential for meaningful error messages and debugging support. Several approaches to location tracking exist:
+
+\begin{itemize}
+    \item \textbf{Embedded location data}: Including location information directly in each AST node \cite{appel2004modern}.
+    \item \textbf{Location maps}: Maintaining a separate mapping from nodes to locations \cite{lesk1975lex}.
+    \item \textbf{Span-based tracking}: Tracking start and end positions to represent ranges in the source code \cite{parr2013definitive}.
+\end{itemize}
+
+The embedded approach, where each AST node contains its source location, offers the most straightforward implementation and is well-suited for educational purposes \cite{appel2004modern}. This approach ensures that location information is always available when processing a node, simplifying error reporting and debugging.
+
+\section{AST Serialization Formats}
+
+For a compiler frontend to be useful across different backend implementations and languages, a well-defined serialization format is essential. This section analyzes various approaches to AST serialization, with a focus on interoperability and readability.
+
+\subsection{JSON-based Serialization}
+
+JSON has become a popular format for AST serialization due to its ubiquitous support across programming languages and human readability \cite{crockford2006json}. Notable examples include:
+
+\begin{itemize}
+    \item \textbf{ESTree}: A JSON schema for JavaScript ASTs used by tools like Babel and ESLint \cite{babel2015estree}.
+    \item \textbf{TypeScript AST}: Microsoft's TypeScript compiler provides JSON serialization of its AST \cite{microsoft2018typescript}.
+    \item \textbf{Clang AST}: Clang's AST can be dumped in a JSON format, though it is quite verbose \cite{lattner2008llvm}.
+\end{itemize}
+
+Advantages of JSON serialization include:
+\begin{itemize}
+    \item \textbf{Language independence}: JSON parsers exist for virtually all programming languages \cite{crockford2006json}.
+    \item \textbf{Human readability}: The text format is relatively easy to understand and debug \cite{crockford2006json}.
+    \item \textbf{Schema support}: JSON Schema can be used to validate AST structures \cite{jsonschema2019}.
+\end{itemize}
+
+Limitations include:
+\begin{itemize}
+    \item \textbf{Verbosity}: JSON representations can be significantly larger than binary formats \cite{bray2017json}.
+    \item \textbf{Limited data types}: JSON's type system is limited, requiring encoding of specialized types \cite{crockford2006json}.
+    \item \textbf{No standardized references}: Representing cross-references in the AST requires custom conventions \cite{bray2017json}.
+\end{itemize}
+
+\subsection{XML Representations}
+
+XML was once the dominant format for serializing complex data structures, including ASTs \cite{bray1997extensible}. While less common today, XML-based AST representations offer some unique features:
+
+\begin{itemize}
+    \item \textbf{Schema validation}: XML Schema and DTD provide strong validation capabilities \cite{bray1997extensible}.
+    \item \textbf{Transformation tools}: XSLT allows for sophisticated transformations of the AST \cite{kay2000xslt}.
+    \item \textbf{XPath querying}: XPath provides a powerful way to query specific parts of the AST \cite{clark1999xml}.
+\end{itemize}
+
+However, XML has significant drawbacks for modern AST serialization:
+\begin{itemize}
+    \item \textbf{Extreme verbosity}: XML markup significantly increases the size of the representation \cite{bray1997extensible}.
+    \item \textbf{Parsing overhead}: XML parsing is generally more expensive than JSON parsing \cite{nurseitov2009comparison}.
+    \item \textbf{Complexity}: XML technologies have a steeper learning curve compared to JSON \cite{nurseitov2009comparison}.
+\end{itemize}
+
+\subsection{Binary Serialization}
+
+For performance-critical applications, binary serialization formats offer significant space and time efficiency advantages \cite{warren2006hacker}. Relevant formats include:
+
+\begin{itemize}
+    \item \textbf{Protocol Buffers}: Google's language-neutral, platform-neutral extensible mechanism for serializing structured data \cite{varda2008protocol}.
+    \item \textbf{MessagePack}: A binary form of JSON with additional data types \cite{furuhashi2013messagepack}.
+    \item \textbf{CBOR}: Concise Binary Object Representation, designed for small code size and small message size \cite{bormann2013cbor}.
+\end{itemize}
+
+Binary formats offer:
+\begin{itemize}
+    \item \textbf{Compactness}: Significantly smaller representation compared to text formats \cite{warren2006hacker}.
+    \item \textbf{Parsing efficiency}: Binary formats can be parsed more efficiently than text-based formats \cite{warren2006hacker}.
+    \item \textbf{Rich type system}: Many binary formats support a wider range of data types than JSON \cite{varda2008protocol}.
+\end{itemize}
+
+Their limitations include:
+\begin{itemize}
+    \item \textbf{Human unreadability}: Binary formats are not directly human-readable, complicating debugging \cite{warren2006hacker}.
+    \item \textbf{Tool dependencies}: Special tools are required to inspect and manipulate the data \cite{varda2008protocol}.
+    \item \textbf{Schema evolution}: Handling changes to the data schema can be complex \cite{varda2008protocol}.
+\end{itemize}
+
+\subsection{Language Server Protocol}
+
+The Language Server Protocol (LSP) has established conventions for representing code structures for IDE integration \cite{microsoft2016language}. While not primarily an AST serialization format, LSP's approaches inform modern compiler design:
+
+\begin{itemize}
+    \item \textbf{Position-based representation}: LSP uses zero-based line and character offsets to represent source positions \cite{microsoft2016language}.
+    \item \textbf{Incremental updates}: The protocol supports efficient incremental updates to code structures \cite{microsoft2016language}.
+    \item \textbf{Standardized diagnostics}: LSP defines a common format for reporting errors and warnings \cite{microsoft2016language}.
+\end{itemize}
+
+These conventions are increasingly relevant for educational compiler design, as modern development environments increasingly expect LSP-compatible integration \cite{microsoft2016language}.
+
+\subsection{Schema Design Considerations}
+
+When designing an AST serialization schema, several key considerations emerge:
+
+\begin{itemize}
+    \item \textbf{Node identification}: How to uniquely identify and reference nodes within the AST \cite{parr2010language}.
+    \item \textbf{Location representation}: How to represent source locations in a language-agnostic way \cite{parr2013definitive}.
+    \item \textbf{Type system encoding}: How to represent the language's type system in the serialized format \cite{appel2004modern}.
+    \item \textbf{Annotations}: How to attach additional metadata such as type information or compiler hints \cite{appel2004modern}.
+    \item \textbf{Versioning}: How to handle schema evolution as the language and compiler evolve \cite{varda2008protocol}.
+\end{itemize}
+
+For the \texttt{tinyC} frontend, JSON offers an appropriate balance of human readability, language independence, and schema validation capabilities. A well-designed JSON schema with clear node identification and comprehensive location tracking will support both educational objectives and practical backend integration.
+
+\section{Educational Compiler Frontends}
+
+Several compiler projects have been designed specifically for educational purposes. Analyzing their approaches provides valuable insights for the \texttt{tinyC} frontend design.
+
+\subsection{MiniJava Implementations}
+
+MiniJava is a subset of Java designed for teaching compiler construction \cite{appel1998modern}. Several implementations exist, offering different educational approaches:
+
+\begin{itemize}
+    \item \textbf{The Tiger Book implementation}: A reference implementation using ML, focusing on functional programming techniques \cite{appel1998modern}.
+    \item \textbf{jmm}: A Java-based implementation emphasizing object-oriented design \cite{patel2021comparing}.
+    \item \textbf{MiniJava-compiler-construction}: An implementation designed to be extended by students incrementally \cite{patel2021comparing}.
+\end{itemize}
+
+These implementations highlight the importance of:
+\begin{itemize}
+    \item \textbf{Clear separation of concerns}: Well-defined interfaces between compiler phases \cite{appel1998modern}.
+    \item \textbf{Incremental learning path}: A structure that allows students to build the compiler in stages \cite{patel2021comparing}.
+    \item \textbf{Consistent design patterns}: Using consistent patterns throughout the codebase to reinforce concepts \cite{appel1998modern}.
+\end{itemize}
+
+\subsection{LLVM-based Educational Projects}
+
+LLVM has become a popular backend for educational compiler projects due to its modular design and extensive optimization capabilities \cite{lattner2004llvm}:
+
+\begin{itemize}
+    \item \textbf{Kaleidoscope tutorial}: LLVM's tutorial for building a simple language frontend \cite{lattner2004llvm}.
+    \item \textbf{COOL compiler}: The Classroom Object-Oriented Language compiler, adapted to use LLVM \cite{aiken2003cool}.
+    \item \textbf{CMSC430 compiler}: A compiler for a subset of Racket targeting LLVM \cite{hsu2020compiler}.
+\end{itemize}
+
+These projects demonstrate:
+\begin{itemize}
+    \item \textbf{Backend independence}: Cleanly separating the frontend from code generation concerns \cite{lattner2004llvm}.
+    \item \textbf{IRs as boundaries}: Using well-defined intermediate representations as interfaces between compiler phases \cite{lattner2004llvm}.
+    \item \textbf{Progressive complexity}: Starting with simple constructs and gradually adding language features \cite{aiken2003cool}.
+\end{itemize}
+
+\subsection{Error Reporting Quality}
+
+The quality of error reporting significantly impacts the educational value of a compiler frontend \cite{traver2010compiler}. Analysis of educational compilers reveals several approaches to error reporting:
+
+\begin{itemize}
+    \item \textbf{Error recovery in parsing}: Techniques for continuing parsing after errors to report multiple issues \cite{aho2007compilers}.
+    \item \textbf{Contextual error messages}: Providing context-specific suggestions based on the parsing context \cite{traver2010compiler}.
+    \item \textbf{Source highlighting}: Visual indication of error locations in the source code \cite{horwitz2007student}.
+\end{itemize}
+
+The most effective educational compilers provide:
+\begin{itemize}
+    \item \textbf{Precise error localization}: Pinpointing the exact location of the error \cite{horwitz2007student}.
+    \item \textbf{Explanatory messages}: Clear explanations of what went wrong \cite{traver2010compiler}.
+    \item \textbf{Suggested corrections}: Hints about how to fix the error \cite{traver2010compiler}.
+\end{itemize}
+
+\subsection{Documentation Standards}
+
+Effective documentation is crucial for educational compiler projects \cite{forward2002relevance}. Analysis of successful projects reveals several documentation patterns:
+
+\begin{itemize}
+    \item \textbf{Architectural overviews}: High-level explanations of the compiler's structure and phases \cite{forward2002relevance}.
+    \item \textbf{API documentation}: Clear documentation of interfaces between components \cite{forward2002relevance}.
+    \item \textbf{Tutorial-style guides}: Step-by-step explanations of how to use and extend the compiler \cite{patel2021comparing}.
+    \item \textbf{Implementation notes}: Explanations of key algorithms and design decisions \cite{appel1998modern}.
+\end{itemize}
+
+The most effective documentation addresses multiple audiences:
+\begin{itemize}
+    \item \textbf{Students using the compiler}: Clear guides on how to write programs in the target language \cite{forward2002relevance}.
+    \item \textbf{Students extending the compiler}: Tutorials on adding features or optimizations \cite{patel2021comparing}.
+    \item \textbf{Instructors}: Materials to help integrate the compiler into coursework \cite{forward2002relevance}.
+\end{itemize}
+
+\subsection{Integration Flexibility}
+
+Educational compiler frontends must be designed for flexible integration with various backend components \cite{jones1997minimal}. Successful approaches include:
+
+\begin{itemize}
+    \item \textbf{Clean API boundaries}: Well-defined interfaces that hide implementation details \cite{jones1997minimal}.
+    \item \textbf{Multiple output formats}: Supporting different IR formats for backend compatibility \cite{lattner2004llvm}.
+    \item \textbf{Extensibility hooks}: Designated points where students can add functionality \cite{patel2021comparing}.
+\end{itemize}
+
+For \texttt{tinyC}, the dual approach of providing both a C++ library and a standalone executable with JSON output maximizes integration flexibility, allowing students to choose the approach that best fits their implementation language and preferences.
+
+\section{Summary of Design Implications}
+
+The analysis of existing solutions leads to several design implications for the \texttt{tinyC} frontend:
+
+\begin{itemize}
+    \item \textbf{Parser approach}: A handwritten recursive descent parser with LL(1) predictive parsing offers the best balance of clarity, control, and educational value.
+    \item \textbf{AST representation}: An object-oriented hierarchy with the visitor pattern provides a clear structure while teaching an important design pattern.
+    \item \textbf{Memory management}: Using \texttt{std::unique\_ptr} for AST nodes demonstrates modern C++ practices while ensuring efficient and safe memory management.
+    \item \textbf{Serialization format}: JSON with a well-defined schema offers the best combination of human readability and language independence.
+    \item \textbf{Error reporting}: Comprehensive source location tracking and contextual error messages are essential for educational value.
+    \item \textbf{Documentation}: Clear architectural overviews, API documentation, and tutorials should accompany the implementation.
+    \item \textbf{Integration flexibility}: The dual library/executable approach maximizes flexibility for various backend implementations.
+\end{itemize}
+
+These insights have directly informed the design requirements and architecture of the \texttt{tinyC} frontend, as detailed in the following chapter.

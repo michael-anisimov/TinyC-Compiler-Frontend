@@ -1,0 +1,74 @@
+\chapter{Introduction}
+
+The primary aim of this thesis is to provide a universal compiler frontend for the \texttt{tinyC} language that simplifies backend implementation for students in the NI-GEN course. By delivering a standardized frontend capable of generating a robust and language-agnostic abstract syntax tree (AST) in a JSON format, students can focus exclusively on backend implementation, optimization techniques, and code generation in their preferred programming language.
+
+\section{Background and Motivation}
+
+The NI-GEN: Code Generators course at the Czech Technical University is designed to teach both theoretical and practical aspects of compiler backend development. According to the course materials, students are expected to ``become acquainted with both theoretical and practical aspects of backend of an optimizing programming language compiler.'' Emphasizing hands-on experience, the course notes that ``the beauty of compilers comes in part from the fact that here, the saying that 'the devil lies in the details' is more pronounced than in many other parts of CS.''
+
+To fulfill course requirements, students implement a compiler for a small language called \texttt{tinyC}, covering aspects such as:
+\begin{itemize}
+\item Syntax and semantic descriptions
+\item Parser
+\item Type checker
+\item Translation to LLVM IR
+\item Optimizations
+\item Code generation for the idealized t86 target
+\end{itemize}
+
+While comprehensive, this approach places considerable demands on students to develop both frontend and backend components within a single term. Given that the course predominantly emphasizes backend development, providing a standardized, high-quality frontend would greatly benefit students, allowing them to concentrate on backend-specific tasks such as optimization and code generation.
+
+\section{Problem Statement}
+
+The current structure of the NI-GEN course assignments, which requires students to implement both frontend and backend components, poses several challenges:
+
+\begin{enumerate}
+    \item Students are provided with an existing parser written in C++, which is of poor quality and contains implementation errors. Consequently, students are forced not only to debug and improve this parser but also to implement the middle and backend in C++, a language in which many may lack sufficient proficiency.
+    \item Limited time within a single-term course restricts in-depth exploration of backend optimization techniques.
+    \item Implementing a robust parser and AST diverts focus from backend-centric learning objectives related to optimization and code generation.
+\end{enumerate}
+
+Thus, there is a clear necessity for a standardized frontend implementation for the \texttt{tinyC} language, facilitating backend development independently of the programming language used.
+
+\section{Project Goals}
+
+This thesis addresses these challenges by developing a universal compiler frontend for the \texttt{tinyC} language. The key objectives are:
+
+\begin{itemize}
+\item Developing a robust lexer and parser that conform precisely to the defined \texttt{tinyC} grammar.
+\item Designing a well-structured and extensible AST.
+\item Providing a library interface suitable for direct integration primarily into C++ projects, along with a standalone executable outputting the AST in a standardized, language-agnostic JSON format.
+\item Including detailed source location information for improved debugging and error reporting.
+\item Ensuring thorough testing, clear documentation, and maintainable implementation.
+\end{itemize}
+
+With these objectives, the project aims to streamline frontend tasks, enabling students to allocate more resources towards mastering backend compiler techniques.
+
+\section{Expected Contributions}
+
+The thesis will provide several significant contributions:
+
+\begin{itemize}
+\item An extensive analysis of existing parser technologies and language-agnostic AST formats.
+\item A robust, object-oriented AST design promoting easy traversal and modification.
+\item A standardized and language-agnostic JSON representation of the AST, enabling flexibility in backend implementation.
+\item A thoroughly tested lexer and parser implementation for \texttt{tinyC} in C++.
+\item Comprehensive documentation and examples to facilitate integration into students' projects.
+\end{itemize}
+
+\section{Thesis Structure}
+
+The remaining chapters of this thesis are structured as follows:
+
+\begin{itemize}
+    \item \textbf{Chapter 2:} \textit{Theoretical Background} introduces fundamental compiler theory, particularly lexical analysis, parsing methods, and AST structures relevant to \texttt{tinyC}.
+    
+    \item \textbf{Chapter 3:} \textit{Analysis of Existing Solutions} reviews current parser technologies and AST representations, and evaluates how well they meet the needs of this project.
+    
+    \item \textbf{Chapter 4:} \textit{Design Requirements \& Architecture} details the architecture of the \texttt{tinyC} compiler frontend, including AST class definitions, the visitor pattern, and the JSON format.
+    
+    \item \textbf{Chapter 5:} \textit{Evaluation} compares the developed frontend with existing solutions, evaluating its effectiveness, usability, and overall improvements.
+    
+    \item \textbf{Chapter 6:} \textit{Conclusion} summarizes the project's achievements and outlines possible future enhancements and extensions.
+\end{itemize}
+
