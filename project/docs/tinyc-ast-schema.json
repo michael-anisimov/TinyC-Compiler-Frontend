@@ -134,7 +134,7 @@
               ]
             },
             "baseType": {
-              "$ref": "#/definitions/NamedType",
+              "$ref": "#/definitions/Type",
               "description": "Base type of the pointer"
             }
           },
@@ -167,8 +167,15 @@
               "description": "Kind of literal"
             },
             "value": {
-              "type": "string",
-              "description": "String representation of the literal value"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "description": "Literal value (string for text, number for numeric literals)"
             }
           },
           "required": [
@@ -248,9 +255,9 @@
             },
             "operator": {
               "type": "string",
-              "description": "Unary operator (+, -, !, ~, ++, --, *, &, )"
+              "description": "Unary operator (+, -, !, ~, ++, --, *, &)"
             },
-              "prefix": {
+            "prefix": {
               "type": "string",
               "enum": [
                 "true",
@@ -586,6 +593,9 @@
                   "$ref": "#/definitions/Declaration"
                 },
                 {
+                  "$ref": "#/definitions/MultipleDeclaration"
+                },
+                {
                   "type": "null"
                 }
               ],
@@ -802,6 +812,32 @@
         }
       ]
     },
+    "MultipleDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "MultipleDeclaration"
+              ]
+            },
+            "declarations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VariableDeclaration"
+              },
+              "description": "List of variable declarations that share the same statement"
+            }
+          },
+          "required": [
+            "declarations"
+          ]
+        }
+      ]
+    },
     "Parameter": {
       "allOf": [
         {
@@ -969,6 +1005,9 @@
           },
           {
             "$ref": "#/definitions/FunctionPointerDeclaration"
+          },
+          {
+            "$ref": "#/definitions/MultipleDeclaration"
           }
         ]
       },
