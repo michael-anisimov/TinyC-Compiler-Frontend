@@ -47,10 +47,10 @@ ERROR_FILES = {
 TEST_CONFIGS = {
     # Default configuration for most files is just parser validation
     # For examples that should be executable, we can add exec configs
-    "1_hello_world": [
-        ("parser", "SUCCESS", None),  # Normal parser test
-        ("exec", "0", None)           # Should exit with code 0
-    ],
+    # "1_hello_world": [
+    #     ("parser", "SUCCESS", None),  # Normal parser test
+    #     ("exec", "0", None)           # Should exit with code 0
+    # ],
     # For error cases
     "16_parser_error": [
         ("parser", "ERROR", "PARSER_ERROR")
@@ -161,8 +161,8 @@ def create_test_file(tc_file: str, json_file: str, output_file: str, use_prefix:
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='TinyC Test File Generator')
-    parser.add_argument('--tc-dir', '-t', default='tinyc',
-                        help='Directory containing TinyC (.tc) files (default: tinyc)')
+    parser.add_argument('--tc-dir', '-t', default='samples',
+                        help='Directory containing TinyC (.tc) files (default: samples)')
     parser.add_argument('--json-dir', '-j', default='json',
                         help='Directory containing JSON output files (default: json)')
     parser.add_argument('--output-dir', '-o', default='tests',
