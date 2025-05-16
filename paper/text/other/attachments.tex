@@ -2,11 +2,25 @@
 
 \dirtree{%
 	.1 /.
-	.2 readme.txt\DTcomment{stručný popis obsahu média}.
-	.2 exe\DTcomment{adresář se spustitelnou formou implementace}.
-	.2 src.
-	.3 impl\DTcomment{zdrojové kódy implementace}.
-	.3 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
-	.2 text\DTcomment{text práce}.
-	.3 thesis.pdf\DTcomment{text práce ve formátu PDF}.
+	.2 README.md\DTcomment{project description and setup instructions}.
+	.2 project\DTcomment{implementation source code}.
+	.3 include\DTcomment{header files}.
+	.3 src\DTcomment{source files}.
+	.4 lexer\DTcomment{lexical analyzer implementation}.
+	.4 parser\DTcomment{parser implementation}.
+	.4 ast\DTcomment{abstract syntax tree implementation}.
+	.4 main.cpp\DTcomment{executable entry point}.
+	.3 tests\DTcomment{test files}.
+	.4 lexer\DTcomment{lexer unit tests}.
+	.4 parser\DTcomment{parser unit tests}.
+	.3 test\_suite\DTcomment{testing suite}.
+	.4 tinyc-ast-schema.json\DTcomment{JSON schema}.
+	.4 tests\DTcomment{TinyC test files}.
+	.4 test\_runner.py\DTcomment{main test runner script}.
+	.4 test\_generator.py\DTcomment{test case generator}.
+	.3 docs\DTcomment{documentation}.
+	.3 CMakeLists.txt\DTcomment{CMake build configuration}.
+	.3 Doxyfile\DTcomment{Doxygen configuration}.
+	.2 paper\DTcomment{thesis text}.
+	.3 thesis.pdf\DTcomment{thesis text in PDF format}.
 }

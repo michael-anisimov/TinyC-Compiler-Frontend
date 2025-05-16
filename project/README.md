@@ -89,46 +89,7 @@ The compiler can be used in two ways:
 
 ## Testing Suite
 
-The project includes a comprehensive testing suite that validates parser implementations against a set of TinyC test files. Each test file contains TinyC code along with metadata about the expected output or error.
-
-### Running Tests
-
-```bash
-cd test_suite
-python3 test_runner.py [options] <parser_command>
-```
-
-Options:
-- `--test-dir DIR`: Directory containing test files (default: "tests")
-- `--schema PATH`: Path to JSON schema file (default: "json/tinyc-ast-schema.json")
-- `--test-num N`: Run a specific test by number
-- `--test-range START-END`: Run tests in a specific range
-- `--verbose`: Enable verbose output
-- `--help`: Show help message
-
-Example:
-```bash
-# Run all tests
-python3 test_runner.py "../build/tinyc-compiler"
-
-# Run a specific test
-python3 test_runner.py --test-num 5 "../build/tinyc-compiler"
-
-# Run tests in a range with verbose output
-python3 test_runner.py --test-range 1-10 --verbose "../build/tinyc-compiler"
-```
-
-### Test File Format
-
-Test files (`.tc`) should follow this format:
-```
-// TINYC TEST
-// INFO: Description of the test
-// EXPECT: SUCCESS|PARSER_ERROR|LEXER_ERROR
-// RESULT: <expected JSON output> (only for SUCCESS tests)
-
-<actual TinyC code>
-```
+The project includes a comprehensive testing suite for validating the compiler implementation. See [test_suite/README.md](test_suite/README.md) for details on running tests and test file format.
 
 ## Key Components
 
