@@ -59,7 +59,7 @@ Function pointers must always be declared before they can be used.
 
 ### Expressions
 
-    F := integer | double | char | string | identifier | '(' EXPRS ')' | E_CAST
+    F := integer | double | char | string | identifier | '(' EXPR ')' | E_CAST
     E_CAST := cast '<' TYPE '>' '(' EXPR ')'
 
     E_CALL_INDEX_MEMBER_POST := F { E_CALL | E_INDEX | E_MEMBER | E_POST }

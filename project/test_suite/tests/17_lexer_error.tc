@@ -1,6 +1,8 @@
 // TINYC TEST
 // INFO: Program with a lexical error (should produce a lexer error)
-// EXPECT: LEXER_ERROR
+// RUN: parser
+// EXPECT: ERROR
+// ERROR_TYPE: LEXER_ERROR
 
 int main() {
     int x = 10;

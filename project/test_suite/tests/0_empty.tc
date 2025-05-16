@@ -1,5 +1,6 @@
 // TINYC TEST
 // INFO: Empty program test
+// RUN: parser
 // EXPECT: SUCCESS
-// RESULT: {"nodeType":"Program","declarations":[],"location":{"filename":"../examples/0_empty.tc","line":0,"column":0}}
+// RESULT: {"nodeType":"Program","declarations":[],"location":{"filename":"./tests/0_empty.tc","line":0,"column":0}}
 
