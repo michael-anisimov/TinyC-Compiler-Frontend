@@ -25,8 +25,8 @@
 \ctufityear{2025}
 \ctufitdeclarationplace{Prague}
 \ctufitdeclarationdate{\today}
-\ctufitabstractCZE{Tato práce představuje univerzální překladový frontend pro programovací jazyk \texttt{tinyC} používaný v kurzu NI-GEN. Frontend umožňuje studentům implementovat zadní části překladače v libovolném jazyce prostřednictvím standardizovaného JSON rozhraní, přičemž nabízí i přímé použití C++ knihovny. Na základě důkladné analýzy technologií parserů a reprezentací AST implementace zahrnuje rekurzivní sestupný parser s LL(1) gramatikou, komplexní sledování pozic ve zdrojovém kódu a jasně definované JSON schéma. Díky své přehledné architektuře a rozsáhlé dokumentaci slouží tento frontend jako efektivní výukový nástroj při zachování rozšiřitelnosti pro budoucí vylepšení.}
-\ctufitabstractENG{This thesis presents a universal compiler frontend for the \texttt{tinyC} programming language used in the NI-GEN course. The frontend allows students to implement compiler backends in any language of their choice via a standardized JSON interface, while also providing a direct C++ library option. Based on a thorough analysis of parser technologies and AST representations, the implementation features a recursive descent parser with LL(1) grammar, comprehensive source location tracking, and a well-defined JSON schema. With its clean architecture and extensive documentation, this frontend serves as an effective educational tool while maintaining extensibility for future enhancements.}
+\ctufitabstractCZE{Tato práce představuje překladový frontend pro programovací jazyk \texttt{tinyC} používaný v kurzu NI-GEN, navržený k usnadnění implementace backendu v různých programovacích jazycích. Frontend nabízí jak standardizované JSON rozhraní pro jazykově nezávislý vývoj backendu, tak i přímé použití C++ knihovny. Na základě analýzy technologií parserů a reprezentací AST implementace zahrnuje rekurzivní sestupný parser s LL(1) gramatikou, sledování pozic ve zdrojovém kódu a definované JSON schéma. Díky své přehledné architektuře a dokumentaci slouží tento frontend jako výukový nástroj při zachování rozšiřitelnosti pro budoucí vylepšení.}
+\ctufitabstractENG{This thesis presents a compiler frontend for the \texttt{tinyC} programming language used in the NI-GEN course, designed to facilitate backend implementation in diverse programming languages. The frontend offers both a standardized JSON interface for language-agnostic backend development and a direct C++ library option. Based on analysis of parser technologies and AST representations, the implementation features a recursive descent parser with LL(1) grammar, source location tracking, and a defined JSON schema. With its clean architecture and documentation, this frontend serves as an educational tool while maintaining extensibility for future enhancements.}
 \ctufitkeywordsCZE{překladový frontend, AST, LL1 parser, \texttt{tinyC}, OOP, serializace JSON, jazykově nezávislý návrh}
 \ctufitkeywordsENG{compiler frontend, AST, recursive descent parser, \texttt{tinyC}, OOP, JSON serialization, language-agnostic design}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,6 +79,7 @@
 \usepackage{listings} % typesetting of sources
 \usepackage{syntax}
 \usepackage{tabularx}
+\usepackage{longtable} % for tables that span multiple pages
 \usepackage{minted}
 \usepackage{etoolbox} % Required for patching minted
 \makeatletter
@@ -147,6 +148,10 @@ I acknowledge that my thesis is subject to the rights and obligations stipulated
 121/2000 Coll., the Copyright Act, as amended, in particular the fact that the Czech Technical
 University in Prague has the right to conclude a license agreement on the utilization of this thesis as
 a school work pursuant of Section 60 (1) of the Act.
+
+I declare that I have used AI tools during the preparation and writing of my thesis. I have verified
+the generated content. I confirm that I am aware that I am fully responsible for the content of the
+thesis.
 \end{declarationpage}
 %%%%%%%%%%%%%%%%%%%
 % DECLARATION END
@@ -154,36 +159,6 @@ a school work pursuant of Section 60 (1) of the Act.
 
 \printabstractpage % do not remove this command
 
-%%%%%%%%%%%%%%%%%%%
-% SUMMARY
-% FILL IN / MODIFY
-% OR REMOVE ENTIRELY (upon agreement with your supervisor)
-% (appropriate to remove in most theses)
-%%%%%%%%%%%%%%%%%%%
-% \begin{summarypage}
-% \section*{Summary section}
-% 
-% \lipsum[1][1-8]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[2][1-6]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[3]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[2]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[1][1-8] Lorem lorem lorem.
-% \end{summarypage}
-%%%%%%%%%%%%%%%%%%%
-% SUMMARY END
-%%%%%%%%%%%%%%%%%%%
 
 \tableofcontents % do not remove this command
 %%%%%%%%%%%%%%%%%%%%%%
@@ -242,7 +217,7 @@ a school work pursuant of Section 60 (1) of the Act.
 
 
 % Introduction
-\include{text/introduction/intoduction}
+\include{text/introduction/introduction}
 
 
 % Theoretical Background
@@ -265,7 +240,7 @@ a school work pursuant of Section 60 (1) of the Act.
 \include{text/conclusion/Conclusion}
 
 
-% % Appendices
+% Appendices
 \appendix\appendixinit % do not remove these two commands
 
 

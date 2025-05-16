@@ -2,15 +2,15 @@
 
 Syntax analysis, commonly known as parsing, is the second phase of the compilation process. It operates on the token stream produced by the lexical analyser and fulfils the following objectives \cite{aho2007compilers}:
 
-\begin{itemize}
+\begin{enumerate}
 \item \textbf{Syntax Verification:} Ensure the token sequence conforms to the language grammar.
 \item \textbf{Structural Construction:} Build a hierarchical representation (parse tree or Abstract Syntax Tree).
 \item \textbf{Error Reporting:} Detect and report syntactic errors in the source code.
-\end{itemize}
+\end{enumerate}
 
 The parser examines the relationships and order of tokens to confirm that the source code adheres to the defined syntax. A successful parse yields a structured representation, which is essential for subsequent phases such as semantic analysis and intermediate code generation.
 
-\subsection{Context-Free Grammars (CFGs): Defining Syntax}
+\subsection{Context-Free Grammars}
 
 Context-free grammars (CFGs) formally specify the syntax of programming languages \cite{aho2007compilers}. A CFG consists of:
 
@@ -21,37 +21,11 @@ Context-free grammars (CFGs) formally specify the syntax of programming language
 \item \textbf{Start Symbol:} The root non-terminal representing a complete program.
 \end{itemize}
 
-Derivation begins at the start symbol and proceeds by applying production rules until the input token sequence is generated. Table~\ref{tab:parse-tree-general} shows the explanatory text and a general parse tree side by side.
+Derivation begins at the start symbol and proceeds by applying production rules until the input token sequence is generated. Table~\ref{tab:parse-tree-general} illustrates parse tree with its corresponding grammar.
 
-\begin{table}[ht!]
-    \centering
-    \renewcommand{\arraystretch}{1.2} 
-    \begin{tabularx}{\textwidth}{%
-        >{\raggedright\arraybackslash}X%
-        >{\centering\arraybackslash}X%
-      }
-      \textbf{Explanation} 
-        & \textbf{General Parse Tree} \\
-      \hline
-      A CFG derivation can be visualised as a tree: the start symbol is at the root, and each application of a production rule adds children corresponding to the symbols on the right-hand side. For instance, given:
-      \[
-        S \;\rightarrow\; A\,B,\quad A\;\rightarrow\;a,\quad B\;\rightarrow\;b,
-      \]
-      the parse tree captures exactly that structure, showing how \(S\) expands into \(A\) and \(B\), and then into terminals \(a\) and \(b\). 
-        & 
-      \begin{tikzpicture}[level distance=1.2cm, sibling distance=1.2cm]
-        \node {S}
-          child { node {A}
-            child { node {a} }
-          }
-          child { node {B}
-            child { node {b} }
-          };
-      \end{tikzpicture} \\
-    \end{tabularx}
-    \caption{General parse tree for the grammar \(S \rightarrow AB,\;A\rightarrow a,\;B\rightarrow b\).}
-    \label{tab:parse-tree-general}
-\end{table}  
+\subsection{Top-Down and Bottom-Up Parsing}
+
+Parsing techniques can be broadly classified into two categories: top-down and bottom-up approaches. As shown in Table~\ref{tab:td-vs-bu}, these methods differ significantly in their approach to constructing the parse tree.
 
 \subsection{Top-Down Parsing Techniques}
 
@@ -70,10 +44,44 @@ Bottom-up parsing starts with tokens and reduces them to non-terminals, reconstr
 \subsubsection*{LR (Shift-Reduce) Parsing}
 LR parsers use ACTION and GOTO tables to decide between \textit{shift} and \textit{reduce} operations. Variants include SLR, LALR, and LR(1) \cite{aho2007compilers}.
 
-
-\begin{table}[h!]
+\begin{table}[ht!]
     \centering
-    \renewcommand{\arraystretch}{1.2} % increase row height
+    \renewcommand{\arraystretch}{1.2} 
+    \begin{tabularx}{\textwidth}{%
+        >{\raggedright\arraybackslash}X%
+        >{\centering\arraybackslash}X%
+      }
+      \textbf{Explanation} 
+        & \textbf{Parse Tree} \\
+      \hline
+      \vspace{0.5em}
+      A CFG derivation can be visualised as a tree: the start symbol is at the root, and each application of a production rule adds children corresponding to the symbols on the right-hand side. For instance, given:
+      \[
+        S \;\rightarrow\; A\,B,\quad A\;\rightarrow\;a,\quad B\;\rightarrow\;b,
+      \]
+      the parse tree captures exactly that structure, showing how \(S\) expands into \(A\) and \(B\), and then into terminals \(a\) and \(b\). 
+      \vspace{0.5em}
+        & 
+      \vspace{3em}
+      \begin{tikzpicture}[level distance=1.2cm, sibling distance=1.2cm]
+        \node {S}
+          child { node {A}
+            child { node {a} }
+          }
+          child { node {B}
+            child { node {b} }
+          };
+      \end{tikzpicture}
+      \vspace{1em} \\
+    \end{tabularx}
+    
+    \caption{Parse tree for the grammar \(S \rightarrow AB,\;A\rightarrow a,\;B\rightarrow b\).}
+    \label{tab:parse-tree-general}
+\end{table}  
+
+\begin{table}[ht!]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
     \begin{tabularx}{\textwidth}{|
         >{\raggedright\arraybackslash}p{0.2\textwidth}|
         >{\raggedright\arraybackslash}X|
@@ -109,7 +117,6 @@ LR parsers use ACTION and GOTO tables to decide between \textit{shift} and \text
     \end{tabularx}
     \caption{Comparison of Top-Down and Bottom-Up Parsing}
     \label{tab:td-vs-bu}
-  \end{table}
-
+\end{table}
 
 \pagebreak

@@ -1,27 +1,27 @@
 \chapter{Evaluation}
 
-This chapter presents a concise evaluation of the TinyC compiler frontend developed in this thesis, focusing on its practical advantages and limitations within the educational context of the NI-GEN course.
+This chapter presents a concise evaluation of the \texttt{tinyC} compiler frontend developed in this thesis, focusing on its practical advantages and limitations within the educational context of the NI-GEN course.
 
 \section{Comparison with Existing Implementation}
 
-The current TinyC parser implementation provided to students in the NI-GEN course has several significant shortcomings that this project aims to address:
+The current \texttt{tinyC} parser implementation provided to students in the NI-GEN course has several significant shortcomings that this project aims to address:
 
 \begin{itemize}
     \item \textbf{Reliability Issues}: The existing implementation contains numerous bugs that require substantial debugging effort from students before they can even begin their backend work.
     
     \item \textbf{Inflexible Design}: Students are effectively forced to implement their backends in C++ regardless of their proficiency level, as the existing parser cannot easily output to a language-agnostic format.
     
-    \item \textbf{Limited Documentation}: The existing implementation lacks comprehensive documentation, making it difficult for students to understand the inner workings of the parser.
+    \item \textbf{Limited Documentation}: The existing implementation lacks documentation, making it difficult for students to understand the inner workings of the parser.
 \end{itemize}
 
-The TinyC compiler frontend developed in this thesis addresses these issues through its robust implementation, clear object-oriented design, comprehensive test suite, and language-agnostic JSON output. The dual interface approach—providing both a C++ library and a standalone executable—gives students the flexibility to work in their preferred programming language without sacrificing quality or functionality.
+The \texttt{tinyC} compiler frontend developed in this thesis addresses these issues through its implementation, clear object-oriented design, test suite, and language-agnostic JSON output. The dual interface approach—providing both a C++ library and a standalone executable—gives students the flexibility to work in their preferred programming language without sacrificing quality or functionality.
 
 \section{Functional Assessment}
 
 The frontend successfully fulfills the key requirements outlined in Chapter 4:
 
 \begin{itemize}
-    \item The lexical analyzer correctly identifies all token types in the TinyC language, handling whitespace, comments, and reporting precise location information for errors.
+    \item The lexical analyzer correctly identifies all token types in the \texttt{tinyC} language, handling whitespace, comments, and reporting precise location information for errors.
     
     \item The syntax analyzer implements the LL(1) grammar and accurately constructs an AST that represents the program structure with clear error messages.
     
@@ -45,6 +45,6 @@ Despite its improvements over the existing implementation, the frontend has cert
 
 \section{Summary}
 
-The evaluation indicates that the TinyC compiler frontend represents a significant improvement over the existing implementation provided to students. Its clean architecture, comprehensive documentation, and dual interface approach make it well-suited for educational purposes, while its robust implementation and thorough testing ensure reliability.
+The evaluation indicates that the \texttt{tinyC} compiler frontend represents a significant improvement over the existing implementation provided to students. Its clean architecture, documentation, and dual interface approach make it well-suited for educational purposes, while its implementation and testing ensure reliability.
 
 While direct student feedback is not yet available, the technical improvements and design considerations suggest that the frontend will effectively serve its primary goal of allowing students to focus on backend compiler development, providing a solid foundation for their coursework in the NI-GEN course.

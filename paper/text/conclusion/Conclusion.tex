@@ -1,17 +1,17 @@
 \chapter{Conclusion}
 
-This thesis has presented the design and implementation of a universal compiler frontend for the TinyC programming language, specifically created for students of the NI-GEN course. The project aimed to provide students with a reliable parsing tool that would allow them to focus on the middle-end and back-end aspects of compiler construction, which are the main learning objectives of the course.
+This thesis has presented the design and implementation of a compiler frontend for the \texttt{tinyC} programming language, specifically created for students of the NI-GEN course. The project aimed to provide students with a reliable parsing tool that would allow them to focus on the middle-end and back-end aspects of compiler construction, which are the main learning objectives of the course.
 
 \section{Summary of Achievements}
 
 The key achievements of this thesis include:
 
 \begin{itemize}
-    \item Development of a robust lexical analyzer capable of accurately tokenizing TinyC source code with precise location tracking
-    \item Implementation of a predictive recursive descent parser that handles the entire TinyC grammar and generates meaningful error messages
-    \item Design of a clean, object-oriented abstract syntax tree structure with a comprehensive visitor pattern implementation
+    \item Development of a lexical analyzer capable of tokenizing \texttt{tinyC} source code with location tracking
+    \item Implementation of a predictive recursive descent parser that handles the entire \texttt{tinyC} grammar and generates meaningful error messages
+    \item Design of a clean, object-oriented abstract syntax tree structure with a visitor pattern implementation
     \item Creation of both a direct C++ library interface and a standardized JSON output format for language-agnostic consumption
-    \item Development of an extensive test suite that verifies the correctness of all components
+    \item Implementation of a testing framework with metadata-driven test files, schema validation, and detailed error reporting
 \end{itemize}
 
 \section{Revisiting the Original Objectives}
@@ -19,13 +19,13 @@ The key achievements of this thesis include:
 The thesis set out to accomplish four main objectives, which have been successfully addressed:
 
 \begin{enumerate}
-    \item \textbf{Analyze the landscape of language parsers and language-agnostic AST representations}: Chapter 3 provided a comprehensive analysis of existing parser technologies, AST designs, and serialization formats, forming the theoretical foundation for the implementation decisions.
+    \item \textbf{Analyze the landscape of language parsers and language-agnostic AST representations}: Chapter 3 provided an analysis of existing parser technologies, AST designs, and serialization formats, forming the theoretical foundation for the implementation decisions.
     
-    \item \textbf{Design and document AST representation for TinyC and its JSON format}: Chapter 4 detailed the AST hierarchy for TinyC, documenting both the internal class structure and the corresponding JSON schema.
+    \item \textbf{Design and document AST representation for \texttt{tinyC} and its JSON format}: Chapter 4 detailed the AST hierarchy for \texttt{tinyC}, documenting both the internal class structure and the corresponding JSON schema.
     
-    \item \textbf{Design, document, implement and test the TinyC parser}: Chapters 4 and 5 presented the design and implementation of the entire frontend, supported by an extensive test suite.
+    \item \textbf{Design, document, implement and test the \texttt{tinyC} parser}: Chapter 4 presented the design and implementation of the entire frontend, supported by an extensive test suite.
     
-    \item \textbf{Discuss further development of the project}: The limitations and potential extensions have been discussed in both the Evaluation chapter and below in Future Work.
+    \item \textbf{Discuss further development of the project}: The limitations and potential extensions have been discussed in Chapter 5 (Evaluation) and below in Future Work.
 \end{enumerate}
 
 \section{Limitations}
@@ -44,19 +44,23 @@ These limitations are intentional boundaries that define where the frontend's re
 Several potential enhancements could be considered for future development:
 
 \begin{itemize}
-    \item \textbf{Enhanced error recovery}: Implementing more sophisticated error recovery techniques would allow the parser to continue after encountering errors, providing more comprehensive feedback.
+    \item \textbf{Enhanced error recovery}: Implementing more sophisticated error recovery techniques would allow the parser to continue after encountering errors, providing more detailed feedback.
     
-    \item \textbf{IDE integration}: Developing plugins for popular IDEs would provide syntax highlighting, code completion, and inline error reporting for TinyC.
+    \item \textbf{IDE integration}: Developing plugins for popular IDEs would provide syntax highlighting, code completion, and inline error reporting for \texttt{tinyC}.
     
-    \item \textbf{Web-based interface}: Creating a web application that allows students to experiment with TinyC parsing would make the tool more accessible.
+    \item \textbf{Web-based interface}: Creating a web application that allows students to experiment with \texttt{tinyC} parsing would make the tool more accessible.
     
     \item \textbf{Language server protocol implementation}: Supporting LSP would enable integration with a wide range of editors and IDEs.
 \end{itemize}
 
-\section{Closing Remarks}
-
-The TinyC compiler frontend developed in this thesis provides a solid foundation for students in the NI-GEN course to focus on the middle-end and back-end aspects of compiler construction. By offering both a direct C++ library interface and a language-agnostic JSON output format, it accommodates a variety of implementation approaches while maintaining a consistent representation of the TinyC language.
+\section{Educational Value}
 
 The clean, object-oriented design and well-documented API further enhance the educational value of the frontend, providing students with clear examples and patterns they can apply in their own work. The visitor pattern implementation, in particular, demonstrates an elegant solution to the problem of separating concerns in compiler design.
 
-While there are opportunities for enhancement, the current implementation successfully fulfills its primary objective: providing a reliable, well-designed, and thoroughly tested compiler frontend that allows students to focus on the core learning objectives of the NI-GEN course. The true measure of success will be seen when the frontend is deployed in future offerings of the course, potentially transforming the learning experience by enabling deeper exploration of optimization techniques and code generation strategies.
+The testing suite represents an additional contribution beyond the core frontend implementation. It provides students with a systematic way to verify their own implementations through metadata-driven test files and schema validation. The test framework demonstrates good software engineering practices, including test-driven development, automated validation, and detailed error reporting. This extra work significantly enhances the educational value of the project by giving students both a reference implementation and a mechanism to validate their own work.
+
+\section{Closing Remarks}
+
+The \texttt{tinyC} compiler frontend developed in this thesis provides a solid foundation for students in the NI-GEN course to focus on the middle-end and back-end aspects of compiler construction. By offering both a direct C++ library interface and a language-agnostic JSON output format, it accommodates a variety of implementation approaches while maintaining a consistent representation of the \texttt{tinyC} language.
+
+While there are opportunities for enhancement, the current implementation successfully fulfills its primary objective: providing a reliable, well-designed, and tested compiler frontend that allows students to focus on the core learning objectives of the NI-GEN course. The true measure of success will be seen when the frontend is deployed in future offerings of the course, potentially transforming the learning experience by enabling deeper exploration of optimization techniques and code generation strategies.

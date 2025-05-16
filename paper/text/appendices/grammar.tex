@@ -1,258 +1,219 @@
-\chapter{Grammar}
-
-\begin{grammar}
-<PROGRAM> ::= <PROGRAM\_ITEM> <PROGRAM> | $\varepsilon$
-
-<PROGRAM\_ITEM> ::= <NON\_VOID\_TYPE> "identifier" <NON\_VOID\_DECL\_TAIL>
-                  | "void" <VOID\_DECL\_TAIL>
-                  | <STRUCT\_DECL>
-                  | <FUNPTR\_DECL>
-
-<NON\_VOID\_DECL\_TAIL> ::= <VARIABLE\_TAIL>
-                          | <FUNCTION\_DECLARATION\_TAIL>
-
-<VOID\_DECL\_TAIL> ::= "identifier" <FUNCTION\_DECLARATION\_TAIL>
-                     | <STAR\_PLUS> "identifier" <FUNC\_OR\_VAR\_TAIL>
-
-<FUNC\_OR\_VAR\_TAIL> ::= <VARIABLE\_TAIL>
-                        | <FUNCTION\_DECLARATION\_TAIL>
-
-<VARIABLE\_TAIL> ::= <OPT\_ARRAY\_SIZE> <OPT\_INIT> <MORE\_GLOBAL\_VARS> ";"
-
-<FUNCTION\_DECLARATION\_TAIL> ::= "(" <OPT\_FUN\_ARGS> ")" <FUNC\_TAIL>
-
-<FUNC\_TAIL> ::= <BLOCK\_STMT>
-               | ";"
-
-<MORE\_GLOBAL\_VARS> ::= "," "identifier" <OPT\_ARRAY\_SIZE> <OPT\_INIT> <MORE\_GLOBAL\_VARS>
-                       | $\varepsilon$
-
-<OPT\_FUN\_ARGS> ::= <FUN\_ARG> <FUN\_ARG\_TAIL>
-                   | $\varepsilon$
-
-<FUN\_ARG\_TAIL> ::= "," <FUN\_ARG> <FUN\_ARG\_TAIL>
-                   | $\varepsilon$
-
-<FUN\_ARG> ::= <TYPE> "identifier"
-
-<STATEMENT> ::= <BLOCK\_STMT>
-              | <IF\_STMT>
-              | <SWITCH\_STMT>
-              | <WHILE\_STMT>
-              | <DO\_WHILE\_STMT>
-              | <FOR\_STMT>
-              | <BREAK\_STMT>
-              | <CONTINUE\_STMT>
-              | <RETURN\_STMT>
-              | <EXPR\_STMT>
-
-<BLOCK\_STMT> ::= "{" <STATEMENT\_STAR> "}"
-
-<STATEMENT\_STAR> ::= <STATEMENT> <STATEMENT\_STAR>
-                    | $\varepsilon$
-
-<IF\_STMT> ::= "if" "(" <EXPR> ")" <STATEMENT> <ELSE\_PART>
-
-<ELSE\_PART> ::= "else" <STATEMENT>
-               | $\varepsilon$
-
-<SWITCH\_STMT> ::= "switch" "(" <EXPR> ")" "{" <CASE\_DEFLT\_STMT\_STAR> "}"
-
-<CASE\_DEFLT\_STMT\_STAR> ::= <CASE\_STMT> <CASE\_DEFLT\_STMT\_STAR>
-                            | $\varepsilon$
-                            | <DEFAULT\_CASE> <CASE\_STMT\_STAR>
-
-<CASE\_STMT\_STAR> ::= <CASE\_STMT> <CASE\_STMT\_STAR>
-                     | $\varepsilon$
-
-<CASE\_STMT> ::= "case" "integer_literal" ":" <CASE\_BODY>
-
-<CASE\_BODY> ::= <STATEMENT\_STAR>
-
-<DEFAULT\_CASE> ::= "default" ":" <CASE\_BODY>
-
-<WHILE\_STMT> ::= "while" "(" <EXPR> ")" <STATEMENT>
-
-<DO\_WHILE\_STMT> ::= "do" <STATEMENT> "while" "(" <EXPR> ")" ";"
-
-<FOR\_STMT> ::= "for" "(" <OPT\_EXPR\_OR\_VAR\_DECL> ";" <OPT\_EXPR> ";" <OPT\_EXPR> ")" <STATEMENT>
-
-<OPT\_EXPR\_OR\_VAR\_DECL> ::= <EXPR\_OR\_VAR\_DECL>
-                             | $\varepsilon$
-
-<OPT\_EXPR> ::= <EXPR>
-              | $\varepsilon$
-
-<BREAK\_STMT> ::= "break" ";"
-
-<CONTINUE\_STMT> ::= "continue" ";"
-
-<RETURN\_STMT> ::= "return" <OPT\_EXPR> ";"
-
-<EXPR\_STMT> ::= <EXPR\_OR\_VAR\_DECL> ";"
-
-<EXPR\_OR\_VAR\_DECL> ::= <VAR\_DECLS>
-                        | <EXPRS>
-
-<VAR\_DECLS> ::= <VAR\_DECL> <VAR\_DECLS\_TAIL>
-
-<VAR\_DECLS\_TAIL> ::= "," <VAR\_DECL> <VAR\_DECLS\_TAIL>
-                     | $\varepsilon$
-
-<VAR\_DECL> ::= <TYPE> "identifier" <OPT\_ARRAY\_SIZE> <OPT\_INIT>
-
-<OPT\_ARRAY\_SIZE> ::= "[" <E9> "]"
-                     | $\varepsilon$
-
-<OPT\_INIT> ::= "=" <EXPR>
-              | $\varepsilon$
-
-<EXPRS> ::= <EXPR> <EXPRS\_TAIL>
-
-<EXPRS\_TAIL> ::= "," <EXPR> <EXPRS\_TAIL>
-                | $\varepsilon$
-
-<TYPE> ::= <BASE\_TYPE> <STAR\_SEQ>
-         | <TYPENAME> <STAR\_SEQ>
-         | "void" <STAR\_PLUS>
-
-<NON\_VOID\_TYPE> ::= <BASE\_TYPE> <STAR\_SEQ>
-                    | <TYPENAME> <STAR\_SEQ>
-
-<BASE\_TYPE> ::= "int"
-               | "double"
-               | "char"
-
-<TYPE\_FUN\_RET> ::= <FUN\_RET\_TYPES> <STAR\_SEQ>
-
-<FUN\_RET\_TYPES> ::= "void"
-                    | <BASE\_TYPE>
-                    | <TYPENAME>
-
-<STAR\_PLUS> ::= "*" <STAR\_SEQ>
-
-<STAR\_SEQ> ::= "*" <STAR\_SEQ>
-              | $\varepsilon$
-
-<STRUCT\_DECL> ::= "struct" "identifier" <OPT\_STRUCT\_BODY> ";"
-
-<OPT\_STRUCT\_BODY> ::= "{" <STRUCT\_FIELDS> "}"
-                      | $\varepsilon$
-
-<STRUCT\_FIELDS> ::= <STRUCT\_FIELD> <STRUCT\_FIELDS>
-                   | $\varepsilon$
-
-<STRUCT\_FIELD> ::= <TYPE> "identifier" ";"
-
-<FUNPTR\_DECL> ::= "typedef" <TYPE\_FUN\_RET> "(" "*" "identifier" ")" "(" <OPT\_FUNPTR\_ARGS> ")" ";"
-
-<OPT\_FUNPTR\_ARGS> ::= <FUNPTR\_ARGS>
-                      | $\varepsilon$
-
-<FUNPTR\_ARGS> ::= <TYPE> <FUNPTR\_ARGS\_TAIL>
-
-<FUNPTR\_ARGS\_TAIL> ::= "," <TYPE> <FUNPTR\_ARGS\_TAIL>
-                       | $\varepsilon$
-
-<EXPR> ::= <E9> <EXPR\_TAIL>
-
-<EXPR\_TAIL> ::= "=" <EXPR>
-               | $\varepsilon$
-
-<E9> ::= <E8> <E9\_Prime>
-
-<E9\_Prime> ::= "||" <E8> <E9\_Prime>
-              | $\varepsilon$
-
-<E8> ::= <E7> <E8\_Prime>
-
-<E8\_Prime> ::= "&&" <E7> <E8\_Prime>
-              | $\varepsilon$
-
-<E7> ::= <E6> <E7\_Prime>
-
-<E7\_Prime> ::= "|" <E6> <E7\_Prime>
-              | $\varepsilon$
-
-<E6> ::= <E5> <E6\_Prime>
-
-<E6\_Prime> ::= "&" <E5> <E6\_Prime>
-              | $\varepsilon$
-
-<E5> ::= <E4> <E5\_Prime>
-
-<E5\_Prime> ::= "==" <E4> <E5\_Prime>
-              | "!=" <E4> <E5\_Prime>
-              | $\varepsilon$
-
-<E4> ::= <E3> <E4\_Prime>
-
-<E4\_Prime> ::= "<" <E3> <E4\_Prime>
-              | "<=" <E3> <E4\_Prime>
-              | ">" <E3> <E4\_Prime>
-              | ">=" <E3> <E4\_Prime>
-              | $\varepsilon$
-
-<E3> ::= <E2> <E3\_Prime>
-
-<E3\_Prime> ::= "<<" <E2> <E3\_Prime>
-              | ">>" <E2> <E3\_Prime>
-              | $\varepsilon$
-
-<E2> ::= <E1> <E2\_Prime>
-
-<E2\_Prime> ::= "+" <E1> <E2\_Prime>
-              | "-" <E1> <E2\_Prime>
-              | $\varepsilon$
-
-<E1> ::= <E\_UNARY\_PRE> <E1\_Prime>
-
-<E1\_Prime> ::= "*" <E\_UNARY\_PRE> <E1\_Prime>
-              | "/" <E\_UNARY\_PRE> <E1\_Prime>
-              | "%" <E\_UNARY\_PRE> <E1\_Prime>
-              | $\varepsilon$
-
-<E\_UNARY\_PRE> ::= "+" <E\_UNARY\_PRE>
-                  | "-" <E\_UNARY\_PRE>
-                  | "!" <E\_UNARY\_PRE>
-                  | "~" <E\_UNARY\_PRE>
-                  | "++" <E\_UNARY\_PRE>
-                  | "--" <E\_UNARY\_PRE>
-                  | "*" <E\_UNARY\_PRE>
-                  | "&" <E\_UNARY\_PRE>
-                  | <E\_CALL\_INDEX\_MEMBER\_POST>
-
-<E\_CALL\_INDEX\_MEMBER\_POST> ::= <F> <E\_CALL\_IDX\_MEM\_POST\_Prime>
-
-<E\_CALL\_IDX\_MEM\_POST\_Prime> ::= <E\_CALL> <E\_CALL\_IDX\_MEM\_POST\_Prime>
-                                   | <E\_INDEX> <E\_CALL\_IDX\_MEM\_POST\_Prime>
-                                   | <E\_MEMBER> <E\_CALL\_IDX\_MEM\_POST\_Prime>
-                                   | <E\_POST> <E\_CALL\_IDX\_MEM\_POST\_Prime>
-                                   | $\varepsilon$
-
-<E\_CALL> ::= "(" <OPT\_EXPR\_LIST> ")"
-
-<OPT\_EXPR\_LIST> ::= <EXPR> <EXPR\_TAIL\_LIST>
-                    | $\varepsilon$
-
-<EXPR\_TAIL\_LIST> ::= "," <EXPR> <EXPR\_TAIL\_LIST>
-                     | $\varepsilon$
-
-<E\_INDEX> ::= "[" <EXPR> "]"
-
-<E\_MEMBER> ::= "." "identifier"
-              | "->" "identifier"
-
-<E\_POST> ::= "++"
-            | "--"
-
-<F> ::= "integer_literal"
-      | "double_literal"
-      | "char_literal"
-      | "string_literal"
-      | "identifier"
-      | "(" <EXPR> ")"
-      | <E\_CAST>
-
-<E\_CAST> ::= "cast" "<" <TYPE> ">" "(" <EXPR> ")"
-\end{grammar}
+\chapter{Grammar}\label{app:grammar}
+
+\begin{footnotesize}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4cm}@{\ }>{\raggedright\arraybackslash}p{1.5cm}@{\ }>{\raggedright\arraybackslash}p{8.5cm}}
+      $\langle$PROGRAM$\rangle$ & ::= & $\langle$PROG\_ITEM$\rangle$ $\langle$PROGRAM$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$PROG\_ITEM$\rangle$ & ::= & $\langle$NON\_VOID\_TYPE$\rangle$ \texttt{identifier} $\langle$NON\_VOID\_TAIL$\rangle$ $\mid$ \\
+      & & \texttt{void} $\langle$VOID\_DECL\_TAIL$\rangle$ $\mid$ \\
+      & & $\langle$STRUCT\_DECL$\rangle$ $\mid$ \\
+      & & $\langle$FUNPTR\_DECL$\rangle$ \\
+      
+      $\langle$NON\_VOID\_TAIL$\rangle$ & ::= & $\langle$VAR\_TAIL$\rangle$ $\mid$ $\langle$FUNC\_DECL\_TAIL$\rangle$ \\
+      
+      $\langle$VOID\_DECL\_TAIL$\rangle$ & ::= & \texttt{identifier} $\langle$FUNC\_DECL\_TAIL$\rangle$ $\mid$ \\
+      & & $\langle$STAR\_PLUS$\rangle$ \texttt{identifier} $\langle$FUNC\_OR\_VAR\_TAIL$\rangle$ \\
+      
+      $\langle$FUNC\_OR\_VAR\_TAIL$\rangle$ & ::= & $\langle$VAR\_TAIL$\rangle$ $\mid$ $\langle$FUNC\_DECL\_TAIL$\rangle$ \\
+      
+      $\langle$VAR\_TAIL$\rangle$ & ::= & $\langle$OPT\_ARRAY\_SIZE$\rangle$ $\langle$OPT\_INIT$\rangle$ $\langle$MORE\_GLOBAL\_VARS$\rangle$ \texttt{;} \\
+      
+      $\langle$FUNC\_DECL\_TAIL$\rangle$ & ::= & \texttt{(} $\langle$OPT\_FUN\_ARGS$\rangle$ \texttt{)} $\langle$FUNC\_TAIL$\rangle$ \\
+      
+      $\langle$FUNC\_TAIL$\rangle$ & ::= & $\langle$BLOCK\_STMT$\rangle$ $\mid$ \texttt{;} \\
+      
+      $\langle$MORE\_GLOBAL\_VARS$\rangle$ & ::= & \texttt{,} \texttt{identifier} $\langle$OPT\_ARRAY\_SIZE$\rangle$ $\langle$OPT\_INIT$\rangle$ $\langle$MORE\_GLOBAL\_VARS$\rangle$ $\mid$ \\
+      & & $\varepsilon$ \\
+      
+      $\langle$OPT\_FUN\_ARGS$\rangle$ & ::= & $\langle$FUN\_ARG$\rangle$ $\langle$FUN\_ARG\_TAIL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$FUN\_ARG\_TAIL$\rangle$ & ::= & \texttt{,} $\langle$FUN\_ARG$\rangle$ $\langle$FUN\_ARG\_TAIL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$FUN\_ARG$\rangle$ & ::= & $\langle$TYPE$\rangle$ \texttt{identifier} \\
+      
+      $\langle$STMT$\rangle$ & ::= & $\langle$BLOCK\_STMT$\rangle$ $\mid$ $\langle$IF\_STMT$\rangle$ $\mid$ $\langle$SWITCH\_STMT$\rangle$ $\mid$ \\
+      & & $\langle$WHILE\_STMT$\rangle$ $\mid$ $\langle$DO\_WHILE\_STMT$\rangle$ $\mid$ $\langle$FOR\_STMT$\rangle$ $\mid$ \\
+      & & $\langle$BREAK\_STMT$\rangle$ $\mid$ $\langle$CONTINUE\_STMT$\rangle$ $\mid$ $\langle$RETURN\_STMT$\rangle$ $\mid$ \\
+      & & $\langle$EXPR\_STMT$\rangle$ \\
+      
+      $\langle$BLOCK\_STMT$\rangle$ & ::= & \texttt{\{} $\langle$STMT\_STAR$\rangle$ \texttt{\}} \\
+      
+      $\langle$STMT\_STAR$\rangle$ & ::= & $\langle$STMT$\rangle$ $\langle$STMT\_STAR$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$IF\_STMT$\rangle$ & ::= & \texttt{if} \texttt{(} $\langle$EXPR$\rangle$ \texttt{)} $\langle$STMT$\rangle$ $\langle$ELSE\_PART$\rangle$ \\
+      
+      $\langle$ELSE\_PART$\rangle$ & ::= & \texttt{else} $\langle$STMT$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$SWITCH\_STMT$\rangle$ & ::= & \texttt{switch} \texttt{(} $\langle$EXPR$\rangle$ \texttt{)} \texttt{\{} $\langle$CASE\_DEFLT\_STAR$\rangle$ \texttt{\}} \\
+      
+      $\langle$CASE\_DEFLT\_STAR$\rangle$ & ::= & $\langle$CASE\_STMT$\rangle$ $\langle$CASE\_DEFLT\_STAR$\rangle$ $\mid$ \\
+      & & $\varepsilon$ $\mid$ \\
+      & & $\langle$DEFAULT\_CASE$\rangle$ $\langle$CASE\_STAR$\rangle$ \\
+      
+      $\langle$CASE\_STAR$\rangle$ & ::= & $\langle$CASE\_STMT$\rangle$ $\langle$CASE\_STAR$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$CASE\_STMT$\rangle$ & ::= & \texttt{case} \texttt{integer\_literal} \texttt{:} $\langle$CASE\_BODY$\rangle$ \\
+      
+      $\langle$CASE\_BODY$\rangle$ & ::= & $\langle$STMT\_STAR$\rangle$ \\
+      
+      $\langle$DEFAULT\_CASE$\rangle$ & ::= & \texttt{default} \texttt{:} $\langle$CASE\_BODY$\rangle$ \\
+      
+      $\langle$WHILE\_STMT$\rangle$ & ::= & \texttt{while} \texttt{(} $\langle$EXPR$\rangle$ \texttt{)} $\langle$STMT$\rangle$ \\
+      
+      $\langle$DO\_WHILE\_STMT$\rangle$ & ::= & \texttt{do} $\langle$STMT$\rangle$ \texttt{while} \texttt{(} $\langle$EXPR$\rangle$ \texttt{)} \texttt{;} \\
+      
+      $\langle$FOR\_STMT$\rangle$ & ::= & \texttt{for} \texttt{(} $\langle$OPT\_DECL$\rangle$ \texttt{;} $\langle$OPT\_EXPR$\rangle$ \texttt{;} \\
+      & & $\langle$OPT\_EXPR$\rangle$ \texttt{)} $\langle$STMT$\rangle$ \\
+      
+      $\langle$OPT\_DECL$\rangle$ & ::= & $\langle$EXPR\_OR\_VAR\_DECL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$OPT\_EXPR$\rangle$ & ::= & $\langle$EXPR$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$BREAK\_STMT$\rangle$ & ::= & \texttt{break} \texttt{;} \\
+      
+      $\langle$CONTINUE\_STMT$\rangle$ & ::= & \texttt{continue} \texttt{;} \\
+      
+      $\langle$RETURN\_STMT$\rangle$ & ::= & \texttt{return} $\langle$OPT\_EXPR$\rangle$ \texttt{;} \\
+      
+      $\langle$EXPR\_STMT$\rangle$ & ::= & $\langle$EXPR\_OR\_VAR\_DECL$\rangle$ \texttt{;} \\
+      
+      $\langle$EXPR\_OR\_VAR\_DECL$\rangle$ & ::= & $\langle$VAR\_DECLS$\rangle$ $\mid$ $\langle$EXPRS$\rangle$ \\
+      
+      $\langle$VAR\_DECLS$\rangle$ & ::= & $\langle$VAR\_DECL$\rangle$ $\langle$VAR\_DECLS\_TAIL$\rangle$ \\
+      
+      $\langle$VAR\_DECLS\_TAIL$\rangle$ & ::= & \texttt{,} $\langle$VAR\_DECL$\rangle$ $\langle$VAR\_DECLS\_TAIL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$VAR\_DECL$\rangle$ & ::= & $\langle$TYPE$\rangle$ \texttt{identifier} $\langle$OPT\_ARRAY\_SIZE$\rangle$ $\langle$OPT\_INIT$\rangle$ \\
+      
+      $\langle$OPT\_ARRAY\_SIZE$\rangle$ & ::= & \texttt{[} $\langle$E9$\rangle$ \texttt{]} $\mid$ $\varepsilon$ \\
+      
+      $\langle$OPT\_INIT$\rangle$ & ::= & \texttt{=} $\langle$EXPR$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$EXPRS$\rangle$ & ::= & $\langle$EXPR$\rangle$ $\langle$EXPRS\_TAIL$\rangle$ \\
+      
+      $\langle$EXPRS\_TAIL$\rangle$ & ::= & \texttt{,} $\langle$EXPR$\rangle$ $\langle$EXPRS\_TAIL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$TYPE$\rangle$ & ::= & $\langle$BASE\_TYPE$\rangle$ $\langle$STAR\_SEQ$\rangle$ $\mid$ \\
+      & & $\langle$TYPENAME$\rangle$ $\langle$STAR\_SEQ$\rangle$ $\mid$ \\
+      & & \texttt{void} $\langle$STAR\_PLUS$\rangle$ \\
+      
+      $\langle$NON\_VOID\_TYPE$\rangle$ & ::= & $\langle$BASE\_TYPE$\rangle$ $\langle$STAR\_SEQ$\rangle$ $\mid$ \\
+      & & $\langle$TYPENAME$\rangle$ $\langle$STAR\_SEQ$\rangle$ \\
+      
+      $\langle$BASE\_TYPE$\rangle$ & ::= & \texttt{int} $\mid$ \texttt{double} $\mid$ \texttt{char} \\
+      
+      $\langle$TYPE\_FUN\_RET$\rangle$ & ::= & $\langle$FUN\_RET\_TYPES$\rangle$ $\langle$STAR\_SEQ$\rangle$ \\
+      
+      $\langle$FUN\_RET\_TYPES$\rangle$ & ::= & \texttt{void} $\mid$ $\langle$BASE\_TYPE$\rangle$ $\mid$ $\langle$TYPENAME$\rangle$ \\
+      
+      $\langle$STAR\_PLUS$\rangle$ & ::= & \texttt{*} $\langle$STAR\_SEQ$\rangle$ \\
+      
+      $\langle$STAR\_SEQ$\rangle$ & ::= & \texttt{*} $\langle$STAR\_SEQ$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$STRUCT\_DECL$\rangle$ & ::= & \texttt{struct} \texttt{identifier} $\langle$OPT\_STRUCT\_BODY$\rangle$ \texttt{;} \\
+      
+      $\langle$OPT\_STRUCT\_BODY$\rangle$ & ::= & \texttt{\{} $\langle$STRUCT\_FIELDS$\rangle$ \texttt{\}} $\mid$ $\varepsilon$ \\
+      
+      $\langle$STRUCT\_FIELDS$\rangle$ & ::= & $\langle$STRUCT\_FIELD$\rangle$ $\langle$STRUCT\_FIELDS$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$STRUCT\_FIELD$\rangle$ & ::= & $\langle$TYPE$\rangle$ \texttt{identifier} \texttt{;} \\
+      
+      $\langle$FUNPTR\_DECL$\rangle$ & ::= & \texttt{typedef} $\langle$TYPE\_FUN\_RET$\rangle$ \texttt{(} \texttt{*} \texttt{identifier} \texttt{)} \\
+      & & \texttt{(} $\langle$OPT\_FUNPTR\_ARGS$\rangle$ \texttt{)} \texttt{;} \\
+      
+      $\langle$OPT\_FUNPTR\_ARGS$\rangle$ & ::= & $\langle$FUNPTR\_ARGS$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$FUNPTR\_ARGS$\rangle$ & ::= & $\langle$TYPE$\rangle$ $\langle$FUNPTR\_ARGS\_TAIL$\rangle$ \\
+      
+      $\langle$FUNPTR\_ARGS\_TAIL$\rangle$ & ::= & \texttt{,} $\langle$TYPE$\rangle$ $\langle$FUNPTR\_ARGS\_TAIL$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$EXPR$\rangle$ & ::= & $\langle$E9$\rangle$ $\langle$EXPR\_TAIL$\rangle$ \\
+      
+      $\langle$EXPR\_TAIL$\rangle$ & ::= & \texttt{=} $\langle$EXPR$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E9$\rangle$ & ::= & $\langle$E8$\rangle$ $\langle$E9\_Prime$\rangle$ \\
+      
+      $\langle$E9\_Prime$\rangle$ & ::= & \texttt{||} $\langle$E8$\rangle$ $\langle$E9\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E8$\rangle$ & ::= & $\langle$E7$\rangle$ $\langle$E8\_Prime$\rangle$ \\
+      
+      $\langle$E8\_Prime$\rangle$ & ::= & \texttt{\&\&} $\langle$E7$\rangle$ $\langle$E8\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E7$\rangle$ & ::= & $\langle$E6$\rangle$ $\langle$E7\_Prime$\rangle$ \\
+      
+      $\langle$E7\_Prime$\rangle$ & ::= & \texttt{|} $\langle$E6$\rangle$ $\langle$E7\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E6$\rangle$ & ::= & $\langle$E5$\rangle$ $\langle$E6\_Prime$\rangle$ \\
+      
+      $\langle$E6\_Prime$\rangle$ & ::= & \texttt{\&} $\langle$E5$\rangle$ $\langle$E6\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E5$\rangle$ & ::= & $\langle$E4$\rangle$ $\langle$E5\_Prime$\rangle$ \\
+      
+      $\langle$E5\_Prime$\rangle$ & ::= & \texttt{==} $\langle$E4$\rangle$ $\langle$E5\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{!=} $\langle$E4$\rangle$ $\langle$E5\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E4$\rangle$ & ::= & $\langle$E3$\rangle$ $\langle$E4\_Prime$\rangle$ \\
+      
+      $\langle$E4\_Prime$\rangle$ & ::= & \texttt{<} $\langle$E3$\rangle$ $\langle$E4\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{<=} $\langle$E3$\rangle$ $\langle$E4\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{>} $\langle$E3$\rangle$ $\langle$E4\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{>=} $\langle$E3$\rangle$ $\langle$E4\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E3$\rangle$ & ::= & $\langle$E2$\rangle$ $\langle$E3\_Prime$\rangle$ \\
+      
+      $\langle$E3\_Prime$\rangle$ & ::= & \texttt{<<} $\langle$E2$\rangle$ $\langle$E3\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{>>} $\langle$E2$\rangle$ $\langle$E3\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E2$\rangle$ & ::= & $\langle$E1$\rangle$ $\langle$E2\_Prime$\rangle$ \\
+      
+      $\langle$E2\_Prime$\rangle$ & ::= & \texttt{+} $\langle$E1$\rangle$ $\langle$E2\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{-} $\langle$E1$\rangle$ $\langle$E2\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E1$\rangle$ & ::= & $\langle$E\_UNARY\_PRE$\rangle$ $\langle$E1\_Prime$\rangle$ \\
+      
+      $\langle$E1\_Prime$\rangle$ & ::= & \texttt{*} $\langle$E\_UNARY\_PRE$\rangle$ $\langle$E1\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{/} $\langle$E\_UNARY\_PRE$\rangle$ $\langle$E1\_Prime$\rangle$ $\mid$ \\
+      & & \texttt{\%} $\langle$E\_UNARY\_PRE$\rangle$ $\langle$E1\_Prime$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E\_UNARY\_PRE$\rangle$ & ::= & \texttt{+} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{-} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{!} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{ \~} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{++} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{--} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{*} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & \texttt{\&} $\langle$E\_UNARY\_PRE$\rangle$ $\mid$ \\
+      & & $\langle$E\_POST$\rangle$ \\
+      
+      $\langle$E\_POST$\rangle$ & ::= & $\langle$F$\rangle$ $\langle$E\_POST\_TAIL$\rangle$ \\
+      
+      $\langle$E\_POST\_TAIL$\rangle$ & ::= & $\langle$E\_CALL$\rangle$ $\langle$E\_POST\_TAIL$\rangle$ $\mid$ \\
+      & & $\langle$E\_INDEX$\rangle$ $\langle$E\_POST\_TAIL$\rangle$ $\mid$ \\
+      & & $\langle$E\_MEMBER$\rangle$ $\langle$E\_POST\_TAIL$\rangle$ $\mid$ \\
+      & & $\langle$E\_POSTFIX$\rangle$ $\langle$E\_POST\_TAIL$\rangle$ $\mid$ \\
+      & & $\varepsilon$ \\
+      
+      $\langle$E\_CALL$\rangle$ & ::= & \texttt{(} $\langle$OPT\_EXPR\_LIST$\rangle$ \texttt{)} \\
+      
+      $\langle$OPT\_EXPR\_LIST$\rangle$ & ::= & $\langle$EXPR$\rangle$ $\langle$EXPR\_TAIL\_LIST$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$EXPR\_TAIL\_LIST$\rangle$ & ::= & \texttt{,} $\langle$EXPR$\rangle$ $\langle$EXPR\_TAIL\_LIST$\rangle$ $\mid$ $\varepsilon$ \\
+      
+      $\langle$E\_INDEX$\rangle$ & ::= & \texttt{[} $\langle$EXPR$\rangle$ \texttt{]} \\
+      
+      $\langle$E\_MEMBER$\rangle$ & ::= & \texttt{.} \texttt{identifier} $\mid$ \\
+      & & \texttt{->} \texttt{identifier} \\
+      
+      $\langle$E\_POSTFIX$\rangle$ & ::= & \texttt{++} $\mid$ \texttt{--} \\
+      
+      $\langle$F$\rangle$ & ::= & \texttt{integer\_literal} $\mid$ \\
+      & & \texttt{double\_literal} $\mid$ \\
+      & & \texttt{char\_literal} $\mid$ \\
+      & & \texttt{string\_literal} $\mid$ \\
+      & & \texttt{identifier} $\mid$ \\
+      & & \texttt{(} $\langle$EXPR$\rangle$ \texttt{)} $\mid$ \\
+      & & $\langle$E\_CAST$\rangle$ \\
+      
+      $\langle$E\_CAST$\rangle$ & ::= & \texttt{cast} \texttt{<} $\langle$TYPE$\rangle$ \texttt{>} \texttt{(} $\langle$EXPR$\rangle$ \texttt{)}
+\end{longtable}
+\end{footnotesize}

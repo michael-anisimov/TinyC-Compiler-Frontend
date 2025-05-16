@@ -1,28 +1,22 @@
 \section{Abstract Syntax Tree}
 
-\begin{itemize}
-  \item The Abstract Syntax Tree (AST) is a tree-like data structure representing the essential syntactic structure of a program’s source code.
-  \item It is constructed by the syntax analysis phase of a compiler, immediately after lexical analysis.
-  \item The AST serves as a crucial intermediate representation for subsequent compiler phases: semantic analysis, intermediate code generation, and code optimisation.
-  \item It abstracts away inessential concrete syntax details (e.g.\ parentheses, semicolons) to focus on core syntactic and semantic information \cite{aho2007compilers}.
-\end{itemize}
+The Abstract Syntax Tree (AST) is a tree-like data structure representing the essential syntactic structure of a program's source code. It is constructed by the syntax analysis phase of a compiler, immediately after lexical analysis. The AST serves as a crucial intermediate representation for subsequent compiler phases: semantic analysis, intermediate code generation, and code optimisation. It abstracts away inessential concrete syntax details (e.g.\ parentheses, semicolons) to focus on core syntactic and semantic information \cite{aho2007compilers}.
 
 \begin{figure}[hb!]
     \centering
-    \begin{tikzpicture}[level distance=1.5cm, sibling distance=3.5cm]
-      \node {Program}
-        child { node {VariableDeclaration}
-          child { node {PrimitiveType \texttt{int}} }
-          child { node {Identifier \texttt{x}} }
-          child { node {Literal \texttt{42}} } };
+    \begin{tikzpicture}[level distance=1.5cm, sibling distance=4.5cm]
+      \node {BinaryOperation: +}
+        child { node {Literal: 2} }
+        child { node {BinaryOperation: -}
+          child { node {Variable: z} }
+          child { node {Literal: 1} }
+        };
     \end{tikzpicture}
-    \caption{AST of the program \texttt{int x = 42;}}
-    \label{fig:ast-tinyc}
+    \caption{AST of the expression \texttt{2 + (z - 1)}}
+    \label{fig:ast-example}
 \end{figure}
 
-\subsection{Key Components}
-
-In an AST, each node represents a construct occurring in the source code \cite{aho2007compilers}. These constructs can include operators (e.g.\ addition, subtraction), variables, control flow statements (e.g.\ if-then-else, loops), function calls, and literals. The children of a node represent its components or operands. For instance, in an AST for the expression \texttt{2 + (z - 1)}, the root node represents the addition operation (\texttt{+}), with two children: one for the literal \texttt{2}, and one for the subtraction operation (\texttt{-}), which in turn has children \texttt{z} and \texttt{1}. Each node stores information about its construct type and related data (e.g.\ variable names, literal values), encoding hierarchical relationships and operator precedence \cite{aho2007compilers}.
+In an AST, each node represents a construct occurring in the source code \cite{aho2007compilers}. These constructs can include operators (e.g.\ addition, subtraction), variables, control flow statements (e.g.\ if-then-else, loops), function calls, and literals. The children of a node represent its components or operands. For instance, in an AST for the expression \texttt{2 + (z - 1)}, as shown in Figure~\ref{fig:ast-example}, the root node represents a binary addition operation, with two children: one for the literal value \texttt{2}, and one for a binary subtraction operation, which in turn has children representing the variable \texttt{z} and the literal value \texttt{1}. Each node stores information about its construct type and related data (e.g.\ variable names, literal values), encoding hierarchical relationships and operator precedence \cite{aho2007compilers}.
 
 \subsection{Abstraction from Concrete Syntax}
 

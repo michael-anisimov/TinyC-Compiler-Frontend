@@ -1,14 +1,15 @@
 \chapter{Theoretical Background}
 
-The construction of robust and efficient compilers relies heavily on a strong theoretical foundation. This chapter aims to establish the importance of these theoretical underpinnings by exploring the key areas that are fundamental to understanding and building the frontend of a compiler. 
-These areas include the principles of formal languages, the distinct phases of the compilation process, the intricacies of lexical analysis, the methodologies of syntax analysis, and the design considerations for abstract syntax trees. 
-
-A solid grasp of these theoretical concepts empowers compiler developers to make informed design decisions, effectively troubleshoot challenges, and ultimately create reliable and performant language processing tools. The ability to build a compiler from its foundational principles, as well as to leverage existing compiler construction tools and understand their inherent limitations, is significantly enhanced by a comprehensive theoretical understanding.
+This chapter presents the essential theoretical concepts that form the foundation for compiler frontend development. We begin with an overview of formal languages and grammars that provide the mathematical framework for defining programming languages. Next, we examine the compilation process, with particular focus on the frontend phases. We then explore lexical analysis (the process of converting source code into tokens) and syntax analysis (parsing tokens according to the language grammar). Finally, we discuss Abstract Syntax Trees (ASTs) as the key intermediate representation produced by the frontend for use in subsequent compiler phases. These concepts directly inform the design decisions made in our \texttt{tinyC} compiler frontend implementation.
 
 \section{Formal Languages}
 
+\subsection{The Significance of Formal Language Theory}
+
+Formal language theory provides the mathematical tools and methodologies for specifying and implementing lexical analysers (via regular expressions and finite automata) and parsers (via context‑free grammars and parsing techniques). It guides the selection of appropriate formalisms, ensuring that compiler design proceeds systematically and reliably.
+
 \begin{definition}
-\textbf{Formal language} is a precisely defined set of strings composed from a finite alphabet, with their structure and validity governed by a specific set of rules known as a formal grammar\cite{aho2007compilers}.
+\textbf{Formal language} is a precisely defined set of strings composed from a finite alphabet, with their structure and validity governed by a specific set of rules known as a formal grammar \cite{aho2007compilers}.
 \end{definition}
 
 Unlike natural languages, which evolve organically and often contain ambiguities, formal languages are intentionally designed for specific applications, such as mathematics, chemistry, and, most importantly for our context, programming. The notation employed by mathematicians to express relationships between numbers and symbols, for instance, constitutes a formal language adept at its intended purpose. Similarly, programming languages are formal languages meticulously crafted to express computations in an unambiguous manner \cite{runestone-formal-natural-languages}.
@@ -46,8 +47,5 @@ While context‑sensitive and recursively enumerable languages appear in the Cho
 
 Understanding syntax, semantics and ambiguity is essential for comprehending how compilers process source code. Syntax governs token formation and program structure, semantics addresses the meaning and consistency checks during semantic analysis, and ambiguity—where a grammar permits multiple parse trees for the same string—is minimised in language design to ensure predictable compiler behaviour \cite{aho2007compilers}.
 
-\subsection{The Significance of Formal Language Theory}
-
-Formal language theory provides the mathematical tools and methodologies for specifying and implementing lexical analysers (via regular expressions and finite automata) and parsers (via context‑free grammars and parsing techniques). It guides the selection of appropriate formalisms, ensuring that compiler design proceeds systematically and reliably.
 
 \pagebreak

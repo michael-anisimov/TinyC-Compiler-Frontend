@@ -4,14 +4,14 @@
 The process of compiling a program is typically structured as a sequence of distinct phases, each responsible for a specific transformation of the source code as it progresses towards becoming executable machine code. These phases generally include Lexical Analysis (Scanning), Syntax Analysis (Parsing), Semantic Analysis, Intermediate Code Generation, Code Optimisation, and Code Generation (see Table~\ref{tab:compilation-phases}).
 
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Lexical Analysis (Scanning):} This initial phase reads the source code character by character and groups these characters into meaningful units called lexemes. For each lexeme, the lexical analyser produces a token, which represents a category of lexical units such as keywords, identifiers, operators, and literals \cite{aho2007compilers}. It also typically removes whitespace and comments from the source code \cite{aho2007compilers}.
     \item \textbf{Syntax Analysis (Parsing):} The parser takes the stream of tokens produced by the lexical analyser and checks if this sequence of tokens adheres to the grammatical rules of the programming language. If the syntax is correct, the parser constructs a parse tree or an Abstract Syntax Tree (AST) that represents the hierarchical structure of the program \cite{aho2007compilers}.
     \item \textbf{Semantic Analysis:} This phase checks the program for semantic correctness, ensuring that the program makes sense according to the language's rules. This can involve type checking, verifying that variables are declared before use, and ensuring that operations are applied to compatible data types \cite{aho2007compilers}.
     \item \textbf{Intermediate Code Generation:} After semantic analysis, the compiler may generate an intermediate representation of the program. This representation is often a low-level, machine-independent code that facilitates optimisation and code generation for various target architectures \cite{aho2007compilers}.
     \item \textbf{Code Optimisation:} This optional phase aims to improve the intermediate code to make the program run faster or use fewer resources. Various optimisation techniques can be applied at this stage \cite{aho2007compilers}.
     \item \textbf{Code Generation:} The final phase translates the optimised intermediate code into the target machine code or assembly language that can be executed by the computer \cite{aho2007compilers}. This phase also involves tasks like register allocation and instruction scheduling.
-\end{itemize}
+\end{enumerate}
 
 
 \begin{table}[t]
@@ -62,9 +62,7 @@ The process of compiling a program is typically structured as a sequence of dist
 
 The compilation process is often divided into a frontend, which primarily deals with the analysis of the source code (lexical, syntax, and semantic analysis), and a backend, which focuses on the synthesis of the target code (intermediate code generation, optimisation, and code generation) \cite{aho2007compilers}. Throughout these phases, a symbol table is maintained to store information about identifiers (such as variable names, function names) used in the program, including their type, scope, and memory location \cite{aho2007compilers}. The modularity of the compilation process into these distinct phases allows for a structured approach to compiler design, where each phase can be developed and optimised with a degree of independence. Breaking down the complex task of translation into smaller, more manageable phases simplifies the overall development effort.
 
-\subsection{Emphasis on the Frontend Phases}
-
-This thesis concentrates on the compiler front end—namely lexical analysis and syntax analysis—as they form the theoretical basis for \texttt{tinyC}’s formal language processing. Lexical analysis tokenises the raw source into a sequence of symbols, while syntax analysis parses these tokens into a structured Abstract Syntax Tree (AST). Together, they ensure that source programs conform to the grammar of \texttt{tinyC}, providing the necessary structure for all subsequent compiler stages.
+This thesis concentrates on the compiler frontend—namely lexical analysis and syntax analysis—as they form the theoretical basis for \texttt{tinyC}’s formal language processing. Lexical analysis tokenises the raw source into a sequence of symbols, while syntax analysis parses these tokens into a structured Abstract Syntax Tree (AST). Together, they ensure that source programs conform to the grammar of \texttt{tinyC}, providing the necessary structure for all subsequent compiler stages.
 
 
 \pagebreak

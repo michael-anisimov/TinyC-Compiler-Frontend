@@ -1,6 +1,7 @@
 \chapter{Introduction}
 
-The primary aim of this thesis is to provide a universal compiler frontend for the \texttt{tinyC} language that simplifies backend implementation for students in the NI-GEN course. By delivering a standardized frontend capable of generating a robust and language-agnostic abstract syntax tree (AST) in a JSON format, students can focus exclusively on backend implementation, optimization techniques, and code generation in their preferred programming language.
+The primary aim of this thesis is to provide a compiler frontend for the \texttt{tinyC} language that simplifies backend implementation for students in the NI-GEN course. By delivering a standardized frontend capable of generating a language-agnostic abstract syntax tree (AST) in a JSON format, students can focus exclusively on backend implementation, optimization techniques, and code generation in their preferred programming language.
+
 
 \section{Background and Motivation}
 
@@ -16,7 +17,7 @@ To fulfill course requirements, students implement a compiler for a small langua
 \item Code generation for the idealized t86 target
 \end{itemize}
 
-While comprehensive, this approach places considerable demands on students to develop both frontend and backend components within a single term. Given that the course predominantly emphasizes backend development, providing a standardized, high-quality frontend would greatly benefit students, allowing them to concentrate on backend-specific tasks such as optimization and code generation.
+While this approach places considerable demands on students to develop both frontend and backend components within a single term. Given that the course predominantly emphasizes backend development, providing a standardized, high-quality frontend would greatly benefit students, allowing them to concentrate on backend-specific tasks such as optimization and code generation.
 
 \section{Problem Statement}
 
@@ -25,21 +26,21 @@ The current structure of the NI-GEN course assignments, which requires students 
 \begin{enumerate}
     \item Students are provided with an existing parser written in C++, which is of poor quality and contains implementation errors. Consequently, students are forced not only to debug and improve this parser but also to implement the middle and backend in C++, a language in which many may lack sufficient proficiency.
     \item Limited time within a single-term course restricts in-depth exploration of backend optimization techniques.
-    \item Implementing a robust parser and AST diverts focus from backend-centric learning objectives related to optimization and code generation.
+    \item Implementing a parser and AST diverts focus from backend-centric learning objectives related to optimization and code generation.
 \end{enumerate}
 
 Thus, there is a clear necessity for a standardized frontend implementation for the \texttt{tinyC} language, facilitating backend development independently of the programming language used.
 
 \section{Project Goals}
 
-This thesis addresses these challenges by developing a universal compiler frontend for the \texttt{tinyC} language. The key objectives are:
+This thesis addresses these challenges by developing a compiler frontend for the \texttt{tinyC} language. The key objectives are:
 
 \begin{itemize}
-\item Developing a robust lexer and parser that conform precisely to the defined \texttt{tinyC} grammar.
+\item Developing a lexer and parser that conform precisely to the defined \texttt{tinyC} grammar.
 \item Designing a well-structured and extensible AST.
 \item Providing a library interface suitable for direct integration primarily into C++ projects, along with a standalone executable outputting the AST in a standardized, language-agnostic JSON format.
 \item Including detailed source location information for improved debugging and error reporting.
-\item Ensuring thorough testing, clear documentation, and maintainable implementation.
+\item Ensuring testing, clear documentation, and maintainable implementation.
 \end{itemize}
 
 With these objectives, the project aims to streamline frontend tasks, enabling students to allocate more resources towards mastering backend compiler techniques.
