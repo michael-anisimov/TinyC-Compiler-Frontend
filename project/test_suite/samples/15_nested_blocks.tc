@@ -1,0 +1,22 @@
+int main() {
+    int x = 10;
+
+    {
+        int y = 20;
+        int x = 30;
+
+        {
+            int z = 40;
+            x = 50;
+
+            int sum = x + y + z;
+        }
+
+        {
+            int y = 60;
+            x = 70;
+        }
+    }
+
+    return x;
+}

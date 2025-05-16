@@ -1,0 +1,21 @@
+struct Point;
+
+struct Point {
+    int x;
+    int y;
+};
+
+int dotProduct(Point p1, struct Point p2) {
+    return p1.x * p2.x + p1.y * p2.y;
+}
+
+int main() {
+    Point p1;
+    Point p2;
+    p1.x = 1;
+    p1.y = 2;
+    p2.x = 3 // Missing semicolon
+    p2.y = 4;
+    int result = dotProduct(p1, p2);
+    return result;
+}

@@ -1,0 +1,26 @@
+int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int a = 5;
+    int b = 10;
+    int c = 15;
+    int arr[5];
+
+    // Nested expressions with function calls
+    int result = add(a * 2, b / 2) + (c % 7);
+
+    char ch = ('c');
+
+    // Complex array indexing
+    arr[add(1, 2)] = a + b * c;
+
+    // Complex assignment
+    result = result + a * b + c / 2;
+
+    // Compound arithmetic
+    int val = ((a + b) * c) / (a - 1) + add(a, b);
+
+    return 0;
+}

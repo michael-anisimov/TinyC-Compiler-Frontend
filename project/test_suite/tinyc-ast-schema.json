@@ -1,0 +1,1025 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TinyC AST JSON Schema",
+  "description": "JSON Schema for the AST representation of the TinyC language",
+  "definitions": {
+    "SourceLocation": {
+      "type": "object",
+      "required": [
+        "filename",
+        "line",
+        "column"
+      ],
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Source file name"
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line number (1-based, 0 for whole file)"
+        },
+        "column": {
+          "type": "integer",
+          "description": "Column number (1-based, 0 for whole file)"
+        }
+      }
+    },
+    "Node": {
+      "type": "object",
+      "required": [
+        "nodeType",
+        "location"
+      ],
+      "properties": {
+        "nodeType": {
+          "type": "string",
+          "description": "Type of the AST node"
+        },
+        "location": {
+          "$ref": "#/definitions/SourceLocation"
+        }
+      }
+    },
+    "Expression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Node"
+        }
+      ]
+    },
+    "Statement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Node"
+        }
+      ]
+    },
+    "Declaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Node"
+        }
+      ]
+    },
+    "Type": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Node"
+        }
+      ]
+    },
+    "PrimitiveType": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Type"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "PrimitiveType"
+              ]
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "int",
+                "double",
+                "char",
+                "void"
+              ],
+              "description": "Kind of primitive type"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "NamedType": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Type"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "NamedType"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the type (struct or typedef)"
+            }
+          },
+          "required": [
+            "identifier"
+          ]
+        }
+      ]
+    },
+    "PointerType": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Type"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "PointerType"
+              ]
+            },
+            "baseType": {
+              "$ref": "#/definitions/Type",
+              "description": "Base type of the pointer"
+            }
+          },
+          "required": [
+            "baseType"
+          ]
+        }
+      ]
+    },
+    "Literal": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "Literal"
+              ]
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "integer",
+                "double",
+                "char",
+                "string"
+              ],
+              "description": "Kind of literal"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "description": "Literal value (string for text, number for numeric literals)"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        }
+      ]
+    },
+    "Identifier": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "Identifier"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the identifier"
+            }
+          },
+          "required": [
+            "identifier"
+          ]
+        }
+      ]
+    },
+    "BinaryExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "BinaryExpression"
+              ]
+            },
+            "operator": {
+              "type": "string",
+              "description": "Binary operator (+, -, *, /, etc.)"
+            },
+            "left": {
+              "$ref": "#/definitions/Expression",
+              "description": "Left operand"
+            },
+            "right": {
+              "$ref": "#/definitions/Expression",
+              "description": "Right operand"
+            }
+          },
+          "required": [
+            "operator",
+            "left",
+            "right"
+          ]
+        }
+      ]
+    },
+    "UnaryExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "UnaryExpression"
+              ]
+            },
+            "operator": {
+              "type": "string",
+              "description": "Unary operator (+, -, !, ~, ++, --, *, &)"
+            },
+            "prefix": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Whether the operator is prefix (true) or postfix (false)"
+            },
+            "operand": {
+              "$ref": "#/definitions/Expression",
+              "description": "Operand of the unary expression"
+            }
+          },
+          "required": [
+            "operator",
+            "prefix",
+            "operand"
+          ]
+        }
+      ]
+    },
+    "CastExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "CastExpression"
+              ]
+            },
+            "targetType": {
+              "$ref": "#/definitions/Type",
+              "description": "Type to cast to"
+            },
+            "expression": {
+              "$ref": "#/definitions/Expression",
+              "description": "Expression to cast"
+            }
+          },
+          "required": [
+            "targetType",
+            "expression"
+          ]
+        }
+      ]
+    },
+    "CallExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "CallExpression"
+              ]
+            },
+            "callee": {
+              "$ref": "#/definitions/Expression",
+              "description": "Function to call"
+            },
+            "arguments": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Expression"
+              },
+              "description": "Arguments for the function call"
+            }
+          },
+          "required": [
+            "callee",
+            "arguments"
+          ]
+        }
+      ]
+    },
+    "IndexExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "IndexExpression"
+              ]
+            },
+            "array": {
+              "$ref": "#/definitions/Expression",
+              "description": "Array or pointer to index"
+            },
+            "index": {
+              "$ref": "#/definitions/Expression",
+              "description": "Index expression"
+            }
+          },
+          "required": [
+            "array",
+            "index"
+          ]
+        }
+      ]
+    },
+    "MemberExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "MemberExpression"
+              ]
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "dot",
+                "arrow"
+              ],
+              "description": "Kind of member access (dot for struct, arrow for pointer to struct)"
+            },
+            "object": {
+              "$ref": "#/definitions/Expression",
+              "description": "Object to access"
+            },
+            "member": {
+              "type": "string",
+              "description": "Name of the member to access"
+            }
+          },
+          "required": [
+            "kind",
+            "object",
+            "member"
+          ]
+        }
+      ]
+    },
+    "CommaExpression": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Expression"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "CommaExpression"
+              ]
+            },
+            "expressions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Expression"
+              },
+              "description": "List of expressions separated by commas"
+            }
+          },
+          "required": [
+            "expressions"
+          ]
+        }
+      ]
+    },
+    "BlockStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "BlockStatement"
+              ]
+            },
+            "statements": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Statement"
+              },
+              "description": "List of statements in the block"
+            }
+          },
+          "required": [
+            "statements"
+          ]
+        }
+      ]
+    },
+    "ExpressionStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "ExpressionStatement"
+              ]
+            },
+            "expression": {
+              "$ref": "#/definitions/Expression",
+              "description": "Expression to execute as a statement"
+            }
+          },
+          "required": [
+            "expression"
+          ]
+        }
+      ]
+    },
+    "IfStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "IfStatement"
+              ]
+            },
+            "condition": {
+              "$ref": "#/definitions/Expression",
+              "description": "Condition to check"
+            },
+            "thenBranch": {
+              "$ref": "#/definitions/Statement",
+              "description": "Statement to execute if condition is true"
+            },
+            "elseBranch": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Statement"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Statement to execute if condition is false (optional)"
+            }
+          },
+          "required": [
+            "condition",
+            "thenBranch"
+          ]
+        }
+      ]
+    },
+    "WhileStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "WhileStatement"
+              ]
+            },
+            "condition": {
+              "$ref": "#/definitions/Expression",
+              "description": "Condition to check before each iteration"
+            },
+            "body": {
+              "$ref": "#/definitions/Statement",
+              "description": "Statement to execute in each iteration"
+            }
+          },
+          "required": [
+            "condition",
+            "body"
+          ]
+        }
+      ]
+    },
+    "DoWhileStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "DoWhileStatement"
+              ]
+            },
+            "body": {
+              "$ref": "#/definitions/Statement",
+              "description": "Statement to execute in each iteration"
+            },
+            "condition": {
+              "$ref": "#/definitions/Expression",
+              "description": "Condition to check after each iteration"
+            }
+          },
+          "required": [
+            "body",
+            "condition"
+          ]
+        }
+      ]
+    },
+    "ForStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "ForStatement"
+              ]
+            },
+            "initialization": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "$ref": "#/definitions/Declaration"
+                },
+                {
+                  "$ref": "#/definitions/MultipleDeclaration"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Initialization expression or variable declaration (optional)"
+            },
+            "condition": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Condition to check before each iteration (optional)"
+            },
+            "update": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Update expression to execute after each iteration (optional)"
+            },
+            "body": {
+              "$ref": "#/definitions/Statement",
+              "description": "Statement to execute in each iteration"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "SwitchCase": {
+      "type": "object",
+      "properties": {
+        "isDefault": {
+          "type": "boolean",
+          "description": "Whether this is a default case or not"
+        },
+        "value": {
+          "type": "integer",
+          "description": "Case value (only for non-default cases)"
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Statement"
+          },
+          "description": "List of statements in the case body"
+        }
+      },
+      "required": [
+        "isDefault",
+        "body"
+      ],
+      "if": {
+        "properties": {
+          "isDefault": {
+            "enum": [
+              false
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "SwitchStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "SwitchStatement"
+              ]
+            },
+            "expression": {
+              "$ref": "#/definitions/Expression",
+              "description": "Expression to switch on"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SwitchCase"
+              },
+              "description": "List of case clauses"
+            }
+          },
+          "required": [
+            "expression",
+            "cases"
+          ]
+        }
+      ]
+    },
+    "BreakStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "BreakStatement"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ContinueStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "ContinueStatement"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ReturnStatement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Statement"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "ReturnStatement"
+              ]
+            },
+            "expression": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return value (optional for void functions)"
+            }
+          }
+        }
+      ]
+    },
+    "VariableDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "VariableDeclaration"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the variable"
+            },
+            "type": {
+              "$ref": "#/definitions/Type",
+              "description": "Type of the variable"
+            },
+            "arraySize": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Size of the array (optional, null for non-array variables)"
+            },
+            "initializer": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/Expression"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Initial value (optional)"
+            }
+          },
+          "required": [
+            "identifier",
+            "type"
+          ]
+        }
+      ]
+    },
+    "MultipleDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "MultipleDeclaration"
+              ]
+            },
+            "declarations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VariableDeclaration"
+              },
+              "description": "List of variable declarations that share the same statement"
+            }
+          },
+          "required": [
+            "declarations"
+          ]
+        }
+      ]
+    },
+    "Parameter": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "Parameter"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the parameter"
+            },
+            "type": {
+              "$ref": "#/definitions/Type",
+              "description": "Type of the parameter"
+            }
+          },
+          "required": [
+            "identifier",
+            "type"
+          ]
+        }
+      ]
+    },
+    "FunctionDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "FunctionDeclaration",
+                "FunctionDefinition"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the function"
+            },
+            "returnType": {
+              "$ref": "#/definitions/Type",
+              "description": "Return type of the function"
+            },
+            "parameters": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Parameter"
+              },
+              "description": "Function parameters"
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/BlockStatement"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Function body (null for declarations, BlockStatement for definitions)"
+            }
+          },
+          "required": [
+            "identifier",
+            "returnType",
+            "parameters"
+          ]
+        }
+      ]
+    },
+    "StructDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "StructDeclaration",
+                "StructDefinition"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the struct"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VariableDeclaration"
+              },
+              "description": "Struct fields (empty for forward declarations)"
+            }
+          },
+          "required": [
+            "identifier",
+            "fields"
+          ]
+        }
+      ]
+    },
+    "FunctionPointerDeclaration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Declaration"
+        },
+        {
+          "properties": {
+            "nodeType": {
+              "enum": [
+                "FunctionPointerDeclaration"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Name of the function pointer type"
+            },
+            "returnType": {
+              "$ref": "#/definitions/Type",
+              "description": "Return type of the function pointer"
+            },
+            "parameterTypes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Type"
+              },
+              "description": "Types of the function parameters"
+            }
+          },
+          "required": [
+            "identifier",
+            "returnType",
+            "parameterTypes"
+          ]
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "nodeType": {
+      "enum": [
+        "Program"
+      ]
+    },
+    "declarations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/VariableDeclaration"
+          },
+          {
+            "$ref": "#/definitions/FunctionDeclaration"
+          },
+          {
+            "$ref": "#/definitions/StructDeclaration"
+          },
+          {
+            "$ref": "#/definitions/FunctionPointerDeclaration"
+          },
+          {
+            "$ref": "#/definitions/MultipleDeclaration"
+          }
+        ]
+      },
+      "description": "Top-level declarations in the program"
+    },
+    "location": {
+      "$ref": "#/definitions/SourceLocation"
+    }
+  },
+  "required": [
+    "nodeType",
+    "declarations",
+    "location"
+  ]
+}

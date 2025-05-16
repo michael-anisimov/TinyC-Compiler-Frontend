@@ -1,0 +1,29 @@
+// Function pointer type definitions
+typedef int (*BinaryOperation)(int, int);
+typedef void (*VoidFunction)();
+
+// Functions to use with function pointers
+int add(int a, int b) {
+    return a + b;
+}
+
+int subtract(int a, int b) {
+    return a - b;
+}
+
+void hello() {
+}
+
+int main() {
+    // Declare and assign function pointers
+    BinaryOperation operation = add;
+    int result = operation(5, 3);
+
+    operation = subtract;
+    result = operation(10, 4);
+
+    VoidFunction greet = hello;
+    greet();
+
+    return 0;
+}

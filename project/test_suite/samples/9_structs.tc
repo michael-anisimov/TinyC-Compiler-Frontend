@@ -1,0 +1,28 @@
+// Struct declaration
+struct Point {
+    int x;
+    int y;
+};
+
+// Forward declaration
+struct Rectangle;
+
+// Struct definition with a previously forward-declared type
+struct Rectangle {
+    Point top_left;
+    Point bottom_right;
+};
+
+int main() {
+    Point p;
+    p.x = 10;
+    p.y = 20;
+
+    // struct Rectangle rect;
+    rect.top_left.x = 0;
+    rect.top_left.y = 0;
+    rect.bottom_right.x = 100;
+    rect.bottom_right.y = 100;
+
+    return 0;
+}
