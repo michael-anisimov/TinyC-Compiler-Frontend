@@ -45,7 +45,7 @@ Table \ref{tab:parser-comparison} presents a comparison of these parser technolo
 \begin{table}[h]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \caption{Comparison of Parser Technologies for Educational Use}
+
     \label{tab:parser-comparison}
     \begin{tabularx}{\textwidth}{|
         >{\raggedright\arraybackslash}p{2.6cm}|
@@ -70,17 +70,13 @@ Table \ref{tab:parser-comparison} presents a comparison of these parser technolo
       Tool dependencies         & None                     & Required                  & Library only                  & Library or Generator   \\
       \hline
     \end{tabularx}
+    \caption{Comparison of Parser Technologies for Educational Use}
 \end{table}  
   
 
 For the \texttt{tinyC} frontend, considering its educational purpose and the need for high-quality error reporting, a recursive descent parser with predictive parsing techniques offers an appealing balance of clarity, control, and performance.
 
 \pagebreak
-
-
-
-
-
 
 
 \section{AST Representations}
@@ -121,7 +117,7 @@ The embedded location data approach includes location information directly in ea
 
 The embedded approach, where each AST node contains its source location, offers the most straightforward implementation and is well-suited for educational purposes \cite{appel2004modern}. This approach ensures that location information is always available when processing a node, simplifying error reporting and debugging for students implementing compiler backends.
 
-\pagebreak
+% \pagebreak
 
 
 
@@ -168,7 +164,6 @@ These conventions are increasingly relevant for educational compiler design, as 
 
 \begin{table}[h!]
     \centering
-    \caption{Comparison of AST Serialization Formats}
     \label{tab:serialization-comparison}
     \begin{tabularx}{\textwidth}{|
         >{\raggedright\arraybackslash}p{2.5cm}|
@@ -194,6 +189,7 @@ These conventions are increasingly relevant for educational compiler design, as 
       Educational suitability & Excellent   & Good         & Limited                \\
       \hline
     \end{tabularx}
+    \caption{Comparison of AST Serialization Formats}
 \end{table}
 
 
@@ -205,7 +201,7 @@ For the \texttt{tinyC} frontend, JSON offers an appropriate balance of human rea
 
 
 
-\pagebreak
+% \pagebreak
 
 \section{Educational Compiler Frontends}
 
@@ -225,7 +221,6 @@ These projects effectively illustrate key principles in modern compiler design. 
 
 \begin{table}[ht!]
     \centering
-    \caption{Comparison of Educational Compiler Projects}
     \label{tab:edu-compiler-comparison}
     \begin{tabularx}{\textwidth}{|
         >{\raggedright\arraybackslash}p{2.5cm}|
@@ -251,6 +246,7 @@ These projects effectively illustrate key principles in modern compiler design. 
       Type system complexity     & Medium        & Low              & High               \\
       \hline
     \end{tabularx}
+    \caption{Comparison of Educational Compiler Projects}
 \end{table}
 
 
